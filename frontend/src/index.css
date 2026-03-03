@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --font-hennyPenny: "Henny Penny", system-ui;
+  --font-pressStart: "Press Start 2P", system-ui;
+}
