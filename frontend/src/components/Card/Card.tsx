@@ -1,33 +1,54 @@
 import { CLUB, DIAMOND, HEART, SPADE } from "../../app/global";
-import type { CardIntegerType } from "../../app/types";
+import type {
+  CardIntegerType,
+  CardParamsType,
+  CardSuitType,
+} from "../../app/types";
 
-export default function Card() {
-  const cardValue: CardIntegerType = 2;
-  const suit = "heart";
-  const club = <img src={CLUB} alt="club" className="w-4 h-auto" />;
-  const diamond = <img src={DIAMOND} alt="diamond" className="w-4 h-auto" />;
-  const heart = <img src={HEART} alt="heart w-4 h-auto" />;
-  const spade = <img src={SPADE} alt="spade w-4 h-auto" />;
-  const cardSuitSmall = <img src={HEART} alt="heart" className="w-4 h-auto" />;
+export default function Card(props: CardParamsType) {
+  const cardValue: CardIntegerType = props.cardValue;
+  const suit = props.cardSuit;
 
-  const cardSuitMedium = <img src={HEART} alt="heart" className="w-6 h-auto" />;
+  const diamondUrl = DIAMOND;
+  const heartUrl = HEART;
+  const clubUrl = CLUB;
+  const spadeUrl = SPADE;
 
-  const createMediumSuitIcon = (suit: string) => {
-    switch (suit) {
-      case "club":
-        return club;
-      case "diamond":
-        return diamond;
-      case "heart":
-        return heart;
-      case "spade":
-        return spade;
+  const chooseTextColor = (suit: CardSuitType) => {
+    if (suit === "club" || suit === "spade") {
+      return "black";
+    } else {
+      return "red-600";
     }
   };
 
-  const newSuit = createMediumSuitIcon(suit);
+  const textColor = chooseTextColor(suit);
 
-  console.log(newSuit);
+  const chooseSuitUrl = (suit: CardSuitType) => {
+    switch (suit) {
+      case "heart":
+        return heartUrl;
+      case "diamond":
+        return diamondUrl;
+      case "club":
+        return clubUrl;
+      case "spade":
+        return spadeUrl;
+      default:
+        return;
+    }
+  };
+
+  const suitUrl = chooseSuitUrl(suit);
+
+  const cardSuitSmall = (
+    <img src={suitUrl} alt="heart" className="w-4 h-auto" />
+  );
+
+  const cardSuitMedium = (
+    <img src={suitUrl} alt="heart" className="w-6 h-auto" />
+  );
+
   const createNewCenterPiece = () => {
     const newCenterPieceFor2 = (
       <div className="w-[70%] grid grid-cols-3 grid-rows-5 justify-between items-between my-5 p-1">
@@ -228,7 +249,9 @@ export default function Card() {
   const newCenterpiece = createNewCenterPiece();
 
   return (
-    <div className="w-35 h-49 bg-white text-black flex rounded-md py-1">
+    <div
+      className={`w-35 h-49 bg-white text-${textColor} flex rounded-md py-1 shadow-2xl`}
+    >
       <div className="w-[15%] flex flex-col items-center">
         <div>{cardValue}</div>
         <div>{cardSuitSmall}</div>

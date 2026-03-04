@@ -5,7 +5,7 @@ export default function Game() {
     <div className="font-hennyPenny text-center bg-cyan-500 h-[90vh] flex flex-col justify-evenly items-center">
       <h1 className="text-7xl m-1 text-shadow-lg">Poker Face</h1>
 
-      <Card />
+      <Card cardSuit="diamond" cardValue={8} />
       <p className="p-1 m-1 text-shadow-md">press any key to continue</p>
     </div>
   );
