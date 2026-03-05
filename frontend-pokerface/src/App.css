@@ -1,0 +1,110 @@
+:root {
+  --ff-main: "Henny Penny", system-ui;
+  --ff-second: "Press Start 2P", system-ui;
+
+  --text-sm: 0.9rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-4xl: 4rem;
+  --text-logo-header: 1.5rem;
+
+  --color-cyan-500: hsl(180, 100%, 50%);
+  --color-cyan-700: hsl(180, 100%, 25%);
+  --color-chipBlue: hsl(225, 49%, 43%);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: inherit;
+}
+
+.align.items-center {
+  align-items: center;
+}
+
+.align-content-center {
+  align-content: center;
+}
+
+.align-self-center {
+  align-self: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.place-center {
+  display: flex;
+  place-content: center;
+  align-content: center;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 1px var(--color-cyan-700);
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.bg-red {
+  background-color: red;
+}
+
+.bg-blue {
+  background-color: var(--color-chipBlue);
+}
+
+.bg-green {
+  background-color: green;
+}
+
+.bg-black {
+  background-color: black;
+}
+
+.text-red {
+  color: red;
+}
+
+.text-black {
+  color: black;
+}
+
+.text-green {
+  color: green;
+}
+
+.text-blue {
+  color: var(--color-chipBlue);
+}
+
+.p-2 {
+  padding: 2rem;
+}
+
+.p-1 {
+  padding: 1rem;
+}
+
+.h-fillScreen {
+  height: 95vh;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}

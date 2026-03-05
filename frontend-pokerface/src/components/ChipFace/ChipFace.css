@@ -1,0 +1,10 @@
+.chip-shadow-md {
+  width: 20rem;
+  height: auto;
+  margin: 0;
+}
+
+.chip-logo {
+  position: relative;
+  bottom: 41%;
+}

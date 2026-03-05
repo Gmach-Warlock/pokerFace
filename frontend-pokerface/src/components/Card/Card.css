@@ -1,0 +1,299 @@
+.playing-card {
+  background-color: white;
+  width: 105px;
+  height: 150px;
+  display: flex;
+  border-radius: 4px;
+  box-shadow: 1px 1px 1px var(--color-cyan-700);
+}
+
+.card-left-row,
+.card-right-row {
+  width: 20%;
+}
+
+.card-centerpiece {
+  width: 60%;
+  height: auto;
+  margin-block: 16px;
+  padding-block: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.card-centerpiece-lg {
+  width: 60%;
+  height: auto;
+  margin-block: 16px;
+  padding-block: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+}
+
+.card-centerpiece-face {
+  width: 60%;
+  height: auto;
+  margin-block: 16px;
+  padding-block: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.small-suit-icon {
+  width: 0.8rem;
+  height: auto;
+}
+
+.medium-suit-icon {
+  width: 1rem;
+  height: auto;
+}
+
+.large-suit-icon {
+  width: 2.5rem;
+  height: auto;
+}
+
+.text-black {
+  color: black;
+}
+
+.text-red {
+  color: red;
+}
+
+.border-red {
+  border: 1px solid red;
+}
+
+.border-black {
+  border: 1px solid black;
+}
+
+.icon {
+  place-content: center;
+}
+.two-a {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  justify-self: center;
+}
+.two-b {
+  grid-column-start: 2;
+  grid-row-start: 5;
+  justify-content: center;
+}
+.three-a {
+  grid-column-start: 2;
+}
+.three-b {
+  grid-column-start: 2;
+  grid-row-start: 3;
+}
+.three-c {
+  grid-column-start: 2;
+  grid-row-start: 5;
+}
+.four-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.four-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.four-c {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.four-d {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.five-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.five-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.five-c {
+  grid-column-start: 2;
+  grid-row-start: 3;
+}
+.five-d {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.five-e {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.six-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.six-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.six-c {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.six-d {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+.six-e {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.six-f {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.seven-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.seven-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.seven-c {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.seven-d {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+.seven-e {
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+.seven-f {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.seven-g {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.eight-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.eight-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.eight-c {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.eight-d {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+.eight-e {
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+.eight-f {
+  grid-column-start: 2;
+  grid-row-start: 4;
+}
+.eight-g {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.eight-h {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.nine-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.nine-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.nine-c {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.nine-d {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+.nine-e {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.nine-f {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.nine-g {
+  grid-column-start: 1;
+  grid-row-start: 7;
+}
+.nine-h {
+  grid-column-start: 3;
+  grid-row-start: 7;
+}
+.nine-i {
+  grid-column-start: 2;
+  grid-row-start: 4;
+}
+.ten-a {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.ten-b {
+  grid-column-start: 3;
+  grid-row-start: 1;
+}
+.ten-c {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.ten-d {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+.ten-e {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.ten-f {
+  grid-column-start: 3;
+  grid-row-start: 5;
+}
+.ten-g {
+  grid-column-start: 1;
+  grid-row-start: 7;
+}
+.ten-h {
+  grid-column-start: 3;
+  grid-row-start: 7;
+}
+.ten-i {
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+.ten-j {
+  grid-column-start: 2;
+  grid-row-start: 6;
+}
+
+.face-card {
+  font-size: 2rem;
+}
