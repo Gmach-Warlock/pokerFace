@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Black_Chip_Side" data-name="Black Chip Side" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1593.59 704.94">
+  <defs>
+    <style>
+      .cls-1 {
+        filter: url(#drop-shadow-3);
+      }
+
+      .cls-1, .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        fill: #231f20;
+        filter: url(#drop-shadow-1);
+      }
+
+      .cls-2 {
+        filter: url(#drop-shadow-2);
+      }
+    </style>
+    <filter id="drop-shadow-1" x="566.41" y="442.44" width="463.68" height="51.6" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur" stdDeviation="3"/>
+      <feFlood flood-color="#231f20" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-2" x="643.45" y="442.44" width="82.08" height="51.6" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur-2" stdDeviation="3"/>
+      <feFlood flood-color="#231f20" flood-opacity=".75"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-3" x="871.69" y="442.44" width="82.08" height="51.6" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur-3" stdDeviation="3"/>
+      <feFlood flood-color="#231f20" flood-opacity=".75"/>
+      <feComposite in2="blur-3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <path class="cls-3" d="M1010.73,482.04c3.94,0,7.14-3.2,7.14-7.14v-19.22c0-3.94-3.2-7.14-7.14-7.14h-430.94c-3.94,0-7.14,3.2-7.14,7.14v19.22c0,3.94,3.2,7.14,7.14,7.14"/>
+  <polyline class="cls-2" points="649.49 482.04 649.49 448.54 713.37 448.54 713.37 482.04"/>
+  <polyline class="cls-1" points="877.78 482.04 877.78 448.54 941.66 448.54 941.66 482.04"/>
+</svg>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Green_Chip_Side" data-name="Green Chip Side" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480.85 478.67">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: #0c8140;
+      }
+    </style>
+  </defs>
+  <rect class="cls-2" x="17.81" y="222.27" width="445.23" height="33.5" rx="7.14" ry="7.14"/>
+  <rect class="cls-1" x="94.66" y="222.27" width="63.88" height="33.5"/>
+  <rect class="cls-1" x="322.95" y="222.27" width="63.88" height="33.5"/>
+</svg>

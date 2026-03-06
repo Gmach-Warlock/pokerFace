@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Black_Chip_Side" data-name="Black Chip Side" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480.85 478.67">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M455.9,255.77c3.94,0,7.14-3.2,7.14-7.14v-19.22c0-3.94-3.2-7.14-7.14-7.14H24.96c-3.94,0-7.14,3.2-7.14,7.14v19.22c0,3.94,3.2,7.14,7.14,7.14"/>
+  <polyline class="cls-2" points="94.66 255.77 94.66 222.27 158.54 222.27 158.54 255.77"/>
+  <polyline class="cls-2" points="322.95 255.77 322.95 222.27 386.83 222.27 386.83 255.77"/>
+</svg>
