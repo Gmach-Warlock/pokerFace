@@ -1,0 +1,54 @@
+:root {
+  --font-hennyPenny: "Henny Penny", system-ui;
+  --font-pressStart: "Press Start 2P", system-ui;
+
+  --text-md: 1.25rem;
+  --text-lg: 1.5rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2rem;
+  --text-4xl: 4rem;
+
+  font-size: 16px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: inherit;
+}
+.text-red {
+  color: red;
+}
+.text-black {
+  color: black;
+}
+.rotate-180 {
+  transform: rotate(180deg);
+}
+.place-center {
+  display: flex;
+  place-content: center;
+}
+.items-center {
+  align-items: center;
+}
+.border-red {
+  border: 1px solid red;
+}
+.border-black {
+  border: 1px solid black;
+}
+.bg-none {
+  background-image: none;
+}
+.bg-bolt {
+  background-image: url(../public/BoltBackside.svg);
+  background-position: center;
+  background-size: cover;
+}
+.visibiliy-visible {
+  visibility: visible;
+}
+.visibiliy-hidden {
+  visibility: hidden;
+}

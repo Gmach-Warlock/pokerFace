@@ -1,0 +1,10 @@
+body {
+  font-family: var(--font-hennyPenny);
+  background-color: black;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  font-size: var(--text-4xl);
+}
