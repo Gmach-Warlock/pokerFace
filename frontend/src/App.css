@@ -52,3 +52,6 @@
 .visibiliy-hidden {
   visibility: hidden;
 }
+.w-full {
+  width: 100%;
+}
