@@ -2,9 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "nodemon dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.5",
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "typescript": "^5.9.3"
   }
 }

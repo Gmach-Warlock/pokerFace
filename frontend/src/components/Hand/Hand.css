@@ -7,7 +7,7 @@
 
   margin: 2rem;
   position: relative;
-  transform: translateX(-4rem);
+  transform: translateX(-6rem);
 }
 .hand-draw-card1 {
   z-index: 1;

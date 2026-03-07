@@ -8,4 +8,5 @@ body {
 h1 {
   font-size: var(--text-4xl);
   margin: 1rem;
+  text-shadow: 2px 2px 2px var(--color-cyan-700);
 }

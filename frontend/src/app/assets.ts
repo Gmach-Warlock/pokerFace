@@ -12,3 +12,8 @@ export const deckDesigns = {
   redFire: "/RedFire.svg",
   theFlyingCow: "/TheFlyingCow.svg",
 };
+
+export const chipLogos = {
+  boy: "/BlackLogoChipBoy.svg",
+  girl: "/BlackLogoChipGirl.svg",
+};

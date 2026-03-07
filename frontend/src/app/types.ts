@@ -24,3 +24,21 @@ export interface CardInterface {
   suit: CardSuitType;
   side: CardSideType;
 }
+
+export interface HandInterface {
+  type: "draw" | "holdem" | "stud";
+  cards: CardInterface[];
+  currentLocation: "p1" | "p2" | "p3" | "p4" | "p5" | "dealer" | "demo";
+  hand:
+    | "single-high"
+    | "pair"
+    | "two-pair"
+    | "straight"
+    | "flush"
+    | "three-of-a-kind"
+    | "full-house"
+    | "four-of-a-kind"
+    | "straight-flush"
+    | "royal-flush"
+    | "tbd";
+}
