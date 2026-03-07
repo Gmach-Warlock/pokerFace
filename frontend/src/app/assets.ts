@@ -6,5 +6,9 @@ export const cardSuitIcons = {
 };
 
 export const deckDesigns = {
-  redBolt: "/BoltBackside.svg",
+  faceExplosion: "/FaceExplosion.svg",
+  fireBolt: "/FireBolt.svg",
+  flowerBall: "/FlowerBall.svg",
+  redFire: "/RedFire.svg",
+  theFlyingCow: "/TheFlyingCow.svg",
 };

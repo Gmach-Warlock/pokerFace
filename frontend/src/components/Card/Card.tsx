@@ -1,16 +1,17 @@
 import { cardSuitIcons } from "../../app/assets";
 import type {
+  CardInterface,
   CardSideType,
   CardSuitType,
   CardValueType,
 } from "../../app/types";
 import "./Card.css";
 
-export default function Card() {
-  const value: CardValueType = "A";
-  const suit: CardSuitType = "spade";
+export default function Card(props: CardInterface) {
+  const value: CardValueType = props.value;
+  const suit: CardSuitType = props.suit;
 
-  const side: CardSideType = "face-down";
+  const side: CardSideType = props.side;
 
   const determineSuitColor = (cardSuit: CardSuitType) => {
     switch (cardSuit) {

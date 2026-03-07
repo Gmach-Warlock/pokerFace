@@ -4,6 +4,7 @@
   background-color: white;
   display: flex;
   border-radius: 0.3rem;
+  border: 0.1px solid black;
 }
 
 .small-suit-icon {
@@ -47,7 +48,7 @@
 }
 
 .face-down {
-  background-image: url(../../../public/BoltBackside.svg);
+  background-image: url(../../../public/FireBolt.svg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

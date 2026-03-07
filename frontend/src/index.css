@@ -7,4 +7,5 @@ body {
 
 h1 {
   font-size: var(--text-4xl);
+  margin: 1rem;
 }

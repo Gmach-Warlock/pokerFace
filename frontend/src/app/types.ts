@@ -18,3 +18,9 @@ export type CardColorType = "red" | "black";
 
 export type ChipColorType = "white" | "red" | "green" | "blue" | "black";
 export type ChipValueType = 1 | 5 | 10 | 25 | 100;
+
+export interface CardInterface {
+  value: CardValueType;
+  suit: CardSuitType;
+  side: CardSideType;
+}
