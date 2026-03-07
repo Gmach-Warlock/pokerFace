@@ -23,6 +23,7 @@ export interface CardInterface {
   value: CardValueType;
   suit: CardSuitType;
   side: CardSideType;
+  currentLocation: "p1" | "p2" | "p3" | "p4" | "p5" | "dealer" | "demo";
 }
 
 export interface HandInterface {
@@ -42,3 +43,14 @@ export interface HandInterface {
     | "royal-flush"
     | "tbd";
 }
+
+export interface HandPropsInterface {
+  hand: HandInterface;
+}
+
+export type CurrentDisplayType =
+  | "title"
+  | "match"
+  | "postGame"
+  | "mainMenu"
+  | "settings";

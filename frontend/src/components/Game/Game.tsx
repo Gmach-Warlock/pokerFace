@@ -1,16 +1,9 @@
-import "./Game.css";
-import Hand from "../Hand/Hand";
+import Title from "./Title/Title";
 
 export default function Game() {
   return (
     <div className="game-container">
-      <div className="game-container-card">
-        <h1>Poker Face</h1>
-
-        <p className="text-shadow-cyan">Hit any button to continue</p>
-
-        <Hand />
-      </div>
+      <Title />
     </div>
   );
 }

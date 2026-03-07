@@ -47,3 +47,36 @@ export const pokerChips = {
     sideShadow: "WhiteChipSideDropShadow.svg",
   },
 };
+
+export const royalFlush = [
+  {
+    value: "A",
+    suit: "spade",
+    side: "face-up",
+    currentLocation: "demo",
+  },
+  {
+    value: "K",
+    suit: "spade",
+    side: "face-up",
+    currentLocation: "demo",
+  },
+  {
+    value: "Q",
+    suit: "spade",
+    side: "face-up",
+    currentLocation: "demo",
+  },
+  {
+    value: "J",
+    suit: "spade",
+    side: "face-up",
+    currentLocation: "demo",
+  },
+  {
+    value: 10,
+    suit: "spade",
+    side: "face-up",
+    currentLocation: "demo",
+  },
+];
