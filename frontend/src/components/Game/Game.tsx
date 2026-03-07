@@ -1,11 +1,9 @@
-import Card from "../Card/Card";
+import Title from "./Title/Title";
 
 export default function Game() {
   return (
-    <div>
-      <h1>Poker Face</h1>
-      <Card />
-      <p>Hit any button to continue</p>
+    <div className="game-container">
+      <Title />
     </div>
   );
 }

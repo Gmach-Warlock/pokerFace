@@ -1,0 +1,13 @@
+.game-container {
+  background-color: cyan;
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+.game-container-card {
+  position: relative;
+  bottom: 5rem;
+}
