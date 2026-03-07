@@ -63,3 +63,7 @@
 .box-shadow-cyan {
   box-shadow: 1px 1px 1px var(--color-cyan-700);
 }
+.fit-content {
+  width: fit-content;
+  height: auto;
+}
