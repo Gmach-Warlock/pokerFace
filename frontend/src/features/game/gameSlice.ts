@@ -7,7 +7,7 @@ interface GameInterface {
 
 const initialGameState: GameInterface = {
   isPlaying: true,
-  currentlyDisplayed: "title",
+  currentlyDisplayed: "mainmenu",
 };
 
 const gameSlice = createSlice({

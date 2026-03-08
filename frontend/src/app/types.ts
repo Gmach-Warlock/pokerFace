@@ -48,9 +48,32 @@ export interface HandPropsInterface {
   hand: HandInterface;
 }
 
-export type CurrentDisplayType =
+export type GameDisplayType =
   | "title"
   | "match"
   | "postGame"
-  | "mainMenu"
+  | "mainmenu"
   | "settings";
+
+export interface PlayerInterFace {
+  name: string;
+  type: "human" | "computer";
+  cards: CardInterface[];
+  moneyTotal: number;
+  chips: {
+    white: number;
+    red: number;
+    blue: number;
+    green: number;
+    black: number;
+  };
+  comments?: {
+    strongHand: string[];
+    weakHand: string[];
+    bluff: string[];
+    mock: string[];
+    cry: string[];
+  };
+  level?: number;
+  experience?: number;
+}
