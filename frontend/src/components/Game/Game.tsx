@@ -20,7 +20,7 @@ export default function Game() {
         return <Match />;
       case "postGame":
         return <PostGame />;
-      case "mainmenu":
+      case "mainMenu":
         return <MainMenu />;
       case "settings":
         return <GameSettings />;

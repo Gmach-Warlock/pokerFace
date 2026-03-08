@@ -52,7 +52,7 @@ export type GameDisplayType =
   | "title"
   | "match"
   | "postGame"
-  | "mainmenu"
+  | "mainMenu"
   | "settings";
 
 export interface PlayerInterFace {

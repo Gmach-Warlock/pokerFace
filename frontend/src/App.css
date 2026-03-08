@@ -57,6 +57,12 @@
 .w-full {
   width: 100%;
 }
+.h-full {
+  height: 100%;
+}
+.bg-cyan {
+  background-color: var(--color-cyan-500);
+}
 .text-shadow-cyan {
   text-shadow: 1px 1px 1px var(--color-cyan-700);
 }

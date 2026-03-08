@@ -1,0 +1,28 @@
+.game-settings {
+  width: 75vw;
+  height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-content: center;
+  justify-self: center;
+  background-color: white;
+  color: black;
+  padding-inline: 2rem;
+}
+
+.setting {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  appearance: none;
+}
+
+.game-settings input::picker {
+  appearance: none;
+  border: none;
+}
+
+.game-settings h2 {
+  margin-bottom: 2rem;
+}

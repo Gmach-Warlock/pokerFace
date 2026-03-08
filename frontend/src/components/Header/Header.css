@@ -3,6 +3,7 @@ header {
   justify-content: space-between;
   padding-inline: 1rem;
   height: 4rem;
+  background-color: black;
 }
 
 .logo-icon-sm {
