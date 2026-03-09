@@ -1,5 +1,5 @@
 .game-container {
-  background-color: cyan;
+  background-color: black;
   height: 95vh;
   display: flex;
   flex-direction: column;
@@ -10,4 +10,11 @@
 .game-container-card {
   position: relative;
   bottom: 5rem;
+}
+
+.setting {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  appearance: none;
 }

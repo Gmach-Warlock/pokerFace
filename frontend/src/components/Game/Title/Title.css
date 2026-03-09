@@ -1,5 +1,4 @@
 .title-container {
-  background-color: cyan;
   height: 95vh;
   display: flex;
   flex-direction: column;
@@ -7,7 +6,54 @@
   align-content: center;
 }
 
-.title-container-card {
+.table-wood-outer-border {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-table-brown-500),
+    15%,
+    var(--color-table-brown-700),
+    85%,
+    var(--color-table-brown-900)
+  );
+  display: flex;
+  place-self: center;
+  place-content: center;
+  align-items: center;
+  width: 95%;
+  height: 70%;
+  border-radius: 25%;
+  border: 0.5px solid var(--color-table-brown-900);
   position: relative;
-  bottom: 5rem;
+  box-shadow: 2px 2px 2px black;
+}
+
+.table-felt-outer-border {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-table-green-500),
+    15%,
+    var(--color-table-green-700),
+    85%,
+    var(--color-table-green-900)
+  );
+  position: absolute;
+  border: 0.5px solid var(--color-table-green-900);
+  width: 85%;
+  height: 85%;
+  border-radius: 25%;
+  place-self: center;
+  display: flex;
+  flex-direction: column;
+  place-content: center;
+}
+
+.table-ring-design {
+  position: absolute;
+  width: 65%;
+  height: 55%;
+  border-radius: 25%;
+  place-self: center;
+  place-content: center;
+  display: flex;
+  flex-direction: column;
 }

@@ -53,7 +53,8 @@ export type GameDisplayType =
   | "match"
   | "postGame"
   | "mainMenu"
-  | "settings";
+  | "settings"
+  | "preGame";
 
 export interface PlayerInterFace {
   name: string;

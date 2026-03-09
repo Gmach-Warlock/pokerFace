@@ -1,6 +1,6 @@
-.game-settings {
+.preGame-menu {
   width: 75vw;
-  height: 75vh;
+  height: 50vh;
   display: flex;
   flex-direction: column;
   justify-content: start;
@@ -9,13 +9,5 @@
   background-color: white;
   color: black;
   padding-inline: 2rem;
-}
-
-.game-settings input::picker {
-  appearance: none;
-  border: none;
-}
-
-.game-settings h2 {
-  margin-bottom: 2rem;
+  margin: 4rem;
 }

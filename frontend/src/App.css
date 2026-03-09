@@ -9,7 +9,15 @@
   --text-4xl: 4rem;
   --color-cyan-500: hsl(180, 100%, 50%);
   --color-cyan-700: hsl(180, 100%, 25%);
-
+  --color-table-green-300: hsl(128, 27%, 55%);
+  --color-table-green-500: hsl(128, 27%, 42%);
+  --color-table-green-700: hsl(128, 27%, 21%);
+  --color-table-green-900: hsl(128, 27%, 15%);
+  --color-table-brown-300: hsl(22, 46%, 45%);
+  --color-table-brown-500: hsl(22, 46%, 40%);
+  --color-table-brown-700: hsl(22, 46%, 21%);
+  --color-table-brown-800: hsl(22, 46%, 18%);
+  --color-table-brown-900: hsl(22, 46%, 11%);
   font-size: 16px;
 }
 * {
@@ -43,11 +51,6 @@
 .bg-none {
   background-image: none;
 }
-.bg-bolt {
-  background-image: url(../public/FireBolt.svg);
-  background-position: center;
-  background-size: cover;
-}
 .visibiliy-visible {
   visibility: visible;
 }
@@ -63,11 +66,12 @@
 .bg-cyan {
   background-color: var(--color-cyan-500);
 }
-.text-shadow-cyan {
-  text-shadow: 1px 1px 1px var(--color-cyan-700);
+
+.text-shadow {
+  text-shadow: 1px 1px 1px black;
 }
-.box-shadow-cyan {
-  box-shadow: 1px 1px 1px var(--color-cyan-700);
+.box-shadow {
+  box-shadow: 1px 1px 1px black;
 }
 .fit-content {
   width: fit-content;

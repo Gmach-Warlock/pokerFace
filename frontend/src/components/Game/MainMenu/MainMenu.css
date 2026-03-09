@@ -1,17 +1,3 @@
-.main-menu {
-  width: 75vw;
-  height: 75vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-content: center;
-  justify-self: center;
-  background-color: white;
-  color: black;
-  padding-inline: 2rem;
-  margin: 4rem;
-}
-
 .setting {
   width: 100%;
   display: flex;
@@ -24,6 +10,16 @@
   border: none;
 }
 
-.main-menu h2 {
-  margin-bottom: 2rem;
+.main-menu {
+  width: 75vw;
+  height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-content: center;
+  justify-self: center;
+  background-color: white;
+  color: black;
+  padding-inline: 2rem;
+  margin: 4rem;
 }

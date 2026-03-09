@@ -1,14 +1,14 @@
-import { Outlet } from "react-router";
 import Title from "./Title/Title";
-import { UseAppSelector } from "../../app/hooks";
+import { useAppSelector } from "../../app/hooks";
 import type { GameDisplayType } from "../../app/types";
 import Match from "./Match/Match";
 import PostGame from "./PostGame/PostGame";
 import MainMenu from "./MainMenu/MainMenu";
 import GameSettings from "./GameSettings/GameSettings";
+import PreGame from "./PreGame/PreGame";
 
 export default function Game() {
-  const currentlyDisplayed = UseAppSelector(
+  const currentlyDisplayed = useAppSelector(
     (state) => state.game.currentlyDisplayed,
   );
 
@@ -24,14 +24,11 @@ export default function Game() {
         return <MainMenu />;
       case "settings":
         return <GameSettings />;
+      case "preGame":
+        return <PreGame />;
     }
   };
   const newGameScreen = createGameScreen(currentlyDisplayed);
 
-  return (
-    <div className="game-container">
-      <Outlet />
-      {newGameScreen}
-    </div>
-  );
+  return <div className="game-container">{newGameScreen}</div>;
 }
