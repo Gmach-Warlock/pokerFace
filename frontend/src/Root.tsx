@@ -1,15 +1,12 @@
-import { useAppSelector } from "./app/hooks";
-import Game from "./components/Game/Game";
+import { Outlet } from "react-router";
 import Header from "./components/Header/Header";
-import Home from "./components/Home/Home";
 
 export default function Root() {
-  const authorized = useAppSelector((state) => state.authorize.authorized);
-
   return (
     <div>
       <Header />
-      {authorized ? <Game /> : <Home />}
+
+      <Outlet />
     </div>
   );
 }

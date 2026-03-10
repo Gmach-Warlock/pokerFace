@@ -12,7 +12,7 @@ interface GameInterface {
 }
 
 const initialGameState: GameInterface = {
-  isPlaying: true,
+  isPlaying: false,
   currentlyDisplayed: "title",
 };
 
