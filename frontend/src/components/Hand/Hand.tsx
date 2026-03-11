@@ -1,44 +1,44 @@
-import type { HandInterface, HandPropsInterface } from "../../app/types";
+import type { HandInterface } from "../../app/types";
 import Card from "../Card/Card";
 import "./Hand.css";
 
-export default function Hand(props: HandPropsInterface) {
+export default function Hand(props: HandInterface) {
   const hand: HandInterface = {
-    type: props.hand.type,
+    type: props.type,
     cards: [
       {
-        value: props.hand.cards[0].value,
-        suit: props.hand.cards[0].suit,
-        side: props.hand.cards[0].side,
-        currentLocation: props.hand.cards[0].currentLocation,
+        value: props.cards[0].value,
+        suit: props.cards[0].suit,
+        side: props.cards[0].side,
+        currentLocation: props.cards[0].currentLocation,
       },
       {
-        value: props.hand.cards[1].value,
-        suit: props.hand.cards[1].suit,
-        side: props.hand.cards[1].side,
-        currentLocation: props.hand.cards[1].currentLocation,
+        value: props.cards[1].value,
+        suit: props.cards[1].suit,
+        side: props.cards[1].side,
+        currentLocation: props.cards[1].currentLocation,
       },
       {
-        value: props.hand.cards[2].value,
-        suit: props.hand.cards[2].suit,
-        side: props.hand.cards[2].side,
-        currentLocation: props.hand.cards[2].currentLocation,
+        value: props.cards[2].value,
+        suit: props.cards[2].suit,
+        side: props.cards[2].side,
+        currentLocation: props.cards[2].currentLocation,
       },
       {
-        value: props.hand.cards[3].value,
-        suit: props.hand.cards[3].suit,
-        side: props.hand.cards[3].side,
-        currentLocation: props.hand.cards[3].currentLocation,
+        value: props.cards[3].value,
+        suit: props.cards[3].suit,
+        side: props.cards[3].side,
+        currentLocation: props.cards[3].currentLocation,
       },
       {
-        value: props.hand.cards[4].value,
-        suit: props.hand.cards[4].suit,
-        side: props.hand.cards[4].side,
-        currentLocation: props.hand.cards[4].currentLocation,
+        value: props.cards[4].value,
+        suit: props.cards[4].suit,
+        side: props.cards[4].side,
+        currentLocation: props.cards[4].currentLocation,
       },
     ],
-    hand: "tbd",
-    currentLocation: "demo",
+    hand: props.hand,
+    currentLocation: props.currentLocation,
   };
 
   const configureHand = (hand: HandInterface) => {

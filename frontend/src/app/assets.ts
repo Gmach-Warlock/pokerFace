@@ -1,81 +1,83 @@
+import type { CardInterface } from "./types";
+
 export const cardSuitIcons = {
-  club: "/Club.svg",
-  diamond: "/Diamond.svg",
-  heart: "/Heart.svg",
-  spade: "/Spade.svg",
+  club: "/dlub.svg",
+  diamond: "/diamond.svg",
+  heart: "/heart.svg",
+  spade: "/spade.svg",
 };
 export const deckDesigns = {
-  faceExplosion: "/FaceExplosion.svg",
-  fireBolt: "/FireBolt.svg",
-  flowerBall: "/FlowerBall.svg",
-  redFire: "/RedFire.svg",
-  theFlyingCow: "/TheFlyingCow.svg",
+  faceExplosion: "/faceExplosion.svg",
+  fireBolt: "/fireBolt.svg",
+  flowerBall: "/flowerBall.svg",
+  redFire: "/redFire.svg",
+  theFlyingCow: "/theFlyingCow.svg",
 };
 export const chipLogos = {
-  boy: "/BlackLogoChipBoy.svg",
-  girl: "/BlackLogoChipGirl.svg",
+  boy: "/blackLogoChipBoy.svg",
+  girl: "/blackLogoChipGirl.svg",
 };
 export const pokerChips = {
   black: {
-    face: "/BlackChipFace.svg",
-    faceShadow: "/BlackChipFaceDropShadow.svg",
-    side: "BlackChipSide.svg",
-    sideShadow: "BlackChipSideDropShadow.svg",
+    face: "/blackChipFace.svg",
+    faceDropShadow: "/blackChipFaceDropShadow.svg",
+    side: "blackChipSide.svg",
+    sideDropShadow: "blackChipSideDropShadow.svg",
   },
   blue: {
-    face: "/BlueChipFace.svg",
-    faceShadow: "/BlueChipFaceDropShadow.svg",
-    side: "BlueChipSide.svg",
-    sideShadow: "BlueChipSideDropShadow.svg",
+    face: "/blueChipFace.svg",
+    faceDropShadow: "/blueChipFaceDropShadow.svg",
+    side: "blueChipSide.svg",
+    sideDropShadow: "blueChipSideDropShadow.svg",
   },
   green: {
-    face: "/GreenChipFace.svg",
-    faceShadow: "/GreenChipFaceDropShadow.svg",
-    side: "GrenChipSide.svg",
-    sideShadow: "GreenChipSideDropShadow.svg",
+    face: "/greenChipFace.svg",
+    faceDropShadow: "/greenChipFaceDropShadow.svg",
+    side: "grenChipSide.svg",
+    sideDropShadow: "greenChipSideDropShadow.svg",
   },
   red: {
-    face: "/RedChipFace.svg",
-    faceShadow: "/RedChipFaceDropShadow.svg",
-    side: "RedChipSide.svg",
-    sideShadow: "RedChipSideDropShadow.svg",
+    face: "/redChipFace.svg",
+    faceDropShadow: "/redChipFaceDropShadow.svg",
+    side: "redChipSide.svg",
+    sideDropShadow: "redChipSideDropShadow.svg",
   },
   white: {
-    face: "/WhiteChipFace.svg",
-    faceShadow: "/WhiteChipFaceDropShadow.svg",
-    side: "WhiteChipSide.svg",
-    sideShadow: "WhiteChipSideDropShadow.svg",
+    face: "/whiteChipFace.svg",
+    faceDropShadow: "/whiteChipFaceDropShadow.svg",
+    side: "whiteChipSide.svg",
+    sideDropShadow: "whiteChipSideDropShadow.svg",
   },
 };
 
-export const royalFlush = [
+export const royalFlush: CardInterface[] = [
   {
     value: "A",
-    suit: "spade",
+    suit: "heart",
     side: "face-up",
     currentLocation: "demo",
   },
   {
     value: "K",
-    suit: "spade",
+    suit: "heart",
     side: "face-up",
     currentLocation: "demo",
   },
   {
     value: "Q",
-    suit: "spade",
+    suit: "heart",
     side: "face-up",
     currentLocation: "demo",
   },
   {
     value: "J",
-    suit: "spade",
+    suit: "heart",
     side: "face-up",
     currentLocation: "demo",
   },
   {
     value: 10,
-    suit: "spade",
+    suit: "heart",
     side: "face-up",
     currentLocation: "demo",
   },

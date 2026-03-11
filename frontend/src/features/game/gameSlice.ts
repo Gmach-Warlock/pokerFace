@@ -30,7 +30,6 @@ const gameSlice = createSlice({
       state.currentlyDisplayed = "mainMenu";
     },
     goToPreGame: (state) => {
-      console.log("checker decker");
       state.currentlyDisplayed = "preGame";
     },
     startMatch: (state) => {

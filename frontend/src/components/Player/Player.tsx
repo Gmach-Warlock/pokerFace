@@ -43,7 +43,7 @@ export default function Player() {
 
   return (
     <div className="player-container">
-      <Hand hand={hand} />
+      <Hand type="draw" cards={hand.cards} currentLocation="demo" hand="tbd" />
       <p>Player One</p>
     </div>
   );

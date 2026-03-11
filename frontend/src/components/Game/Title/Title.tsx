@@ -1,8 +1,12 @@
+import { royalFlush } from "../../../app/assets";
 import { useAppDispatch } from "../../../app/hooks";
 import { goToPreGame } from "../../../features/game/gameSlice";
+import Chip from "../../Chip/Chip";
+import Hand from "../../Hand/Hand";
 import "./Title.css";
 
 export default function Title() {
+  const winningHand = royalFlush;
   const dispatch = useAppDispatch();
 
   const handleClick = () => {
@@ -11,15 +15,15 @@ export default function Title() {
 
   return (
     <div className="title-container">
-      <div className="table-wood-outer-border">
-        <div className="table-felt-outer-border">
-          <h1>Poker Face</h1>
+      <h1>Poker Face</h1>
 
-          <p className="text-shadow" onClick={handleClick}>
-            Hit any key to continue
-          </p>
-        </div>
-      </div>
+      <Hand type="draw" cards={winningHand} currentLocation="demo" hand="tbd" />
+
+      <p className="text-shadow" onClick={handleClick}>
+        Hit any key to continue
+      </p>
+
+      <Chip />
     </div>
   );
 }
