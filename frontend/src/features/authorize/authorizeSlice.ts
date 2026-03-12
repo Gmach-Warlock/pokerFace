@@ -1,10 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
+import type { DeckStyleType } from "../../app/types";
 
 interface AuthorizeInterface {
   authorized: boolean;
   username: string;
   email: string;
   password: string;
+  level: number;
+  xp: number;
+  availableDecks: DeckStyleType[];
 }
 
 const initialAuthorizeState: AuthorizeInterface = {
@@ -12,6 +16,9 @@ const initialAuthorizeState: AuthorizeInterface = {
   username: "",
   email: "",
   password: "",
+  level: 1,
+  xp: 0,
+  availableDecks: ["arrowBolt"],
 };
 
 const authorizeSlice = createSlice({

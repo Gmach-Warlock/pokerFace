@@ -23,6 +23,19 @@ export default function PreGame() {
               </select>
             </div>
           </div>
+          <div className="deck-style setting">
+            <div>
+              <span>Which deck style do you want to use?</span>
+            </div>
+            <div>
+              <select name="deck-style" id="deck-style" title="deck-style">
+                <option value="arrowBolt">Arrow Bolt</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
         </form>
       </div>
       <div className="matchStartButton">

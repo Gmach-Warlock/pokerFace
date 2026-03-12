@@ -1,10 +1,10 @@
-import type { CardInterface } from "./types";
+import type { CardInterface, FetchInterface } from "./types";
 
 export const cardSuitIcons = {
-  club: "/dlub.svg",
-  diamond: "/diamond.svg",
-  heart: "/heart.svg",
-  spade: "/spade.svg",
+  club: "/club.png",
+  diamond: "/diamond.png",
+  heart: "/heart.png",
+  spade: "/spade.png",
 };
 export const deckDesigns = {
   faceExplosion: "/faceExplosion.svg",
@@ -14,8 +14,8 @@ export const deckDesigns = {
   theFlyingCow: "/theFlyingCow.svg",
 };
 export const chipLogos = {
-  boy: "/blackLogoChipBoy.svg",
-  girl: "/blackLogoChipGirl.svg",
+  boy: "/chipBoy.png",
+  girl: "/chipGirl.png",
 };
 export const pokerChips = {
   black: {
@@ -82,3 +82,9 @@ export const royalFlush: CardInterface[] = [
     currentLocation: "demo",
   },
 ];
+
+export const fetchObject: FetchInterface = {
+  status: "idle",
+  message: "",
+  payload: null,
+};

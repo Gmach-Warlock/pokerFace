@@ -30,6 +30,13 @@ export type CurrentLocationType =
   | "p5"
   | "dealer"
   | "demo";
+export type DeckStyleType =
+  | "arrowBolt"
+  | "explodingFace"
+  | "inBloom"
+  | "redFire"
+  | "theFlyingCow";
+export type FetchStatusType = "idle" | "pending" | "failed" | "succeeded";
 export type GameDisplayType =
   | "title"
   | "match"
@@ -50,7 +57,9 @@ export type HandType =
   | "royal-flush"
   | "tbd";
 export type MatchType = "draw" | "holdem" | "stud";
+export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
+export type IconSizeType = "small" | "medium" | "large";
 
 export interface CardInterface {
   value: CardValueType;
@@ -62,6 +71,11 @@ export interface ChipInterFace {
   color: ChipColorType;
   icon: ChipIconType;
   currentLocation: CurrentLocationType;
+}
+export interface FetchInterface {
+  status: FetchStatusType;
+  message: string;
+  payload: null | object;
 }
 export interface HandInterface {
   type: MatchType;
