@@ -57,6 +57,17 @@ export type HandType =
   | "royal-flush"
   | "tbd";
 export type MatchType = "draw" | "holdem" | "stud";
+export type NextLevelXpType =
+  | 5
+  | 20
+  | 45
+  | 80
+  | 125
+  | 180
+  | 245
+  | 320
+  | 405
+  | 500;
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
 export type IconSizeType = "small" | "medium" | "large";

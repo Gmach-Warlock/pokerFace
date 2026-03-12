@@ -16,3 +16,11 @@ h2 {
   display: block;
   margin: 2rem;
 }
+
+button {
+  font-family: var(--font-hennyPenny);
+  padding: 0 1rem;
+  border-radius: 0.5rem;
+  background-color: yellow;
+  font-size: var(--text-md);
+}
