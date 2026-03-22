@@ -1,21 +1,44 @@
 .playing-card {
-  width: 10rem;
-  height: 14rem;
   background-color: white;
   display: flex;
   border-radius: 0.3rem;
-  border: 0.1px solid gray;
-  box-shadow: 1px 1px 1px var(--color-cyan-700);
+  box-shadow:
+    0 4px 10px var(--card-shadow),
+    0 0 20px var(--card-glow);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+  border: 1px solid hsl(0, 0%, 90%);
+  position: relative;
+  width: 120px;
+  height: 180px;
+  margin-left: -60px; /* This creates the overlap */
+  background-color: var(--card-white);
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 10px;
+}
+
+.playing-card:first-child {
+  margin-left: 0;
+}
+
+.playing-card:hover {
+  z-index: 10;
+  transform: translateY(-10px) scale(1.02);
+  box-shadow:
+    0 15px 30px var(--card-shadow),
+    0 0 30px hsla(183, 100%, 50%, 0.3);
 }
 
 .small-suit-icon {
-  width: 1rem;
+  width: 0.9rem;
   height: auto;
 }
 
 .medium-suit-icon {
-  width: 1.6rem;
-  height: auto;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .large-suit-icon {

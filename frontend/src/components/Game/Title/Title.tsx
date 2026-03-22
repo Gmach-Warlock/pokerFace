@@ -18,7 +18,7 @@ export default function Title() {
 
   return (
     <div className="title-container">
-      <h1>Poker Face</h1>
+      <h1 className="manga-outline neon-glow-cyan">Poker Face</h1>
 
       <Hand type="draw" cards={winningHand} currentLocation="demo" hand="tbd" />
 

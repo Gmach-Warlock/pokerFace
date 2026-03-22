@@ -1,6 +1,9 @@
 import "./Chip.css";
 
 export default function Chip() {
+
+
+  
   return (
     <div className="chip-container">
       <div className="chip-outer-border place-center">

@@ -1,6 +1,6 @@
 body {
   font-family: var(--font-hennyPenny);
-  background-color: cyan;
+  background-color: var(--color-nt-bg);
   color: white;
   text-align: center;
 }

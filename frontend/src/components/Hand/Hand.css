@@ -1,6 +1,10 @@
 .hand-container {
   margin: 1rem;
   height: 18rem;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  perspective: 1000px;
 }
 .hand-draw {
   display: flex;

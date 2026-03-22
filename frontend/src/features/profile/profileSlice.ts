@@ -20,7 +20,7 @@ interface ProfileInterface {
 }
 
 const initialAuthorizeState: ProfileInterface = {
-  authorized: false,
+  authorized: true,
   username: "gary",
   email: "gary@mail.com",
   password: "weakpassword",

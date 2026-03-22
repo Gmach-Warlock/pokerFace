@@ -88,3 +88,18 @@ export const fetchObject: FetchInterface = {
   message: "",
   payload: null,
 };
+
+export const PIP_MAP: Record<
+  string,
+  { left: number; center: number; right: number }
+> = {
+  "2": { left: 0, center: 2, right: 0 },
+  "3": { left: 0, center: 3, right: 0 },
+  "4": { left: 2, center: 0, right: 2 },
+  "5": { left: 2, center: 1, right: 2 },
+  "6": { left: 3, center: 0, right: 3 },
+  "7": { left: 3, center: 1, right: 3 },
+  "8": { left: 3, center: 2, right: 3 },
+  "9": { left: 4, center: 1, right: 4 }, // 4-1-4 layout
+  "10": { left: 4, center: 2, right: 4 }, // 4-2-4 layout
+};
