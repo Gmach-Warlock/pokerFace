@@ -1,21 +1,24 @@
+import type { ChipColorType, ChipIconType } from "../../app/types";
+import { pokerChips, chipValues } from "../../app/assets";
 import "./Chip.css";
 
-export default function Chip() {
+interface ChipProps {
+  color: ChipColorType;
+  icon: ChipIconType;
+  value?: number;
+}
 
+export default function Chip({ color, icon }: ChipProps) {
+  const chipSrc = pokerChips[color][icon];
+  const chipValue = chipValues[color];
 
-  
   return (
-    <div className="chip-container">
-      <div className="chip-outer-border place-center">
-        <div className="chip-other-layer-container place-center">
-          <div className="chip-outer-cap-border">
-            <div className="chip-inner-stripes">
-              <div className="chip-inner-cap"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div></div>
+    <div>
+      <img
+        src={chipSrc}
+        alt={`${color} poker chip worth ${chipValue}`}
+        className="chip"
+      />
     </div>
   );
 }

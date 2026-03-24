@@ -13,7 +13,9 @@ interface GameInterface {
   currentMatch: {
     numberOfOpponents: NumberOfOpponentsType;
     deckStyle: DeckStyleType;
+    opponents: Array<object>;
   };
+  isMatchStarted: boolean;
 }
 
 const initialGameState: GameInterface = {
@@ -22,7 +24,9 @@ const initialGameState: GameInterface = {
   currentMatch: {
     numberOfOpponents: "tbd",
     deckStyle: "arrowBolt",
+    opponents: [],
   },
+  isMatchStarted: false,
 };
 
 const gameSlice = createSlice({

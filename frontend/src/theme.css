@@ -6,7 +6,6 @@
   --neon-blue: hsl(183, 100%, 50%); /* Electric Cyan */
   --neon-pink: hsl(306, 100%, 50%); /* Hot Magenta */
 
-  /* Card Colors */
   --card-red: hsl(355, 78%, 56%); /* Vibrant Poker Red */
   --card-black: hsl(0, 0%, 10%); /* Neutral Black */
   --card-white: hsl(0, 0%, 100%); /* Pure White */
@@ -21,6 +20,10 @@
 .btn {
   background-color: var(--ui-gold);
   color: black;
+  font-family: var(--font-hennyPenny);
+  padding: 0 1rem;
+  border-radius: 0.5rem;
+  font-size: var(--text-md);
 }
 
 /* Why HSL is great: Easy Hover States */

@@ -5,7 +5,7 @@ import "./Home.css";
 import { API_URL } from "../../app/global";
 
 export default function Home() {
-  const authorized = useAppSelector((state) => state.authorize.authorized);
+  const authorized = useAppSelector((state) => state.profile.meta.authorized);
   const navigate = useNavigate();
 
   const myapiurl = API_URL;

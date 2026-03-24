@@ -4,7 +4,7 @@ import "./Hand.css";
 
 export default function Hand(props: HandInterface) {
   const hand: HandInterface = {
-    type: props.type,
+    matchType: props.matchType,
     cards: [
       {
         value: props.cards[0].value,
@@ -42,7 +42,7 @@ export default function Hand(props: HandInterface) {
   };
 
   const configureHand = (hand: HandInterface) => {
-    switch (hand.type) {
+    switch (hand.matchType) {
       case "draw":
         return (
           <div className="hand-draw place-center w-full">

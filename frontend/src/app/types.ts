@@ -30,6 +30,15 @@ export type CurrentLocationType =
   | "p5"
   | "dealer"
   | "demo";
+export type CurrentSituationType =
+  | "strongHand"
+  | "weakHand"
+  | "bluffing"
+  | "gloating"
+  | "sulking"
+  | "neutral"
+  | "nagging"
+  | "egging";
 export type DeckStyleType =
   | "arrowBolt"
   | "explodingFace"
@@ -71,6 +80,7 @@ export type NextLevelXpType =
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
 export type IconSizeType = "small" | "medium" | "large";
+export type VillainThemeType = "classic" | "gritty" | "modern" | "pro";
 
 export interface CardInterface {
   value: CardValueType;
@@ -78,10 +88,17 @@ export interface CardInterface {
   side: CardSideType;
   currentLocation: CurrentLocationType;
 }
-export interface ChipInterFace {
+export interface ChipInterface {
   color: ChipColorType;
   icon: ChipIconType;
   currentLocation: CurrentLocationType;
+}
+export interface ChipMapInterface {
+  white: number;
+  red: number;
+  blue: number;
+  green: number;
+  black: number;
 }
 export interface FetchInterface {
   status: FetchStatusType;
@@ -89,30 +106,28 @@ export interface FetchInterface {
   payload: null | object;
 }
 export interface HandInterface {
-  type: MatchType;
+  matchType: MatchType;
   cards: CardInterface[];
   currentLocation: CurrentLocationType;
   hand: HandType;
 }
-export interface PlayerInterFace {
+export interface HandResultInterface {
+  playerId: string;
+  handRank: number;
+  handLabel: string;
+  winningCards: CardInterface[];
+  kickers: CardInterface[];
+}
+export interface PlayerInterface {
+  id: string | null;
   name: string;
   type: "human" | "computer";
   cards: CardInterface[];
   moneyTotal: number;
-  chips: {
-    white: number;
-    red: number;
-    blue: number;
-    green: number;
-    black: number;
-  };
-  comments?: {
-    strongHand: string[];
-    weakHand: string[];
-    bluff: string[];
-    mock: string[];
-    cry: string[];
-  };
+  chips: ChipMapInterface;
+  comments?: Partial<Record<CurrentSituationType, string[]>>;
   level?: number;
   experience?: number;
+  availableDecks?: DeckStyleType[];
+  currentDeckChoice?: DeckStyleType;
 }
