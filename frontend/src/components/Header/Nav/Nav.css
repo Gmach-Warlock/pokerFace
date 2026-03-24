@@ -1,0 +1,13 @@
+.nav {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 1rem;
+  height: 4rem;
+  background-color: black;
+}
+
+.nav__item {
+  display: flex;
+  place-content: center;
+  align-items: center;
+}

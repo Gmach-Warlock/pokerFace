@@ -4,7 +4,7 @@ import { type HandInterface } from "../../app/types";
 
 export default function Player() {
   const hand: HandInterface = {
-    type: "draw",
+    matchType: "draw",
     cards: [
       {
         value: "A",
@@ -43,7 +43,12 @@ export default function Player() {
 
   return (
     <div className="player-container">
-      <Hand hand={hand} />
+      <Hand
+        matchType="draw"
+        cards={hand.cards}
+        currentLocation="demo"
+        hand="tbd"
+      />
       <p>Player One</p>
     </div>
   );

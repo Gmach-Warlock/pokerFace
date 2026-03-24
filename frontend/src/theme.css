@@ -1,0 +1,38 @@
+:root {
+  /* HSL Palette */
+  /* Usage: hsl(Hue, Saturation%, Lightness%) */
+
+  --bg-dark: hsl(260, 75%, 8%); /* Deep midnight purple */
+  --neon-blue: hsl(183, 100%, 50%); /* Electric Cyan */
+  --neon-pink: hsl(306, 100%, 50%); /* Hot Magenta */
+
+  --card-red: hsl(355, 78%, 56%); /* Vibrant Poker Red */
+  --card-black: hsl(0, 0%, 10%); /* Neutral Black */
+  --card-white: hsl(0, 0%, 100%); /* Pure White */
+
+  /* Surface / UI Colors */
+  --ui-gold: hsl(50, 100%, 50%); /* That "Logout" button yellow */
+
+  --card-shadow: hsla(0, 0%, 0%, 0.4);
+  --card-glow: hsla(183, 100%, 50%, 0.15); /* A faint tint of your neon blue */
+}
+
+.btn {
+  background-color: var(--ui-gold);
+  color: black;
+  font-family: var(--font-hennyPenny);
+  padding: 0 1rem;
+  border-radius: 0.5rem;
+  font-size: var(--text-md);
+}
+
+/* Why HSL is great: Easy Hover States */
+.btn-neon {
+  background-color: var(--neon-blue);
+  transition: background-color 0.2s;
+}
+
+.btn-neon:hover {
+  /* We just drop the lightness from 50% to 40% to make it darker! */
+  background-color: hsl(183, 100%, 40%);
+}

@@ -1,14 +1,8 @@
 body {
   font-family: var(--font-hennyPenny);
-  background-color: cyan;
+  background-color: var(--color-nt-bg);
   color: white;
   text-align: center;
-}
-
-h1 {
-  font-size: var(--text-4xl);
-  margin: 1rem;
-  text-shadow: 2px 2px 2px black;
 }
 
 h2 {

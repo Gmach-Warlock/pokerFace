@@ -2,23 +2,36 @@
   --font-hennyPenny: "Henny Penny", system-ui;
   --font-pressStart: "Press Start 2P", system-ui;
 
-  --text-md: 1.25rem;
-  --text-lg: 1.5rem;
-  --text-xl: 1.75rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
   --text-2xl: 2rem;
   --text-4xl: 4rem;
+
+  --bw-hs: 0, 0%;
+  --red-hs: 0, 100%;
+  --green-hs: 120, 100%;
+  --blue-hs: 240, 100%;
+  --table-felt-hs: 128, 27%;
+  --table-wood-hs: 22, 46%;
+  --nt-night-hs: 259, 75%; /* Deep Midnight Purple */
+  --nt-neon-pink-hs: 331, 100%; /* Shocking Pink */
+  --nt-electric-cyan-hs: 184, 100%; /* Electric Cyan */
+  --nt-gold-hs: 45, 100%; /* Gold for wins/highlights */
+
+  --color-nt-bg: hsl(var(--nt-night-hs), 8%);
+  --color-nt-surface: hsl(var(--nt-night-hs), 15%);
+  --color-nt-accent-pink: hsl(var(--nt-neon-pink-hs), 50%);
+  --color-nt-accent-cyan: hsl(var(--nt-electric-cyan-hs), 50%);
+  --color-nt-gold: hsl(var(--nt-gold-hs), 50%);
+
+  --color-red-500: hsl(var(--red-hs), 50%);
+  --color-green-500: hsl(var(--green-hs), 25%);
+  --color-blue-500: hsl(var(--blue-hs), 50%);
+  --color-black: hsl(var(--bw-hs), 0%);
+  --color-white: hsl(var(--bw-hs), 100%);
   --color-cyan-500: hsl(180, 100%, 50%);
   --color-cyan-700: hsl(180, 100%, 25%);
-  --color-table-green-300: hsl(128, 27%, 55%);
-  --color-table-green-500: hsl(128, 27%, 42%);
-  --color-table-green-700: hsl(128, 27%, 21%);
-  --color-table-green-900: hsl(128, 27%, 15%);
-  --color-table-brown-300: hsl(22, 46%, 45%);
-  --color-table-brown-500: hsl(22, 46%, 40%);
-  --color-table-brown-700: hsl(22, 46%, 21%);
-  --color-table-brown-800: hsl(22, 46%, 18%);
-  --color-table-brown-900: hsl(22, 46%, 11%);
-  font-size: 16px;
 }
 * {
   margin: 0;
@@ -66,7 +79,6 @@
 .bg-cyan {
   background-color: var(--color-cyan-500);
 }
-
 .text-shadow {
   text-shadow: 1px 1px 1px black;
 }
@@ -76,4 +88,42 @@
 .fit-content {
   width: fit-content;
   height: auto;
+}
+
+/* High Contrast Backgrounds */
+.bg-nt-night {
+  background-color: var(--color-nt-bg);
+}
+
+.bg-nt-pink {
+  background-color: var(--color-nt-accent-pink);
+}
+
+/* Manga Text Styles */
+.text-nt-cyan {
+  color: var(--color-nt-accent-cyan);
+}
+
+/* The "Manga Stroke" - essential for the Henny Penny font */
+.manga-outline {
+  -webkit-text-stroke: 1.5px var(--color-black);
+  paint-order: stroke fill;
+}
+
+/* The "Cyber Glow" Effect */
+.neon-glow-cyan {
+  text-shadow:
+    0 0 5px hsl(var(--nt-electric-cyan-hs), 50%),
+    0 0 10px hsl(var(--nt-electric-cyan-hs), 30%);
+}
+
+.neon-glow-pink {
+  box-shadow: 0 0 15px hsl(var(--nt-neon-pink-hs), 40%);
+}
+
+/* Card Container Style */
+.panel-tokyo {
+  background-color: var(--color-nt-surface);
+  border: 3px solid var(--color-black);
+  box-shadow: 6px 6px 0px var(--color-nt-accent-pink); /* Hard Manga Shadow */
 }

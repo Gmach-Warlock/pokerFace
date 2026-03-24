@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import type { DeckStyleType, NumberOfOpponentsType } from "../../app/types";
 
 interface GameInterface {
   isPlaying: boolean;
@@ -9,11 +10,23 @@ interface GameInterface {
     | "mainMenu"
     | "settings"
     | "preGame";
+  currentMatch: {
+    numberOfOpponents: NumberOfOpponentsType;
+    deckStyle: DeckStyleType;
+    opponents: Array<object>;
+  };
+  isMatchStarted: boolean;
 }
 
 const initialGameState: GameInterface = {
   isPlaying: false,
   currentlyDisplayed: "title",
+  currentMatch: {
+    numberOfOpponents: "tbd",
+    deckStyle: "arrowBolt",
+    opponents: [],
+  },
+  isMatchStarted: false,
 };
 
 const gameSlice = createSlice({
@@ -30,7 +43,6 @@ const gameSlice = createSlice({
       state.currentlyDisplayed = "mainMenu";
     },
     goToPreGame: (state) => {
-      console.log("checker decker");
       state.currentlyDisplayed = "preGame";
     },
     startMatch: (state) => {
