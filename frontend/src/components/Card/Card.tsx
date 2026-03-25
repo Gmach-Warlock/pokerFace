@@ -14,48 +14,19 @@ export default function Card(props: CardInterface) {
   const isRed = suit === "heart" || suit === "diamond";
   const suitColor = isRed ? "red" : "black";
 
-  const createSuitIcon = (suit: CardSuitType, size: IconSizeType) => {
-    switch (suit) {
-      case "club":
-        return (
-          <img
-            src={cardSuitIcons.club}
-            alt="club"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "diamond":
-        return (
-          <img
-            src={cardSuitIcons.diamond}
-            alt="diamond"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "heart":
-        return (
-          <img
-            src={cardSuitIcons.heart}
-            alt="heart"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "spade":
-        return (
-          <img
-            src={cardSuitIcons.spade}
-            alt="spade"
-            className={`${size}-suit-icon`}
-          />
-        );
-    }
-  };
+  const createSuitIcon = (suit: CardSuitType, size: IconSizeType) => (
+    <img
+      src={cardSuitIcons[suit]}
+      alt={suit}
+      className={`suit-icon--${size}`}
+    />
+  );
 
   const createCenterPiece = (val: CardValueType) => {
     if (typeof val === "string") {
       return (
         <div
-          className={`playing-card-centerpiece-face place-center items-center border-${suitColor}`}
+          className={`card__centerpiece-face place-center items-center border-${suitColor}`}
         >
           <div>{createSuitIcon(suit, "large")}</div>
         </div>
@@ -75,7 +46,7 @@ export default function Card(props: CardInterface) {
     const count = val as number;
     const prefix = numberMap[count];
     const containerClass =
-      count > 8 ? "playing-card-centerpiece-lg" : "playing-card-centerpiece";
+      count > 8 ? "card__centerpiece-lg" : "card__centerpiece";
 
     return (
       <div className={containerClass}>
@@ -106,15 +77,15 @@ export default function Card(props: CardInterface) {
     switch (side) {
       case "face-up":
         return (
-          <div className={`playing-card text-${suitColor}`}>
-            <div className="playing-card-side-column">
+          <div className={`card text-${suitColor}`}>
+            <div className="card__side-column">
               <div className="place-center">{value}</div>
               <div className="place-center">
                 {createSuitIcon(suit, "small")}
               </div>
             </div>
             {createCenterPiece(value)}
-            <div className="playing-card-side-column rotate-180">
+            <div className="card__side-column rotate-180">
               <div className="place-center">{value}</div>
               <div className="place-center">
                 {createSuitIcon(suit, "small")}
@@ -123,7 +94,7 @@ export default function Card(props: CardInterface) {
           </div>
         );
       case "face-down":
-        return <div className="playing-card face-down"></div>;
+        return <div className="card card--face-down"></div>;
     }
   };
 

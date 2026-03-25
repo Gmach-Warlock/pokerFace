@@ -28,7 +28,7 @@ export default function Title() {
 
     return () => {
       events.forEach((type) =>
-        window.addEventListener(type, handleInteraction),
+        window.removeEventListener(type, handleInteraction),
       );
     };
   }, [navToPreGame]);

@@ -1,0 +1,47 @@
+/* Shelter.css */
+
+.shelter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  flex: 1;
+  width: 90%;
+  justify-self: center;
+
+  /* HSL: Hue 230 (Blue), Saturation 96%, Lightness 62% */
+  background: radial-gradient(
+    circle,
+    hsla(230, 96%, 62%, 0.2) 0%,
+    hsla(0, 0%, 0%, 0) 70%
+  );
+  border: 2px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 20px;
+  margin: 0, auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.shelter::after {
+  content: "";
+  position: absolute;
+  bottom: 10%;
+  width: 60%;
+  height: 20px;
+  background: hsla(0, 0%, 100%, 0.05);
+  filter: blur(10px);
+  border-radius: 50%;
+  /* Using a light blue Cyan for the floor glow */
+  box-shadow: 0 0 30px 10px hsla(190, 100%, 50%, 0.2);
+}
+
+.heroUi {
+  z-index: 1;
+  color: hsl(0, 0%, 100%);
+  /* A nice neon green glow using HSL */
+  text-shadow: 0 0 10px hsl(142, 70%, 58%);
+  font-weight: bold;
+  font-size: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}

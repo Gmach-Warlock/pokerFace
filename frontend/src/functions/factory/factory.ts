@@ -42,28 +42,39 @@ export const createPlayer = (
     id: generateRandomString(8),
     name,
     type,
-    cards: [],
-    moneyTotal: startingPot,
+    currentHand: [],
+    money: startingPot,
     chips: newChipMap,
+    level: 1,
+    xp: 0,
+    nextLevel: 5,
+    availableDecks: ["arrowBolt"],
+    currentDeckChoice: "arrowBolt",
+    plei: 0,
   };
 };
 
-export const createVillain = (): PlayerInterface => {
-  const getUniqueVillainName = (theme: VillainThemeType) => {
+export const createVillain = (
+  theme: VillainThemeType,
+  nameOverride?: string, // Add this optional parameter
+): PlayerInterface => {
+  const getRandomVillainName = (theme: VillainThemeType) => {
     const pool = villainPool[theme];
     return pool[Math.floor(Math.random() * pool.length)];
   };
 
-  const newVillainName = getUniqueVillainName("classic");
+  const newVillainName = nameOverride || getRandomVillainName(theme);
   const chipMap = createChips(500);
 
   const newVillain: PlayerInterface = {
-    id: newVillainName + generateRandomString(4),
+    id: `${newVillainName}-${generateRandomString(4)}`,
     name: newVillainName,
     type: "computer",
-    cards: [],
-    moneyTotal: 500,
+    difficulty: "normal",
+    currentHand: [],
+    money: 500,
     chips: chipMap,
+    comments: null,
   };
 
   return newVillain;
@@ -71,7 +82,6 @@ export const createVillain = (): PlayerInterface => {
 export const generateDeck = (): CardInterface[] => {
   const deck: CardInterface[] = [];
 
-  // Cast keys to the specific Suit type defined in your CardInterface
   const suits = Object.keys(cardSuitIcons) as (keyof typeof cardSuitIcons)[];
   const ranks = Object.keys(cardRankValues);
 
@@ -80,7 +90,6 @@ export const generateDeck = (): CardInterface[] => {
       const rawValue = isNaN(Number(rank)) ? rank : Number(rank);
 
       deck.push({
-        // Use the specific types from your types.ts instead of 'any'
         value: rawValue as CardValueType,
         suit: suit,
         side: "face-down",
@@ -92,6 +101,12 @@ export const generateDeck = (): CardInterface[] => {
   return deck;
 };
 
+export const pickWeightedIndex = (arrayLength: number): number => {
+  // Squaring a number between 0 and 1 skews it toward 0.
+  // Example: 0.9 * 0.9 = 0.81 | 0.2 * 0.2 = 0.04
+  const skewedRandom = Math.pow(Math.random(), 2);
+  return Math.floor(skewedRandom * arrayLength);
+};
 /**
  * Shuffles an array of cards using the Fisher-Yates algorithm.
  */

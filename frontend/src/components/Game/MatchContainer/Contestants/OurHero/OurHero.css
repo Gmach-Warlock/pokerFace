@@ -1,0 +1,25 @@
+/* OurHero.css */
+.our-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.our-hero__hand-container {
+  position: relative;
+  /* This width should be wide enough to accommodate the translateX values in Hand.css */
+  width: 400px;
+  height: 250px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.our-hero__pot {
+  grid-row: 4 span 2;
+}

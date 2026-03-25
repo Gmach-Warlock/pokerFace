@@ -9,8 +9,6 @@ export default function Hud() {
     <section className="hud">
       <div className="hud__name">{username}</div>
       <div className="hud__level">{playerData.level}</div>
-      <div className="hud__wins">{`W: ${playerData.wins}`}</div>
-      <div className="hud__losses">{`L: ${playerData.losses}`}</div>
     </section>
   );
 }

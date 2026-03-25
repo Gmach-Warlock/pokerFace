@@ -11,6 +11,7 @@
 
   margin: 2rem;
   position: relative;
+  width: 100%;
 }
 .hand-draw-card1 {
   z-index: 1;

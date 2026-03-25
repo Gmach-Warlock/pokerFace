@@ -11,7 +11,8 @@ import Home from "./components/Home/Home";
 import Protected from "./components/Protected/Protected";
 import Title from "./components/Game/Title/Title";
 import PreGame from "./components/Game/PreGame/PreGame";
-import Match from "./components/Game/Match/Match";
+import MatchContainer from "./components/Game/MatchContainer/MatchContainer";
+import Shelter from "./components/Game/MatchContainer/areas/Shelter/Shelter";
 
 function App() {
   const router = createBrowserRouter(
@@ -25,7 +26,9 @@ function App() {
             <Route index element={<Title />} />
             <Route path="title" element={<Title />} />
             <Route path="preGame" element={<PreGame />} />
-            <Route path="match" element={<Match />} />
+            <Route path="match" element={<MatchContainer />}>
+              <Route path="shelter" element={<Shelter />} />
+            </Route>
           </Route>
         </Route>
       </Route>,

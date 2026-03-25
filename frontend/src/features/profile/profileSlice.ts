@@ -1,18 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type {
   CardInterface,
+  ChipMapInterface,
   DeckStyleType,
+  MatchLocationType,
   NextLevelXpType,
 } from "../../app/types";
+import { startingChips } from "../../app/assets";
 
 interface ProfileInterface {
   meta: {
     authorized: boolean;
+    id: string;
     username: string;
     email: string;
     password: string;
   };
   playerData: {
+    id: string;
+    name: string;
+    type: "human";
+    cards: CardInterface[];
+    money: number;
+    chips: ChipMapInterface;
     level: number;
     xp: number;
     nextLevel: NextLevelXpType;
@@ -20,7 +30,8 @@ interface ProfileInterface {
     losses: number;
     availableDecks: DeckStyleType[];
     currentDeckChoice: DeckStyleType;
-    currency: number;
+    availableLocations: MatchLocationType[];
+    plei: number;
     currentHand: CardInterface[] | null;
   };
 }
@@ -28,11 +39,18 @@ interface ProfileInterface {
 const initialAuthorizeState: ProfileInterface = {
   meta: {
     authorized: true,
+    id: "abcde123",
     username: "gary",
     email: "gary@mail.com",
     password: "weakpassword",
   },
   playerData: {
+    id: "abcde123",
+    name: "GMach",
+    type: "human",
+    cards: [],
+    money: 500,
+    chips: startingChips,
     level: 1,
     xp: 0,
     nextLevel: 5,
@@ -40,7 +58,8 @@ const initialAuthorizeState: ProfileInterface = {
     losses: 0,
     availableDecks: ["arrowBolt"],
     currentDeckChoice: "arrowBolt",
-    currency: 0,
+    availableLocations: ["shelter"],
+    plei: 0,
     currentHand: null,
   },
 };
