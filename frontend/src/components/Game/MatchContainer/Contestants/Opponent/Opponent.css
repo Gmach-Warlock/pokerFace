@@ -1,0 +1,27 @@
+[data-design="arrowBolt"] .card-back {
+  background-image: url("/arrowBolt.png");
+}
+[data-design="explodingFace"] .card-back {
+  background-image: url("/explodingFace.png");
+}
+[data-design="inBloom"] .card-back {
+  background-image: url("/inBloom.png");
+}
+[data-design="redFire"] .card-back {
+  background-image: url("/redFire.png");
+}
+[data-design="theFlyingCow"] .card-back {
+  background-image: url("/theFlyingCow.png");
+}
+
+.opponent-card {
+  grid-column: span 4; /* 3 opponents per row */
+  aspect-ratio: 1 / 1.2;
+  background: hsla(261, 40%, 20%, 0.4);
+  border: 1px solid hsla(261, 20%, 40%, 0.3);
+  font-size: 0.8rem;
+}
+
+.opponent {
+  max-width: 50%;
+}

@@ -4,6 +4,7 @@ import type {
   NumberOfOpponentsType,
   DifficultyType,
   MatchLocationType,
+  DeckNumberType,
 } from "../../../app/types";
 import "./PreGame.css";
 import { useNavigate } from "react-router";
@@ -28,11 +29,18 @@ export default function PreGame() {
     ) as NumberOfOpponentsType;
     const difficulty = formData.get("difficulty-level") as DifficultyType;
     const location = formData.get("match-area-select") as MatchLocationType;
+
+    const rawValue = formData.get("deck-number-select");
+    const parsed = Number(rawValue);
+
+    const numberOfDecks: DeckNumberType =
+      parsed >= 1 && parsed <= 5 ? (parsed as DeckNumberType) : 1;
     dispatch(
       startMatch({
         numberOfOpponents: opponents,
         levelOfDifficulty: difficulty,
         matchLocation: location,
+        numberOfDecks: numberOfDecks,
       }),
     );
     navigate(`/game/match/${location}`);
@@ -98,6 +106,17 @@ export default function PreGame() {
                   value={area}
                 >{`The ${formatOptionText(area.trim())}`}</option>
               ))}
+            </select>
+          </div>
+
+          <div className="setting">
+            <label htmlFor="deck-number-select">How many decks?</label>
+            <select name="deck-number-select" id="deck-number-select">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
             </select>
           </div>
 

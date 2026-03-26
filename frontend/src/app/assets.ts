@@ -4,6 +4,19 @@ import type {
   FetchInterface,
   MatchMapInterface,
 } from "./types";
+
+export const AnteMap = {
+  shelter: 1,
+  "low-vault-lounge": 5,
+  "neon-alley-club": 10,
+  halls: 15,
+  compound: 15,
+  "holdem-hotel": 25,
+  "draw-den": 25,
+  "stud-stay": 25,
+  atrium: 50,
+  zenith: 100,
+};
 export const cardSuitIcons = {
   club: "/club.png",
   diamond: "/diamond.png",
@@ -72,6 +85,29 @@ export const gamePhases = {
     sixthStreet: "Sixth Street",
     seventhStreet: "The River (Down Card)",
     showdown: "Showdown",
+  },
+};
+export const GamePhaseMap = {
+  draw: {
+    ante: { cards: 0, hero: "face-up", opp: "face-down" },
+    deal: { cards: 5, hero: "face-up", opp: "face-down" },
+    discard: { cards: 0, hero: "face-up", opp: "face-down" },
+    draw: { cards: "variable", hero: "face-up", opp: "face-down" },
+  },
+  holdem: {
+    ante: { cards: 0, hero: "face-up", opp: "face-down" },
+    hole: { cards: 2, hero: "face-up", opp: "face-down" },
+    flop: { cards: 3, community: "face-up" },
+    turn: { cards: 1, community: "face-up" },
+    river: { cards: 1, community: "face-up" },
+  },
+  stud: {
+    street2: { cards: 2, hero: "face-down", opp: "face-down" },
+    street3: { cards: 1, hero: "face-up", opp: "face-up" },
+    street4: { cards: 1, hero: "face-up", opp: "face-up" },
+    street5: { cards: 1, hero: "face-up", opp: "face-up" },
+    street6: { cards: 1, hero: "face-up", opp: "face-up" },
+    river: { cards: 1, hero: "face-down", opp: "face-down" },
   },
 };
 export const handRanks = {

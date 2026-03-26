@@ -1,38 +1,26 @@
 import { type PlayerInterface } from "../../../../../app/types";
 import "./Opponent.css";
-import Hand from "../../../../Hand/Hand";
+import { useAppSelector } from "../../../../../app/hooks";
 
 interface OpponentPropsInterface {
   data: PlayerInterface;
 }
 
 export default function Opponent({ data }: OpponentPropsInterface) {
-  // Logic: If they have no cards, show 5 face-down cards as a placeholder
-  const handToRender =
-    data.currentHand && data.currentHand.length > 0
-      ? data.currentHand
-      : Array(5).fill({
-          value: "A",
-          suit: "spade",
-          side: "face-down",
-          currentLocation: "demo",
-        });
+  // Grab the design key just like in ArenaCenter
+  const designKey = useAppSelector(
+    (state) => state.game.currentMatch.deckStyle,
+  );
 
   return (
-    <div className="opponent-card">
+    /* Apply the data-design attribute here */
+    <div className="opponent-card" data-design={designKey}>
       <div className="opponent-info">
         <h3 className="opponent-name">{data.name}</h3>
         <p className="opponent-stats">${data.money}</p>
       </div>
 
-      <div className="opponent-hand-wrapper">
-        <Hand
-          matchType="draw"
-          cards={handToRender}
-          currentLocation="demo"
-          hand="tbd"
-        />
-      </div>
+      <div className="opponent-hand-wrapper"></div>
     </div>
   );
 }

@@ -1,25 +1,25 @@
 /* 1. Map the Designs */
-.deck-stack[data-design="arrowBolt"] .card-back {
+.deck-design[data-design="arrowBolt"] .card-back {
   background-image: url("/arrowBolt.png");
 }
-.deck-stack[data-design="explodingFace"] .card-back {
+.deck-design[data-design="explodingFace"] .card-back {
   background-image: url("/explodingFace.png");
 }
-.deck-stack[data-design="inBloom"] .card-back {
+.deck-design[data-design="inBloom"] .card-back {
   background-image: url("/inBloom.png");
 }
-.deck-stack[data-design="redFire"] .card-back {
+.deck-design[data-design="redFire"] .card-back {
   background-image: url("/redFire.png");
 }
-.deck-stack[data-design="theFlyingCow"] .card-back {
+.deck-design[data-design="theFlyingCow"] .card-back {
   background-image: url("/theFlyingCow.png");
 }
 
 /* 2. Base Card Styling */
 .card-back {
   position: absolute;
-  width: 60px;
-  height: 84px;
+  width: 120px;
+  height: 180px;
   background-size: cover;
   background-position: center;
   border-radius: 4px;
@@ -67,4 +67,26 @@
   bottom: 14px;
   right: 7px;
   z-index: 7;
+}
+
+.arena-center__centerpiece {
+  grid-column: 5 / span 3;
+  place-content: center;
+}
+
+.arena-center {
+  grid-column: 1 / -1;
+  grid-row: 4 / 8;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  justify-content: center;
+  align-items: center;
+  gap: 40px; /* Space between deck and pot */
+}
+
+.deck-stack {
+  grid-column: 1 / span 3;
+  position: relative;
+  width: 120px;
+  height: 180px;
 }

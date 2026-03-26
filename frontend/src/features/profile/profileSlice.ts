@@ -7,6 +7,7 @@ import type {
   NextLevelXpType,
 } from "../../app/types";
 import { startingChips } from "../../app/assets";
+import { type PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileInterface {
   meta: {
@@ -20,7 +21,7 @@ interface ProfileInterface {
     id: string;
     name: string;
     type: "human";
-    cards: CardInterface[];
+    currentHand: CardInterface[];
     money: number;
     chips: ChipMapInterface;
     level: number;
@@ -32,7 +33,6 @@ interface ProfileInterface {
     currentDeckChoice: DeckStyleType;
     availableLocations: MatchLocationType[];
     plei: number;
-    currentHand: CardInterface[] | null;
   };
 }
 
@@ -48,7 +48,7 @@ const initialAuthorizeState: ProfileInterface = {
     id: "abcde123",
     name: "GMach",
     type: "human",
-    cards: [],
+    currentHand: [],
     money: 500,
     chips: startingChips,
     level: 1,
@@ -60,7 +60,6 @@ const initialAuthorizeState: ProfileInterface = {
     currentDeckChoice: "arrowBolt",
     availableLocations: ["shelter"],
     plei: 0,
-    currentHand: null,
   },
 };
 
@@ -74,8 +73,12 @@ const profileSlice = createSlice({
       state.meta.password = action.payload.password;
       state.meta.authorized = true;
     },
+    subtractHeroMoney: (state, action: PayloadAction<{ amount: number }>) => {
+      state.playerData.money -= action.payload.amount;
+      // Here you would also call your chip calculator logic to update state.playerData.chips
+    },
   },
 });
 
-export const { createUser } = profileSlice.actions;
+export const { createUser, subtractHeroMoney } = profileSlice.actions;
 export default profileSlice.reducer;

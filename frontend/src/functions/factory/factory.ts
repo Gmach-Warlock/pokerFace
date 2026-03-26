@@ -79,24 +79,25 @@ export const createVillain = (
 
   return newVillain;
 };
-export const generateDeck = (): CardInterface[] => {
+export const generateDeck = (count: number = 1): CardInterface[] => {
   const deck: CardInterface[] = [];
-
   const suits = Object.keys(cardSuitIcons) as (keyof typeof cardSuitIcons)[];
   const ranks = Object.keys(cardRankValues);
 
-  suits.forEach((suit) => {
-    ranks.forEach((rank) => {
-      const rawValue = isNaN(Number(rank)) ? rank : Number(rank);
+  for (let i = 0; i < count; i++) {
+    suits.forEach((suit) => {
+      ranks.forEach((rank) => {
+        const rawValue = isNaN(Number(rank)) ? rank : Number(rank);
 
-      deck.push({
-        value: rawValue as CardValueType,
-        suit: suit,
-        side: "face-down",
-        currentLocation: "deck" as CurrentLocationType,
+        deck.push({
+          value: rawValue as CardValueType,
+          suit: suit,
+          side: "face-down", // Fixed your earlier type mismatch here too!
+          currentLocation: "deck" as CurrentLocationType,
+        });
       });
     });
-  });
+  }
 
   return deck;
 };
@@ -117,4 +118,27 @@ export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+};
+export const calculateHandValue = (cards: CardInterface[]): number => {
+  let value = 0;
+  let aceCount = 0;
+
+  cards.forEach((card) => {
+    if (typeof card.value === "number") {
+      value += card.value;
+    } else if (["J", "Q", "K"].includes(card.value as string)) {
+      value += 10;
+    } else if (card.value === "A") {
+      aceCount += 1;
+      value += 11;
+    }
+  });
+
+  // If we busted but have Aces, convert them from 11 to 1
+  while (value > 21 && aceCount > 0) {
+    value -= 10;
+    aceCount -= 1;
+  }
+
+  return value;
 };
