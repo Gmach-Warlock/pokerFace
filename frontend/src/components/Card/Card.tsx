@@ -1,66 +1,38 @@
 import { cardSuitIcons } from "../../app/assets";
 import type {
   CardInterface,
-  CardSideType,
-  CardSuitType,
   CardValueType,
   IconSizeType,
 } from "../../app/types";
 import "./Card.css";
 
-export default function Card(props: CardInterface) {
-  const { value, suit, side } = props;
-
+export default function Card({ value, suit, side }: CardInterface) {
   const isRed = suit === "heart" || suit === "diamond";
   const suitColor = isRed ? "red" : "black";
 
-  const createSuitIcon = (suit: CardSuitType, size: IconSizeType) => {
-    switch (suit) {
-      case "club":
-        return (
-          <img
-            src={cardSuitIcons.club}
-            alt="club"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "diamond":
-        return (
-          <img
-            src={cardSuitIcons.diamond}
-            alt="diamond"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "heart":
-        return (
-          <img
-            src={cardSuitIcons.heart}
-            alt="heart"
-            className={`${size}-suit-icon`}
-          />
-        );
-      case "spade":
-        return (
-          <img
-            src={cardSuitIcons.spade}
-            alt="spade"
-            className={`${size}-suit-icon`}
-          />
-        );
-    }
-  };
+  // --- Helper Sub-renderers ---
 
-  const createCenterPiece = (val: CardValueType) => {
+  const renderSuitIcon = (size: IconSizeType) => (
+    <img
+      src={cardSuitIcons[suit]}
+      alt={suit}
+      className={`suit-icon--${size}`}
+    />
+  );
+
+  const renderCenterPiece = (val: CardValueType) => {
+    // Face Card Logic (J, Q, K, A)
     if (typeof val === "string") {
       return (
         <div
-          className={`playing-card-centerpiece-face place-center items-center border-${suitColor}`}
+          className={`card__centerpiece-face place-center items-center border-${suitColor}`}
         >
-          <div>{createSuitIcon(suit, "large")}</div>
+          <div>{renderSuitIcon("large")}</div>
         </div>
       );
     }
+
+    // Number Card Logic (2-10)
     const numberMap: Record<number, string> = {
       2: "two",
       3: "three",
@@ -72,29 +44,27 @@ export default function Card(props: CardInterface) {
       9: "nine",
       10: "ten",
     };
+
     const count = val as number;
     const prefix = numberMap[count];
     const containerClass =
-      count > 8 ? "playing-card-centerpiece-lg" : "playing-card-centerpiece";
+      count > 8 ? "card__centerpiece-lg" : "card__centerpiece";
 
     return (
       <div className={containerClass}>
         {Array(count)
           .fill(null)
           .map((_, i) => {
-            const letter = String.fromCharCode(97 + i);
             const isBottomHalf = i >= Math.ceil(count / 2);
-            const isThreeCase = count === 3 && i === 3;
-            const isStandardRotation = count !== 3 && isBottomHalf;
-
-            const shouldRotate = isThreeCase || isStandardRotation;
+            const isThreeCase = count === 3 && i === 2; // Fixed index logic for 3
+            const shouldRotate = isThreeCase || (count !== 3 && isBottomHalf);
 
             return (
               <div
                 key={i}
-                className={`${prefix}-${letter} place-center ${shouldRotate ? "rotate-180" : ""}`}
+                className={`${prefix}-${String.fromCharCode(97 + i)} place-center ${shouldRotate ? "rotate-180" : ""}`}
               >
-                {createSuitIcon(suit, "medium")}
+                {renderSuitIcon("medium")}
               </div>
             );
           })}
@@ -102,32 +72,29 @@ export default function Card(props: CardInterface) {
     );
   };
 
-  const chooseSide = (side: CardSideType) => {
-    switch (side) {
-      case "face-up":
-        return (
-          <div className={`playing-card text-${suitColor}`}>
-            <div className="playing-card-side-column">
-              <div className="place-center">{value}</div>
-              <div className="place-center">
-                {createSuitIcon(suit, "small")}
-              </div>
-            </div>
-            {createCenterPiece(value)}
-            <div className="playing-card-side-column rotate-180">
-              <div className="place-center">{value}</div>
-              <div className="place-center">
-                {createSuitIcon(suit, "small")}
-              </div>
-            </div>
-          </div>
-        );
-      case "face-down":
-        return <div className="playing-card face-down"></div>;
-    }
-  };
+  // --- Main Render Logic ---
 
-  const newSide = chooseSide(side);
+  if (side === "face-down") {
+    // Added 'card-back' so your data-design selectors finally work!
+    return <div className="card card-back card--face-down" />;
+  }
 
-  return <>{newSide}</>;
+  return (
+    <div className={`card text-${suitColor}`}>
+      {/* Top Left Corner */}
+      <div className="card__side-column">
+        <div className="place-center">{value}</div>
+        <div className="place-center">{renderSuitIcon("small")}</div>
+      </div>
+
+      {/* Main Art Area */}
+      {renderCenterPiece(value)}
+
+      {/* Bottom Right Corner */}
+      <div className="card__side-column rotate-180">
+        <div className="place-center">{value}</div>
+        <div className="place-center">{renderSuitIcon("small")}</div>
+      </div>
+    </div>
+  );
 }

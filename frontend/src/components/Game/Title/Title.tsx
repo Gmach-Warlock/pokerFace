@@ -28,7 +28,7 @@ export default function Title() {
 
     return () => {
       events.forEach((type) =>
-        window.addEventListener(type, handleInteraction),
+        window.removeEventListener(type, handleInteraction),
       );
     };
   }, [navToPreGame]);
@@ -37,12 +37,14 @@ export default function Title() {
     <div className="title">
       <h1 className="title__title manga-outline neon-glow-cyan">Poker Face</h1>
 
-      <Hand
-        matchType="draw"
-        cards={winningHand}
-        currentLocation="demo"
-        hand="tbd"
-      />
+      <div className="title__hand-container">
+        <Hand
+          matchType="draw"
+          cards={winningHand}
+          currentLocation="demo"
+          hand="tbd"
+        />
+      </div>
 
       <p className="text-shadow">Hit any key to continue</p>
     </div>

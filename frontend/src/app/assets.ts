@@ -1,5 +1,22 @@
-import type { CardInterface, FetchInterface } from "./types";
+import type {
+  CardInterface,
+  ChipMapInterface,
+  FetchInterface,
+  MatchMapInterface,
+} from "./types";
 
+export const AnteMap = {
+  shelter: 1,
+  "low-vault-lounge": 5,
+  "neon-alley-club": 10,
+  halls: 15,
+  compound: 15,
+  "holdem-hotel": 25,
+  "draw-den": 25,
+  "stud-stay": 25,
+  atrium: 50,
+  zenith: 100,
+};
 export const cardSuitIcons = {
   club: "/club.png",
   diamond: "/diamond.png",
@@ -39,104 +56,6 @@ export const deckDesigns = {
   redFire: "/redFire.png",
   theFlyingCow: "/theFlyingCow.png",
 };
-export const dialoguePool = {
-  strongHand: {
-    classic: [
-      "A formidable display of cards.",
-      "I believe the odds are in my favor.",
-    ],
-    gritty: ["Read 'em and weep.", "You're walking into a buzzsaw, kid."],
-    modern: [
-      "Straight fire in my hand right now.",
-      "This is peak performance.",
-    ],
-    pro: [
-      "The equity here is heavily weighted toward me.",
-      "I've got the nuts.",
-    ],
-  },
-  weakHand: {
-    classic: [
-      "The cards are quite shy today.",
-      "One must make do with what one is dealt.",
-    ],
-    gritty: ["Garbage in, garbage out.", "This hand is a total dumpster fire."],
-    modern: ["Low-key struggling here.", "This hand is a major 'oof'."],
-    pro: ["Range disadvantage is real right now.", "Dead cards, moving on."],
-  },
-  bluffing: {
-    classic: [
-      "Confidence is the soul of the game.",
-      "A bold move for a bold player.",
-    ],
-    gritty: [
-      "You don't have the guts to call.",
-      "I can smell your fear from here.",
-    ],
-    modern: [
-      "Just vibe-checking your stack.",
-      "Don't overthink it, just fold.",
-    ],
-    pro: ["I'm polarized here, and you know it.", "Testing your resolve."],
-  },
-  gloating: {
-    classic: ["Splendid! Simply splendid.", "Better luck next time, my dear."],
-    gritty: [
-      "Easiest money I made all day.",
-      "Next time, bring a bigger wallet.",
-    ],
-    modern: ["L + Ratio + No Chips.", "Ez game, ez life."],
-    pro: [
-      "Standard result. I played the math.",
-      "Don't tap the glass on the fish.",
-    ],
-  },
-  sulking: {
-    classic: ["How very unfortunate.", "I simply cannot believe my luck."],
-    gritty: ["Complete and utter garbage.", "That river was a crime."],
-    modern: ["Absolute robbery.", "Bruh. Are you serious right now?"],
-    pro: [
-      "One-outer. Disgusting.",
-      "I played it perfectly; the deck just failed.",
-    ],
-  },
-  neutral: {
-    classic: ["The game continues.", "Interesting..."],
-    gritty: ["Just play the cards.", "Moving right along."],
-    modern: ["Neutral vibes only.", "Next hand, let's go."],
-    pro: ["Action's on you.", "Checking the ranges."],
-  },
-  nagging: {
-    classic: [
-      "Patience is a virtue, but time is fleeting.",
-      "Shall we continue, sir?",
-    ],
-    gritty: [
-      "Clock's ticking. You falling asleep?",
-      "I haven't got all day. Move it.",
-    ],
-    modern: ["Don't lag the game, let's go.", "Hello? Anyone home?"],
-    pro: [
-      "I'm going to have to call 'time' soon.",
-      "Keep the game moving, please.",
-    ],
-  },
-  egging: {
-    classic: [
-      "A wager of this size surely requires a response.",
-      "Are you quite finished?",
-    ],
-    gritty: [
-      "Just put the chips in. Stop stalling.",
-      "You're scared. I can see it.",
-    ],
-    modern: ["Betting is the whole point, right?", "Send it. Full heart."],
-    pro: [
-      "It's a profitable call if you have the range.",
-      "You know you want to see the cards.",
-    ],
-  },
-};
 export const fetchObject: FetchInterface = {
   status: "idle",
   message: "",
@@ -166,6 +85,29 @@ export const gamePhases = {
     sixthStreet: "Sixth Street",
     seventhStreet: "The River (Down Card)",
     showdown: "Showdown",
+  },
+};
+export const GamePhaseMap = {
+  draw: {
+    ante: { cards: 0, hero: "face-up", opp: "face-down" },
+    deal: { cards: 5, hero: "face-up", opp: "face-down" },
+    discard: { cards: 0, hero: "face-up", opp: "face-down" },
+    draw: { cards: "variable", hero: "face-up", opp: "face-down" },
+  },
+  holdem: {
+    ante: { cards: 0, hero: "face-up", opp: "face-down" },
+    hole: { cards: 2, hero: "face-up", opp: "face-down" },
+    flop: { cards: 3, community: "face-up" },
+    turn: { cards: 1, community: "face-up" },
+    river: { cards: 1, community: "face-up" },
+  },
+  stud: {
+    street2: { cards: 2, hero: "face-down", opp: "face-down" },
+    street3: { cards: 1, hero: "face-up", opp: "face-up" },
+    street4: { cards: 1, hero: "face-up", opp: "face-up" },
+    street5: { cards: 1, hero: "face-up", opp: "face-up" },
+    street6: { cards: 1, hero: "face-up", opp: "face-up" },
+    river: { cards: 1, hero: "face-down", opp: "face-down" },
   },
 };
 export const handRanks = {
@@ -210,36 +152,48 @@ export const handRanks = {
     label: "Royal Flush",
   },
 };
+export const matchMap: MatchMapInterface = {
+  shelter: ["gritty"],
+  "low-vault-lounge": ["gritty", "modern"],
+  "neon-alley-club": ["gritty", "modern", "classy"],
+  halls: ["modern", "classic"],
+  compound: ["modern", "pro", "classy"],
+  "holdem-hotel": ["pro", "modern", "classy"],
+  "draw-den": ["pro", "classic", "classy"],
+  "stud-stay": ["pro", "classic", "classy"],
+  atrium: ["classic", "pro", "modern", "classy"],
+  zenith: ["classic", "gritty", "modern", "classy", "pro"],
+};
 export const pokerChips = {
   black: {
     face: "/blackChipFace.png",
     faceDropShadow: "/blackChipFaceDropShadow.png",
-    side: "blackChipSide.png",
-    sideDropShadow: "blackChipSideDropShadow.png",
+    side: "/blackChipSide.png",
+    sideDropShadow: "/blackChipSideDropShadow.png",
   },
   blue: {
     face: "/blueChipFace.png",
     faceDropShadow: "/blueChipFaceDropShadow.png",
-    side: "blueChipSide.png",
-    sideDropShadow: "blueChipSideDropShadow.png",
+    side: "/blueChipSide.png",
+    sideDropShadow: "/blueChipSideDropShadow.png",
   },
   green: {
     face: "/greenChipFace.png",
     faceDropShadow: "/greenChipFaceDropShadow.png",
-    side: "greenChipSide.png",
-    sideDropShadow: "greenChipSideDropShadow.png",
+    side: "/greenChipSide.png",
+    sideDropShadow: "/greenChipSideDropShadow.png",
   },
   red: {
     face: "/redChipFace.png",
     faceDropShadow: "/redChipFaceDropShadow.png",
-    side: "redChipSide.png",
-    sideDropShadow: "redChipSideDropShadow.png",
+    side: "/redChipSide.png",
+    sideDropShadow: "/redChipSideDropShadow.png",
   },
   white: {
     face: "/whiteChipFace.png",
     faceDropShadow: "/whiteChipFaceDropShadow.png",
-    side: "whiteChipSide.png",
-    sideDropShadow: "whiteChipSideDropShadow.png",
+    side: "/whiteChipSide.png",
+    sideDropShadow: "/whiteChipSideDropShadow.png",
   },
 };
 export const royalFlush: CardInterface[] = [
@@ -274,6 +228,13 @@ export const royalFlush: CardInterface[] = [
     currentLocation: "demo",
   },
 ];
+export const startingChips: ChipMapInterface = {
+  white: 30,
+  red: 25,
+  blue: 17,
+  green: 7,
+  black: 0,
+};
 export const suitColors = {
   club: "black",
   spade: "black",
@@ -293,6 +254,11 @@ export const villainPool = {
     "Kyle",
     "Mary",
     "Clark",
+    "Donna",
+    "Frank",
+    "Gretta",
+    "Wilma",
+    "Joey",
   ],
   gritty: [
     "Jax",
@@ -308,6 +274,9 @@ export const villainPool = {
     "Sledge",
     "Vanna",
     "Steel",
+    "Gutter",
+    "Tank",
+    "Li",
   ],
   modern: [
     "Leo",
@@ -322,6 +291,33 @@ export const villainPool = {
     "Zadie",
     "Merrick",
     "Lana",
+    "Vaughn",
   ],
-  pro: ["Doyle", "Stu", "Phil", "Johnny", "Annette"],
+  classy: [
+    "Julian",
+    "Beatrice",
+    "Bob",
+    "Madelaine",
+    "Gemma",
+    "Hubert",
+    "Lindsay",
+    "Veronica",
+    "Winthrop",
+    "Joseph",
+    "Gerald",
+    "Kathleen",
+    "Derek",
+  ],
+  pro: [
+    "Doyle",
+    "Stu",
+    "Phil",
+    "Johnny",
+    "Annette",
+    "Barbara",
+    "Linda",
+    "Carlos",
+    "Jennifer",
+    "Michael",
+  ],
 };

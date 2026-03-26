@@ -1,18 +1,29 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type {
   CardInterface,
+  ChipMapInterface,
   DeckStyleType,
+  MatchLocationType,
   NextLevelXpType,
 } from "../../app/types";
+import { startingChips } from "../../app/assets";
+import { type PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileInterface {
   meta: {
     authorized: boolean;
+    id: string;
     username: string;
     email: string;
     password: string;
   };
   playerData: {
+    id: string;
+    name: string;
+    type: "human";
+    currentHand: CardInterface[];
+    money: number;
+    chips: ChipMapInterface;
     level: number;
     xp: number;
     nextLevel: NextLevelXpType;
@@ -20,19 +31,26 @@ interface ProfileInterface {
     losses: number;
     availableDecks: DeckStyleType[];
     currentDeckChoice: DeckStyleType;
-    currency: number;
-    currentHand: CardInterface[] | null;
+    availableLocations: MatchLocationType[];
+    plei: number;
   };
 }
 
 const initialAuthorizeState: ProfileInterface = {
   meta: {
     authorized: true,
+    id: "abcde123",
     username: "gary",
     email: "gary@mail.com",
     password: "weakpassword",
   },
   playerData: {
+    id: "abcde123",
+    name: "GMach",
+    type: "human",
+    currentHand: [],
+    money: 500,
+    chips: startingChips,
     level: 1,
     xp: 0,
     nextLevel: 5,
@@ -40,8 +58,8 @@ const initialAuthorizeState: ProfileInterface = {
     losses: 0,
     availableDecks: ["arrowBolt"],
     currentDeckChoice: "arrowBolt",
-    currency: 0,
-    currentHand: null,
+    availableLocations: ["shelter"],
+    plei: 0,
   },
 };
 
@@ -55,8 +73,12 @@ const profileSlice = createSlice({
       state.meta.password = action.payload.password;
       state.meta.authorized = true;
     },
+    subtractHeroMoney: (state, action: PayloadAction<{ amount: number }>) => {
+      state.playerData.money -= action.payload.amount;
+      // Here you would also call your chip calculator logic to update state.playerData.chips
+    },
   },
 });
 
-export const { createUser } = profileSlice.actions;
+export const { createUser, subtractHeroMoney } = profileSlice.actions;
 export default profileSlice.reducer;

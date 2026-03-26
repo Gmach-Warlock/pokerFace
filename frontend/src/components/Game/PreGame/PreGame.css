@@ -7,7 +7,8 @@
 
 .preGame-menu {
   width: 90vw;
-  max-width: 450px;
+  min-width: 250px;
+  max-width: 500px;
   background-color: white;
   padding: 2.5rem;
   border-radius: 15px;

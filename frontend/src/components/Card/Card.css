@@ -1,4 +1,4 @@
-.playing-card {
+.card {
   background-color: white;
   display: flex;
   border-radius: 0.3rem;
@@ -19,11 +19,11 @@
   border-radius: 10px;
 }
 
-.playing-card:first-child {
+.card:first-child {
   margin-left: 0;
 }
 
-.playing-card:hover {
+.card:hover {
   z-index: 10;
   transform: translateY(-10px) scale(1.02);
   box-shadow:
@@ -31,26 +31,26 @@
     0 0 30px hsla(183, 100%, 50%, 0.3);
 }
 
-.small-suit-icon {
+.suit-icon--small {
   width: 0.9rem;
   height: auto;
 }
 
-.medium-suit-icon {
+.suit-icon--medium {
   width: 1.2rem;
   height: 1.2rem;
 }
 
-.large-suit-icon {
+.suit-icon--large {
   width: 4rem;
   height: auto;
 }
 
-.playing-card-side-column {
+.card__side-column {
   width: 20%;
 }
 
-.playing-card-centerpiece {
+.card__centerpiece {
   width: 60%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -58,7 +58,7 @@
   margin-block: 0.8rem;
 }
 
-.playing-card-centerpiece-lg {
+.card__centerpiece-lg {
   width: 60%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -66,13 +66,12 @@
   margin-block: 0.8rem;
 }
 
-.playing-card-centerpiece-face {
+.card__centerpiece-face {
   width: 60%;
   margin-block: 0.8rem;
 }
 
-.face-down {
-  background-image: url(../../../public/FireBolt.svg);
+.card--face-down {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

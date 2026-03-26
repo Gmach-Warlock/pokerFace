@@ -127,3 +127,19 @@
   border: 3px solid var(--color-black);
   box-shadow: 6px 6px 0px var(--color-nt-accent-pink); /* Hard Manga Shadow */
 }
+
+[data-design="arrowBolt"] .card-back {
+  background-image: url("/arrowBolt.png");
+}
+[data-design="explodingFace"] .card-back {
+  background-image: url("/explodingFace.png");
+}
+[data-design="inBloom"] .card-back {
+  background-image: url("/inBloom.png");
+}
+[data-design="redFire"] .card-back {
+  background-image: url("/redFire.png");
+}
+[data-design="theFlyingCow"] .card-back {
+  background-image: url("/theFlyingCow.png");
+}

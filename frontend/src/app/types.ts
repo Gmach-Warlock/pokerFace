@@ -22,6 +22,7 @@ export type ChipIconType =
   | "side"
   | "faceDropShadow"
   | "sideDropShadow";
+export type ContestantType = "hero" | "opponent" | "dealer";
 export type CurrentLocationType =
   | "p1"
   | "p2"
@@ -39,12 +40,14 @@ export type CurrentSituationType =
   | "neutral"
   | "nagging"
   | "egging";
+export type DeckNumberType = 1 | 2 | 3 | 4 | 5;
 export type DeckStyleType =
   | "arrowBolt"
   | "explodingFace"
   | "inBloom"
   | "redFire"
   | "theFlyingCow";
+export type DifficultyType = "easy" | "normal" | "hard";
 export type FetchStatusType = "idle" | "pending" | "failed" | "succeeded";
 export type GameDisplayType =
   | "title"
@@ -53,6 +56,27 @@ export type GameDisplayType =
   | "mainMenu"
   | "settings"
   | "preGame";
+export type GamePhaseType =
+  | "preFlop"
+  | "flop"
+  | "turn"
+  | "river"
+  | "showdown"
+  | "ante"
+  | "deal"
+  | "bettingOne"
+  | "draw"
+  | "bettingTwo"
+  | "thirdStreet"
+  | "fourthStreet"
+  | "fifthStreet"
+  | "sixthStreet"
+  | "seventhStreet"
+  | "notInGameYet";
+export type GamePhaseConfigType = Record<
+  string,
+  Record<string, PhaseInstruction>
+>;
 export type HandType =
   | "single-high"
   | "pair"
@@ -66,6 +90,18 @@ export type HandType =
   | "royal-flush"
   | "tbd";
 export type MatchType = "draw" | "holdem" | "stud";
+export type MatchLocationType =
+  | "shelter"
+  | "low-vault-lounge"
+  | "neon-alley-club"
+  | "halls"
+  | "compound"
+  | "holdem-hotel"
+  | "draw-den"
+  | "stud-stay"
+  | "atrium"
+  | "zenith";
+
 export type NextLevelXpType =
   | 5
   | 20
@@ -80,7 +116,12 @@ export type NextLevelXpType =
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
 export type IconSizeType = "small" | "medium" | "large";
-export type VillainThemeType = "classic" | "gritty" | "modern" | "pro";
+export type VillainThemeType =
+  | "classic"
+  | "gritty"
+  | "modern"
+  | "classy"
+  | "pro";
 
 export interface CardInterface {
   value: CardValueType;
@@ -100,10 +141,19 @@ export interface ChipMapInterface {
   green: number;
   black: number;
 }
+export interface DealCardPayload {
+  target: ContestantType;
+  side: CardSideType;
+  opponentIndex?: number;
+}
 export interface FetchInterface {
   status: FetchStatusType;
   message: string;
   payload: null | object;
+}
+export interface GamePhaseInterface {
+  type: MatchType;
+  phase: GamePhaseType;
 }
 export interface HandInterface {
   matchType: MatchType;
@@ -118,16 +168,40 @@ export interface HandResultInterface {
   winningCards: CardInterface[];
   kickers: CardInterface[];
 }
+export interface MatchMapInterface {
+  shelter: ["gritty"];
+  "low-vault-lounge": ["gritty", "modern"];
+  "neon-alley-club": ["gritty", "modern", "classy"];
+  halls: ["modern", "classic"];
+  compound: ["modern", "pro", "classy"];
+  "holdem-hotel": ["pro", "modern", "classy"];
+  "draw-den": ["pro", "classic", "classy"];
+  "stud-stay": ["pro", "classic", "classy"];
+  atrium: ["classic", "pro", "modern", "classy"];
+  zenith: ["classic", "gritty", "modern", "classy", "pro"];
+}
+// app/types.ts (or wherever you defined this)
+export interface PhaseInstruction {
+  cards: number | "variable";
+  hero?: CardSideType; // Added ?
+  opp?: CardSideType; // Added ?
+  community?: CardSideType; // Already optional
+}
 export interface PlayerInterface {
   id: string | null;
   name: string;
-  type: "human" | "computer";
-  cards: CardInterface[];
-  moneyTotal: number;
+  type: PlayerType;
+  difficulty?: DifficultyType;
+  preferredDifficulty?: DifficultyType;
+  currentHand: CardInterface[];
+  isDiscarding?: boolean;
+  money: number;
   chips: ChipMapInterface;
-  comments?: Partial<Record<CurrentSituationType, string[]>>;
-  level?: number;
-  experience?: number;
-  availableDecks?: DeckStyleType[];
-  currentDeckChoice?: DeckStyleType;
+  comments?: Partial<Record<CurrentSituationType, string[]>> | null;
+  level?: number | null;
+  xp?: number | null;
+  nextLevel?: number | null;
+  availableDecks?: DeckStyleType[] | null;
+  currentDeckChoice?: DeckStyleType | null;
+  plei?: number | null;
 }

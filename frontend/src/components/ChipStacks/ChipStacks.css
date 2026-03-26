@@ -1,0 +1,38 @@
+.stacks {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  perspective: 1000px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  position: relative;
+}
+
+.stack .chip:last-child {
+  margin-top: 0;
+}
+
+.stack .chip:nth-child(even) {
+  transform: translateX(0.5px); /* Very subtle shift */
+}
+
+.stack .chip:nth-child(3n) {
+  transform: translateX(-0.5px);
+}
+
+.stack::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  width: 80%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  filter: blur(2px);
+  z-index: -1;
+}

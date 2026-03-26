@@ -42,56 +42,72 @@ export const createPlayer = (
     id: generateRandomString(8),
     name,
     type,
-    cards: [],
-    moneyTotal: startingPot,
+    currentHand: [],
+    money: startingPot,
     chips: newChipMap,
+    level: 1,
+    xp: 0,
+    nextLevel: 5,
+    availableDecks: ["arrowBolt"],
+    currentDeckChoice: "arrowBolt",
+    plei: 0,
   };
 };
 
-export const createVillain = (): PlayerInterface => {
-  const getUniqueVillainName = (theme: VillainThemeType) => {
+export const createVillain = (
+  theme: VillainThemeType,
+  nameOverride?: string, // Add this optional parameter
+): PlayerInterface => {
+  const getRandomVillainName = (theme: VillainThemeType) => {
     const pool = villainPool[theme];
     return pool[Math.floor(Math.random() * pool.length)];
   };
 
-  const newVillainName = getUniqueVillainName("classic");
+  const newVillainName = nameOverride || getRandomVillainName(theme);
   const chipMap = createChips(500);
 
   const newVillain: PlayerInterface = {
-    id: newVillainName + generateRandomString(4),
+    id: `${newVillainName}-${generateRandomString(4)}`,
     name: newVillainName,
     type: "computer",
-    cards: [],
-    moneyTotal: 500,
+    difficulty: "normal",
+    currentHand: [],
+    money: 500,
     chips: chipMap,
+    comments: null,
   };
 
   return newVillain;
 };
-export const generateDeck = (): CardInterface[] => {
+export const generateDeck = (count: number = 1): CardInterface[] => {
   const deck: CardInterface[] = [];
-
-  // Cast keys to the specific Suit type defined in your CardInterface
   const suits = Object.keys(cardSuitIcons) as (keyof typeof cardSuitIcons)[];
   const ranks = Object.keys(cardRankValues);
 
-  suits.forEach((suit) => {
-    ranks.forEach((rank) => {
-      const rawValue = isNaN(Number(rank)) ? rank : Number(rank);
+  for (let i = 0; i < count; i++) {
+    suits.forEach((suit) => {
+      ranks.forEach((rank) => {
+        const rawValue = isNaN(Number(rank)) ? rank : Number(rank);
 
-      deck.push({
-        // Use the specific types from your types.ts instead of 'any'
-        value: rawValue as CardValueType,
-        suit: suit,
-        side: "face-down",
-        currentLocation: "deck" as CurrentLocationType,
+        deck.push({
+          value: rawValue as CardValueType,
+          suit: suit,
+          side: "face-down", // Fixed your earlier type mismatch here too!
+          currentLocation: "deck" as CurrentLocationType,
+        });
       });
     });
-  });
+  }
 
   return deck;
 };
 
+export const pickWeightedIndex = (arrayLength: number): number => {
+  // Squaring a number between 0 and 1 skews it toward 0.
+  // Example: 0.9 * 0.9 = 0.81 | 0.2 * 0.2 = 0.04
+  const skewedRandom = Math.pow(Math.random(), 2);
+  return Math.floor(skewedRandom * arrayLength);
+};
 /**
  * Shuffles an array of cards using the Fisher-Yates algorithm.
  */
@@ -102,4 +118,27 @@ export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+};
+export const calculateHandValue = (cards: CardInterface[]): number => {
+  let value = 0;
+  let aceCount = 0;
+
+  cards.forEach((card) => {
+    if (typeof card.value === "number") {
+      value += card.value;
+    } else if (["J", "Q", "K"].includes(card.value as string)) {
+      value += 10;
+    } else if (card.value === "A") {
+      aceCount += 1;
+      value += 11;
+    }
+  });
+
+  // If we busted but have Aces, convert them from 11 to 1
+  while (value > 21 && aceCount > 0) {
+    value -= 10;
+    aceCount -= 1;
+  }
+
+  return value;
 };

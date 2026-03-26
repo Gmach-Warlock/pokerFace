@@ -1,4 +1,13 @@
 .chip {
-  width: 4rem;
+  width: 2.3rem; /* Adjust based on your preferred chip size */
   height: auto;
+  display: block;
+  /* This prevents the div from taking up full height */
+  margin-top: -32px;
+}
+
+/* Optional: Add a slight hover effect to make them feel tactile */
+.chip:hover {
+  filter: brightness(1.2);
+  cursor: pointer;
 }

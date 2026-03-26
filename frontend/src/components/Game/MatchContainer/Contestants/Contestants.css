@@ -1,0 +1,108 @@
+/* ContestantsContainer.css */
+
+.contestants__container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  margin: 0.25rem;
+  height: 80vh;
+}
+.opponents {
+  grid-column: 1 / -1; /* Span all 12 columns */
+  grid-row: 1 / 4;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: auto;
+  grid-column: 1 span 12;
+}
+
+/* 2. Hero Zone (Anchored at Bottom) */
+
+.ourHero__container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.hero-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 20px;
+  /* Add a slight border or glow to highlight the player area */
+  border-top: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.hero-card {
+  width: 90%;
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 120px;
+  background: hsla(142, 70%, 10%, 0.6);
+  border: 2px solid hsl(142, 70%, 58%);
+  box-shadow: 0 -5px 20px hsla(142, 70%, 58%, 0.15);
+}
+
+.card-back {
+  position: absolute;
+  width: 120px;
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.deck-count {
+  position: absolute;
+  bottom: -25px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 3. The 3D Stack Logic */
+.layer-0 {
+  bottom: 0;
+  right: 0;
+  z-index: 0;
+}
+.layer-1 {
+  bottom: 2px;
+  right: 1px;
+  z-index: 1;
+}
+.layer-2 {
+  bottom: 4px;
+  right: 2px;
+  z-index: 2;
+}
+.layer-3 {
+  bottom: 6px;
+  right: 3px;
+  z-index: 3;
+}
+.layer-4 {
+  bottom: 8px;
+  right: 4px;
+  z-index: 4;
+}
+.layer-5 {
+  bottom: 10px;
+  right: 5px;
+  z-index: 5;
+}
+.layer-6 {
+  bottom: 12px;
+  right: 6px;
+  z-index: 6;
+}
+.layer-7 {
+  bottom: 14px;
+  right: 7px;
+  z-index: 7;
+}
