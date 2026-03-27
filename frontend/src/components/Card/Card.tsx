@@ -6,10 +6,15 @@ import type {
 } from "../../app/types";
 import "./Card.css";
 
-export default function Card({ value, suit, side }: CardInterface) {
+export default function Card({
+  value,
+  suit,
+  side,
+  isDiscarded,
+}: CardInterface) {
   const isRed = suit === "heart" || suit === "diamond";
   const suitColor = isRed ? "red" : "black";
-
+  const cardClass = `card-face ${isDiscarded ? "card-discarded" : ""}`;
   // --- Helper Sub-renderers ---
 
   const renderSuitIcon = (size: IconSizeType) => (
@@ -80,7 +85,7 @@ export default function Card({ value, suit, side }: CardInterface) {
   }
 
   return (
-    <div className={`card text-${suitColor}`}>
+    <div className={`card text-${suitColor} ${cardClass}`}>
       {/* Top Left Corner */}
       <div className="card__side-column">
         <div className="place-center">{value}</div>

@@ -92,8 +92,9 @@ export const generateDeck = (count: number = 1): CardInterface[] => {
         deck.push({
           value: rawValue as CardValueType,
           suit: suit,
-          side: "face-down", // Fixed your earlier type mismatch here too!
+          side: "face-down",
           currentLocation: "deck" as CurrentLocationType,
+          isDiscarded: false,
         });
       });
     });
