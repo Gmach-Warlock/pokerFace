@@ -17,6 +17,109 @@ export const AnteMap = {
   atrium: 50,
   zenith: 100,
 };
+
+export const archetypeRanges = {
+  gritty: {
+    aggressiveness: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    bluffFrequency: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    foldThreshold: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+  },
+  classic: {
+    aggressiveness: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    bluffFrequency: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    foldThreshold: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+  },
+  modern: {
+    aggressiveness: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    bluffFrequency: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    foldThreshold: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+  },
+  classy: {
+    aggressiveness: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    bluffFrequency: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    foldThreshold: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+  },
+  pro: {
+    aggressiveness: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    bluffFrequency: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+    foldThreshold: [
+      { min: 4, max: 5 },
+      { min: 5, max: 6 },
+      { min: 6, max: 8 },
+      { min: 2, max: 3 },
+    ],
+  },
+};
 export const cardSuitIcons = {
   club: "/club.png",
   diamond: "/diamond.png",
@@ -202,30 +305,35 @@ export const royalFlush: CardInterface[] = [
     suit: "heart",
     side: "face-up",
     currentLocation: "demo",
+    isDiscarded: false,
   },
   {
     value: "K",
     suit: "heart",
     side: "face-up",
     currentLocation: "demo",
+    isDiscarded: false,
   },
   {
     value: "Q",
     suit: "heart",
     side: "face-up",
     currentLocation: "demo",
+    isDiscarded: false,
   },
   {
     value: "J",
     suit: "heart",
     side: "face-up",
     currentLocation: "demo",
+    isDiscarded: false,
   },
   {
     value: 10,
     suit: "heart",
     side: "face-up",
     currentLocation: "demo",
+    isDiscarded: false,
   },
 ];
 export const startingChips: ChipMapInterface = {
@@ -255,10 +363,6 @@ export const villainPool = {
     "Mary",
     "Clark",
     "Donna",
-    "Frank",
-    "Gretta",
-    "Wilma",
-    "Joey",
   ],
   gritty: [
     "Jax",

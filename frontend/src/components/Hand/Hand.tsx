@@ -2,23 +2,54 @@
 import type { HandInterface } from "../../app/types";
 import Card from "../Card/Card";
 import "./Hand.css";
+import { toggleDiscard } from "../../features/game/gameSlice";
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
 
 export default function Hand(props: HandInterface) {
   const { matchType, cards, currentLocation } = props;
+  const dispatch = useAppDispatch();
+  const phase = useAppSelector(
+    (state) => state.game.currentMatch.currentPhase.phase,
+  );
 
-  // 1. Define sub-renderers for different game types
+  // Helper flags
+  const isHero = currentLocation === "p1";
+  const isDrawPhase = phase === "draw";
+  const canDiscard = isHero && isDrawPhase;
+
+  const handleCardClick = (index: number) => {
+    if (canDiscard) {
+      dispatch(toggleDiscard(index));
+    }
+  };
+
   const renderDrawHand = () => (
     <div className="hand-draw place-center w-full">
-      {cards.map((card, index) => (
-        <div key={index} className={`hand-draw-card${index + 1}`}>
-          <Card
-            value={card.value}
-            suit={card.suit}
-            side={card.side}
-            currentLocation={currentLocation}
-          />
-        </div>
-      ))}
+      {cards.map((card, index) => {
+        // Construct the class string dynamically
+        const wrapperClass = [
+          `hand-draw-card${index + 1}`,
+          canDiscard ? "card-interactive" : "",
+        ]
+          .join(" ")
+          .trim();
+
+        return (
+          <div
+            key={index}
+            className={wrapperClass}
+            onClick={() => handleCardClick(index)}
+          >
+            <Card
+              value={card.value}
+              suit={card.suit}
+              side={card.side}
+              currentLocation={currentLocation}
+              isDiscarded={card.isDiscarded}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 

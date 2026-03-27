@@ -341,3 +341,23 @@
   grid-column-start: 3;
   grid-row-start: 7;
 }
+
+/* The base class for the face of the card */
+.card-face {
+  transition:
+    transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+    filter 0.3s ease;
+}
+
+/* The state when a player clicks to discard */
+.card.card-discarded {
+  filter: brightness(0.4) grayscale(0.6);
+  transform: translateY(20px);
+  /* Optional: stop the hover lift effect if you have one */
+  pointer-events: auto;
+}
+
+/* If you want to dim the suit icons specifically when discarded */
+.card-discarded img {
+  opacity: 0.7;
+}

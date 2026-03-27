@@ -1,22 +1,35 @@
-// OurHero.tsx
-import { useAppSelector } from "../../../../../app/hooks";
+import { useMemo } from "react";
+import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
+import { evaluateHand } from "../../../../../app/logic/logic";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
 import Hand from "../../../../Hand/Hand";
 import "./OurHero.css";
 
 export default function OurHero() {
-  // Assuming the human player's hand is stored in your profile or game state
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+
   const heroName = useAppSelector((state) => state.profile.playerData.name);
   const heroMoney = useAppSelector((state) => state.profile.playerData.money);
-  const heroHand =
-    useAppSelector((state) => state.game.currentMatch.herosHand) || [];
+
+  // FIX: Move the fallback inside the selector.
+  // Redux will ensure heroHand is stable.
+  const heroHand = useAppSelector(
+    (state) => state.game.currentMatch.herosHand ?? [],
+  );
 
   const heroChips = useAppSelector((state) => state.profile.playerData.chips);
+
+  // Now the linter sees heroHand as a stable dependency
+  const handResult = useMemo(() => evaluateHand(heroHand), [heroHand]);
 
   return (
     <div className="our-hero">
       <div className="our-hero__info">
-        <div className="our-hero__title">{heroName}</div>
+        <div className="our-hero__title-row">
+          <span className="our-hero__name">{heroName}</span>
+          {/* 2. The User-Friendly Display! */}
+          <span className="our-hero__hand-label">{handResult.displayName}</span>
+        </div>
         <div className="our-hero__money">{`$${heroMoney}`}</div>
       </div>
 
@@ -26,19 +39,21 @@ export default function OurHero() {
             matchType="draw"
             cards={heroHand}
             currentLocation="p1"
-            hand="royal-flush"
+            hand={handResult.handType} // Pass the dynamic type here!
           />
         </div>
 
-        <div className="our-hero__chips">
-          <ChipStacks
-            white={heroChips.white}
-            green={heroChips.green}
-            red={heroChips.red}
-            blue={heroChips.blue}
-            black={heroChips.black}
-          />
-        </div>
+        {isLargeScreen && (
+          <div className="our-hero__chips">
+            <ChipStacks
+              white={heroChips.white}
+              green={heroChips.green}
+              red={heroChips.red}
+              blue={heroChips.blue}
+              black={heroChips.black}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

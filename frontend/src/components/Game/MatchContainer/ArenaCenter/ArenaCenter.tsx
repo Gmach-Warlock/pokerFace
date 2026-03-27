@@ -15,17 +15,39 @@ export default function ArenaCenter() {
   const phase = useAppSelector(
     (state) => state.game.currentMatch.currentPhase.phase,
   );
+  const heroHand = useAppSelector((state) => state.game.currentMatch.herosHand);
+
+  const discardCount = heroHand.filter((card) => card.isDiscarded).length;
 
   const handleAction = () => {
     if (phase === "ante") {
-      // 1. Pay the ante
       dispatch(performAnteUp());
-      // 2. Move to the next phase (e.g., 'deal')
+      dispatch(advancePhase());
+    } else if (phase === "draw") {
+      // 1. Swap the cards in the state (requires updating dealRound logic)
+      dispatch(dealRound());
+      // 2. Move to the next betting round or showdown
       dispatch(advancePhase());
     } else {
-      // 3. For all other phases, trigger the deal logic defined in your Map
+      // Handles initial 'deal' phase
       dispatch(dealRound());
-      // Optional: advancePhase() again if you want to move to 'betting' immediately
+      dispatch(advancePhase());
+    }
+  };
+
+  // Determine Dynamic Button Label
+  const getButtonLabel = () => {
+    switch (phase) {
+      case "ante":
+        return "Ante Up";
+      case "deal":
+        return "Deal Round";
+      case "draw":
+        return discardCount > 0
+          ? `Confirm Draw (${discardCount})`
+          : "Stand Pat";
+      default:
+        return "Next Round";
     }
   };
 
@@ -39,14 +61,21 @@ export default function ArenaCenter() {
       </div>
 
       <div className="arena-center__centerpiece">
+        <div className="arena-center__phase-display">
+          <p>{phase}</p>
+        </div>
         <div className="pot">
           <p>Pot</p>
           <span>{pot}</span>
         </div>
         <div className="arena-center__deal">
-          <button type="button" onClick={handleAction}>
-            {/* Dynamic Button Text */}
-            {phase === "ante" ? "Ante Up" : "Deal Round"}
+          <button
+            type="button"
+            onClick={handleAction}
+            // Dynamic styling for visual feedback
+            className={discardCount > 0 ? "btn-confirm-draw" : "btn-standard"}
+          >
+            {getButtonLabel()}
           </button>
         </div>
       </div>

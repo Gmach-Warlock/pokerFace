@@ -1,3 +1,4 @@
+export type AttributeValueType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type CardValueType =
   | 2
   | 3
@@ -101,7 +102,6 @@ export type MatchLocationType =
   | "stud-stay"
   | "atrium"
   | "zenith";
-
 export type NextLevelXpType =
   | 5
   | 20
@@ -128,6 +128,7 @@ export interface CardInterface {
   suit: CardSuitType;
   side: CardSideType;
   currentLocation: CurrentLocationType;
+  isDiscarded: boolean;
 }
 export interface ChipInterface {
   color: ChipColorType;

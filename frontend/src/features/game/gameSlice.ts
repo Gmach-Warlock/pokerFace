@@ -85,17 +85,12 @@ const gameSlice = createSlice({
     },
     advancePhase: (state) => {
       const { type, phase } = state.currentMatch.currentPhase;
-
-      // 1. Cast the result of Object.keys to GamePhaseType[]
       const phaseSequence = Object.keys(
         gamePhases[type as keyof typeof gamePhases],
       ) as GamePhaseType[];
-
-      // 2. Cast 'phase' here as well to ensure the index search works correctly
       const currentIndex = phaseSequence.indexOf(phase as GamePhaseType);
 
       if (currentIndex === -1) {
-        // 3. Since phaseSequence[0] is now seen as GamePhaseType, this works!
         state.currentMatch.currentPhase.phase = phaseSequence[0];
       } else if (currentIndex < phaseSequence.length - 1) {
         state.currentMatch.currentPhase.phase = phaseSequence[currentIndex + 1];
@@ -108,11 +103,8 @@ const gameSlice = createSlice({
       const threshold = 15;
 
       if (deck.length < threshold) {
-        // Generate the amount of decks specified for this match
         const freshCards = generateDeck(numberOfDecks);
         const shuffledCards = shuffleDeck(freshCards);
-
-        // Add the new cards to the bottom of the current deck
         state.currentMatch.deck = [...deck, ...shuffledCards];
       }
     },
@@ -153,58 +145,88 @@ const gameSlice = createSlice({
       const typedMap = GamePhaseMap as GamePhaseConfigType;
       const config = typedMap[type]?.[phase];
 
-      // Guard: if no config or cards to deal, exit
       if (!config || config.cards === 0) return;
 
-      // 1. Determine how many cards to deal
-      // If 'variable', we calculate how many cards the player needs to reach 5
-      const getRequiredCount = (currentHandLength: number) => {
-        return config.cards === "variable"
-          ? 5 - currentHandLength
-          : (config.cards as number);
-      };
+      // --- 1. HANDLE HERO DRAW/SWAP ---
+      if (config.hero) {
+        if (phase === "draw") {
+          // Filter out cards marked for discard
+          state.currentMatch.herosHand = state.currentMatch.herosHand.filter(
+            (card) => !card.isDiscarded,
+          );
 
-      // 2. Deal to Opponents
-      if (config.opp) {
-        state.currentMatch.opponents.forEach((opp, idx) => {
-          const needs = getRequiredCount(opp.currentHand.length);
+          // Calculate how many new ones we need to get back to 5
+          const needs = 5 - state.currentMatch.herosHand.length;
+
           for (let i = 0; i < needs; i++) {
             const card = state.currentMatch.deck.pop();
             if (card) {
-              opp.currentHand.push({
+              state.currentMatch.herosHand.push({
                 ...card,
-                side: config.opp!,
-                currentLocation: `p${idx + 2}` as CurrentLocationType,
+                side: config.hero,
+                currentLocation: "p1",
+                isDiscarded: false, // Ensure new card isn't pre-discarded
               });
             }
           }
+        } else {
+          // Standard initial deal logic (what you had before)
+          const needs =
+            config.cards === "variable"
+              ? 5 - state.currentMatch.herosHand.length
+              : (config.cards as number);
+          for (let i = 0; i < needs; i++) {
+            const card = state.currentMatch.deck.pop();
+            if (card) {
+              state.currentMatch.herosHand.push({
+                ...card,
+                side: config.hero,
+                currentLocation: "p1",
+                isDiscarded: false,
+              });
+            }
+          }
+        }
+      }
+
+      // --- 2. HANDLE OPPONENT DRAW (AI) ---
+      if (config.opp) {
+        state.currentMatch.opponents.forEach((opp, idx) => {
+          if (phase === "draw") {
+            // Simple AI: Discard nothing for now (Stand Pat)
+            // You can add AI logic here later!
+            opp.currentHand = opp.currentHand.filter(
+              (card) => !card.isDiscarded,
+            );
+            const needs = 5 - opp.currentHand.length;
+            for (let i = 0; i < needs; i++) {
+              const card = state.currentMatch.deck.pop();
+              if (card) {
+                opp.currentHand.push({
+                  ...card,
+                  side: config.opp!,
+                  currentLocation: `p${idx + 2}` as CurrentLocationType,
+                });
+              }
+            }
+          } else {
+            // Standard initial deal
+            const needs =
+              config.cards === "variable"
+                ? 5 - opp.currentHand.length
+                : (config.cards as number);
+            for (let i = 0; i < needs; i++) {
+              const card = state.currentMatch.deck.pop();
+              if (card) {
+                opp.currentHand.push({
+                  ...card,
+                  side: config.opp!,
+                  currentLocation: `p${idx + 2}` as CurrentLocationType,
+                });
+              }
+            }
+          }
         });
-      }
-
-      // 3. Deal to Hero
-      if (config.hero) {
-        const needs = getRequiredCount(state.currentMatch.herosHand.length);
-        for (let i = 0; i < needs; i++) {
-          const heroCard = state.currentMatch.deck.pop(); // variable is heroCard
-          if (heroCard) {
-            state.currentMatch.herosHand.push({
-              ...heroCard, // Use heroCard here!
-              side: config.hero!,
-              currentLocation: "p1",
-            });
-          }
-        }
-      }
-
-      // 4. Deal to Community (For future games like Hold'em)
-      if (config.community && typeof config.cards === "number") {
-        for (let i = 0; i < config.cards; i++) {
-          const card = state.currentMatch.deck.pop();
-          if (card) {
-            // Assuming you add a communityCards array to your state later
-            // state.currentMatch.communityCards.push({ ...card, side: config.community });
-          }
-        }
       }
     },
     finishMatch: (state) => {
@@ -271,6 +293,15 @@ const gameSlice = createSlice({
         opponent.money -= action.payload.amount;
       }
     },
+    toggleDiscard: (state, action: PayloadAction<number>) => {
+      const cardIndex = action.payload;
+
+      const card = state.currentMatch.herosHand[cardIndex];
+
+      if (card) {
+        card.isDiscarded = !card.isDiscarded;
+      }
+    },
   },
 });
 
@@ -288,5 +319,6 @@ export const {
   startMatch,
   startPlaying,
   subtractOpponentMoney,
+  toggleDiscard,
 } = gameSlice.actions;
 export default gameSlice.reducer;

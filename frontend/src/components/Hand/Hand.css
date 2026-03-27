@@ -37,3 +37,26 @@
   position: absolute;
   transform: translateX(3rem);
 }
+
+.hand-draw-card1,
+.hand-draw-card2,
+.hand-draw-card3,
+.hand-draw-card4,
+.hand-draw-card5 {
+  /* Common transition for smooth movements */
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* New helper class */
+.card-interactive {
+  cursor: pointer;
+}
+
+/* Optional: Add a slight lift when hovering over a clickable card */
+.card-interactive:hover {
+  filter: brightness(1.1);
+  /* This moves the card up slightly relative to its current stack position */
+  z-index: 10;
+}
