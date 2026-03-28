@@ -1,54 +1,49 @@
 import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
-import { performAnteUp } from "../../../../features/betting/bettingActions";
-import { dealRound, advancePhase } from "../../../../features/game/gameSlice";
+import type { BettingActionType } from "../../../../app/types";
+import {
+  selectActionButtonLabel,
+  selectCurrentMatch,
+  selectCurrentPhase,
+  selectDeck,
+  selectDeckStyle,
+  selectDiscardCount,
+  selectHeroMoney,
+  selectHerosId,
+  selectIsBettingPhase,
+  selectPot,
+} from "../../../../features/game/gameSelectors";
+
+import { advancePhase, processBet } from "../../../../features/game/gameSlice";
+import { processArenaAction } from "../../../../features/game/gameThunks";
+import BettingForm from "../BettingForm/BettingForm";
 import "./ArenaCenter.css";
 
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
+  const currentMatch = useAppSelector(selectCurrentMatch);
+  const deck = useAppSelector(selectDeck);
+  const designKey = useAppSelector(selectDeckStyle);
+  const pot = useAppSelector(selectPot);
+  const phase = useAppSelector(selectCurrentPhase);
+  const herosId = useAppSelector(selectHerosId);
+  const heroMoney = useAppSelector(selectHeroMoney);
+  const discardCount = useAppSelector(selectDiscardCount);
+  const isBettingPhase = useAppSelector(selectIsBettingPhase);
+  const buttonLabel = useAppSelector(selectActionButtonLabel);
 
-  // State Selectors
-  const deck = useAppSelector((state) => state.game.currentMatch.deck);
-  const designKey = useAppSelector(
-    (state) => state.game.currentMatch.deckStyle,
-  );
-  const pot = useAppSelector((state) => state.game.currentMatch.pot);
-  const phase = useAppSelector(
-    (state) => state.game.currentMatch.currentPhase.phase,
-  );
-  const heroHand = useAppSelector((state) => state.game.currentMatch.herosHand);
+  const handleAction = () => dispatch(processArenaAction());
 
-  const discardCount = heroHand.filter((card) => card.isDiscarded).length;
+  const handleBetFinalized = (amount: number, type: BettingActionType) => {
+    if (!herosId) return;
 
-  const handleAction = () => {
-    if (phase === "ante") {
-      dispatch(performAnteUp());
-      dispatch(advancePhase());
-    } else if (phase === "draw") {
-      // 1. Swap the cards in the state (requires updating dealRound logic)
-      dispatch(dealRound());
-      // 2. Move to the next betting round or showdown
-      dispatch(advancePhase());
-    } else {
-      // Handles initial 'deal' phase
-      dispatch(dealRound());
-      dispatch(advancePhase());
-    }
-  };
-
-  // Determine Dynamic Button Label
-  const getButtonLabel = () => {
-    switch (phase) {
-      case "ante":
-        return "Ante Up";
-      case "deal":
-        return "Deal Round";
-      case "draw":
-        return discardCount > 0
-          ? `Confirm Draw (${discardCount})`
-          : "Stand Pat";
-      default:
-        return "Next Round";
-    }
+    dispatch(
+      processBet({
+        playerId: herosId,
+        amount: amount,
+        type: type,
+      }),
+    );
+    dispatch(advancePhase());
   };
 
   return (
@@ -61,22 +56,42 @@ export default function ArenaCenter() {
       </div>
 
       <div className="arena-center__centerpiece">
+        <div>
+          <button
+            type="button"
+            onClick={() => {
+              console.log(currentMatch);
+            }}
+          >
+            State
+          </button>
+        </div>
+
         <div className="arena-center__phase-display">
           <p>{phase}</p>
         </div>
+
         <div className="pot">
           <p>Pot</p>
           <span>{pot}</span>
         </div>
+
         <div className="arena-center__deal">
-          <button
-            type="button"
-            onClick={handleAction}
-            // Dynamic styling for visual feedback
-            className={discardCount > 0 ? "btn-confirm-draw" : "btn-standard"}
-          >
-            {getButtonLabel()}
-          </button>
+          {isBettingPhase ? (
+            <BettingForm
+              currentPot={pot}
+              heroMoney={heroMoney}
+              onConfirm={handleBetFinalized}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={handleAction}
+              className={discardCount > 0 ? "btn-confirm-draw" : "btn-standard"}
+            >
+              {buttonLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>

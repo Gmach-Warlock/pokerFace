@@ -4,6 +4,11 @@
   flex-direction: column;
   justify-content: center;
   align-content: center;
+  transition:
+    opacity 0.8s ease-out,
+    transform 0.8s ease-out;
+  opacity: 1;
+  transform: scale(1);
 }
 
 .title__title {
@@ -14,4 +19,18 @@
     0 0 10px hsl(var(--nt-electric-cyan-hs), 30%);
   font-size: var(--text-4xl);
   margin: 1rem;
+}
+
+.title--exit {
+  opacity: 0;
+  transform: scale(1.1); /* Slight zoom in */
+  pointer-events: none; /* Prevent double-clicks */
+}
+
+/* Optional: Make the title text glow intensely during the exit */
+.title--exit .title__title {
+  text-shadow:
+    0 0 50px #0ff,
+    0 0 100px #0ff;
+  transition: text-shadow 2.5s ease-in;
 }

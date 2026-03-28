@@ -1,48 +1,42 @@
-import { useMemo } from "react";
 import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
-import { evaluateHand } from "../../../../../app/logic/logic";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
 import Hand from "../../../../Hand/Hand";
 import "./OurHero.css";
+import { selectHeroHandEval } from "../../../../../app/middleware";
 
 export default function OurHero() {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+  const hero = useAppSelector((state) => state.game.currentMatch.hero);
 
-  const heroName = useAppSelector((state) => state.profile.playerData.name);
-  const heroMoney = useAppSelector((state) => state.profile.playerData.money);
-
-  // FIX: Move the fallback inside the selector.
-  // Redux will ensure heroHand is stable.
   const heroHand = useAppSelector(
-    (state) => state.game.currentMatch.herosHand ?? [],
+    (state) => state.game.currentMatch.hero.currentHand ?? [],
   );
-
-  const heroChips = useAppSelector((state) => state.profile.playerData.chips);
-
-  // Now the linter sees heroHand as a stable dependency
-  const handResult = useMemo(() => evaluateHand(heroHand), [heroHand]);
+  const heroChips = useAppSelector(
+    (state) => state.game.currentMatch.hero.chips,
+  );
+  const heroEval = useAppSelector(selectHeroHandEval);
 
   return (
     <div className="our-hero">
       <div className="our-hero__info">
         <div className="our-hero__title-row">
-          <span className="our-hero__name">{heroName}</span>
-          {/* 2. The User-Friendly Display! */}
-          <span className="our-hero__hand-label">{handResult.displayName}</span>
+          <p className="our-hero__name">{hero.name}</p>
         </div>
-        <div className="our-hero__money">{`$${heroMoney}`}</div>
+        <div className="our-hero__money">{`$${hero.money}`}</div>
+        <div>
+          {" "}
+          <span className="our-hero__hand-label">{heroEval.displayName}</span>
+        </div>
       </div>
-
       <div className="our-hero__grid">
         <div className="our-hero__hand-container">
           <Hand
             matchType="draw"
             cards={heroHand}
             currentLocation="p1"
-            hand={handResult.handType} // Pass the dynamic type here!
+            hand={heroEval.handType}
           />
         </div>
-
         {isLargeScreen && (
           <div className="our-hero__chips">
             <ChipStacks

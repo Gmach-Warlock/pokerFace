@@ -9,11 +9,11 @@ interface OpponentPropsInterface {
 }
 
 export default function Opponent({ data }: OpponentPropsInterface) {
-  // Grab the design key just like in ArenaCenter
   const designKey = useAppSelector(
     (state) => state.game.currentMatch.deckStyle,
   );
 
+  const cardStatusClass = data.isFolded ? "opponent__card--folded" : "";
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
@@ -26,9 +26,15 @@ export default function Opponent({ data }: OpponentPropsInterface) {
 
   const chipMap = data.chips;
 
+  const handleClick = () => {
+    console.log(data);
+  };
+
   return (
-    /* Apply the data-design attribute here */
-    <div className="opponent__card" data-design={designKey}>
+    <div
+      className={`opponent__card ${cardStatusClass}`}
+      data-design={designKey}
+    >
       {isLargeScreen && (
         <div className="opponent__chips">
           <ChipStacks
@@ -40,11 +46,22 @@ export default function Opponent({ data }: OpponentPropsInterface) {
           />
         </div>
       )}
+
       <div className="opponent__info">
         <h3 className="opponent__name">{data.name}</h3>
         <p className="opponent__stats">${data.money}</p>
       </div>
+      {data.isFolded && (
+        <div className="opponent__fold-overlay">
+          <span>FOLDED</span>
+        </div>
+      )}
       <div className="opponent__bubble"></div>
+      <div>
+        <button type="button" onClick={handleClick}>
+          check state
+        </button>
+      </div>
     </div>
   );
 }

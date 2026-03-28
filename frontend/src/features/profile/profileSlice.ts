@@ -8,6 +8,7 @@ import type {
 } from "../../app/types";
 import { startingChips } from "../../app/assets";
 import { type PayloadAction } from "@reduxjs/toolkit";
+import { createChips } from "../../functions/factory/factory";
 
 interface ProfileInterface {
   meta: {
@@ -76,6 +77,7 @@ const profileSlice = createSlice({
     subtractHeroMoney: (state, action: PayloadAction<{ amount: number }>) => {
       state.playerData.money -= action.payload.amount;
       // Here you would also call your chip calculator logic to update state.playerData.chips
+      state.playerData.chips = createChips(state.playerData.money);
     },
   },
 });

@@ -6,6 +6,7 @@
   grid-template-rows: repeat(12, 1fr);
   margin: 0.25rem;
   height: 80vh;
+  position: relative;
 }
 .opponents {
   grid-column: 1 / -1; /* Span all 12 columns */
@@ -18,14 +19,13 @@
   grid-column: 1 span 12;
 }
 
-/* 2. Hero Zone (Anchored at Bottom) */
-
 .ourHero__container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
 }
+
 .hero-section {
   display: flex;
   justify-content: center;
@@ -34,7 +34,6 @@
   /* Add a slight border or glow to highlight the player area */
   border-top: 1px solid rgba(0, 255, 255, 0.1);
 }
-
 .hero-card {
   width: 90%;
   max-width: 500px;

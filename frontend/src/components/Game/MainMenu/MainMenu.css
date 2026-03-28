@@ -11,15 +11,17 @@
 }
 
 .main-menu {
-  width: 75vw;
-  height: 75vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-content: center;
-  justify-self: center;
+  width: 90vw;
+  min-width: 250px;
+  max-width: 500px;
   background-color: white;
-  color: black;
-  padding-inline: 2rem;
-  margin: 4rem;
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 207, 213, 0.3); /* Neon cyan glow */
+  color: #1a1a1a; /* Dark text for high contrast on white */
+  justify-self: center;
+}
+
+.btn--previous {
+  float: right;
 }

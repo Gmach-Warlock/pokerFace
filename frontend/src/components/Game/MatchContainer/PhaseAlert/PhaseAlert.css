@@ -1,23 +1,40 @@
-.phase-text {
-  /* ... existing styles ... */
-  animation: splashIn 2s ease-out forwards;
+.phase-overlay {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
 }
 
-@keyframes splashIn {
+.phase-text {
+  display: inline-block;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow:
+    0 0 15px rgba(0, 0, 0, 0.8),
+    2px 2px 0px #000;
+
+  /* Slower duration (4s) and a smoother timing function */
+  animation: phase-slide-slow 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes phase-slide-slow {
   0% {
-    transform: scale(0.5);
+    transform: translateX(110%);
     opacity: 0;
   }
   15% {
-    transform: scale(1);
     opacity: 1;
   }
   85% {
-    transform: scale(1);
     opacity: 1;
   }
   100% {
-    transform: scale(1.2);
+    transform: translateX(-110%);
     opacity: 0;
-  } /* Fade out at the end */
+  }
 }

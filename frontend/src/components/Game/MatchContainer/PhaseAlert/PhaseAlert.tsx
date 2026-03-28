@@ -1,4 +1,5 @@
 import type { GamePhaseType } from "../../../../app/types";
+import "./PhaseAlert.css";
 
 interface PhaseAlertProps {
   phase: GamePhaseType;
