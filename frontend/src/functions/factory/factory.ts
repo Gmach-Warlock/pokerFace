@@ -43,6 +43,7 @@ export const createPlayer = (
     name,
     type,
     currentHand: [],
+    isFolded: false,
     money: startingPot,
     chips: newChipMap,
     level: 1,
@@ -72,6 +73,7 @@ export const createVillain = (
     type: "computer",
     difficulty: "normal",
     currentHand: [],
+    isFolded: false,
     money: 500,
     chips: chipMap,
     comments: null,
@@ -119,27 +121,4 @@ export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
-};
-export const calculateHandValue = (cards: CardInterface[]): number => {
-  let value = 0;
-  let aceCount = 0;
-
-  cards.forEach((card) => {
-    if (typeof card.value === "number") {
-      value += card.value;
-    } else if (["J", "Q", "K"].includes(card.value as string)) {
-      value += 10;
-    } else if (card.value === "A") {
-      aceCount += 1;
-      value += 11;
-    }
-  });
-
-  // If we busted but have Aces, convert them from 11 to 1
-  while (value > 21 && aceCount > 0) {
-    value -= 10;
-    aceCount -= 1;
-  }
-
-  return value;
 };

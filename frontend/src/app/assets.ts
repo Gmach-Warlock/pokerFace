@@ -425,3 +425,19 @@ export const villainPool = {
     "Michael",
   ],
 };
+export const prefixes = [
+  "Slippery",
+  "Old Man",
+  "Crazy",
+  "Gentleman",
+  "Deacon",
+  "Rattlesnake",
+  "Smiling",
+];
+export const suffixes = [
+  "the Kid",
+  "the Cheat",
+  "Two-Times",
+  "of the West",
+  "Smooth",
+];

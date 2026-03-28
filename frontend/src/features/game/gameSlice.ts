@@ -12,17 +12,20 @@ import type {
   DeckNumberType,
   GamePhaseType,
   GamePhaseConfigType,
+  BettingActionType,
 } from "../../app/types";
 import { generateDeck, shuffleDeck } from "../../functions/factory/factory";
 import { createVillain } from "../../functions/factory/factory";
 import {
   matchMap,
-  villainPool,
   gamePhases,
   GamePhaseMap,
+  startingChips,
 } from "../../app/assets";
+import { handleFoldLogic, pickAnteAmount } from "../../functions/utils/utils";
+import { evaluatePokerHand } from "../../functions/utils/utils";
 
-interface GameInterface {
+export interface GameInterface {
   isPlaying: boolean;
   currentlyDisplayed:
     | "title"
@@ -38,20 +41,26 @@ interface GameInterface {
     matchLocation: MatchLocationType;
     numberOfDecks: DeckNumberType;
     opponents: PlayerInterface[];
-    herosHand: CardInterface[];
+    hero: PlayerInterface;
     dealersHand: CardInterface[];
     deck: CardInterface[];
     pot: number;
+    currentBet: number;
+    lastRaiserId: string | null;
+    activePlayerIndex: number;
     currentPhase: GamePhaseInterface;
+    winnerId?: string;
+    winningHand?: string;
+    isGameOver?: boolean;
   };
   isMatchStarted: boolean;
 }
-
-interface GamePayloadInterface {
+export interface GamePayloadInterface {
   numberOfOpponents: NumberOfOpponentsType;
   levelOfDifficulty: DifficultyType;
   matchLocation: MatchLocationType;
   numberOfDecks: DeckNumberType;
+  hero: PlayerInterface;
 }
 
 const initialGameState: GameInterface = {
@@ -64,10 +73,22 @@ const initialGameState: GameInterface = {
     matchLocation: "shelter",
     numberOfDecks: 1,
     opponents: [],
-    herosHand: [],
+    hero: {
+      id: "abcd123",
+      name: "Gary",
+      type: "human",
+      currentHand: [],
+      isFolded: false,
+      money: 500,
+      chips: startingChips,
+    },
+
     dealersHand: [],
     deck: [],
     pot: 0,
+    currentBet: 0,
+    lastRaiserId: null,
+    activePlayerIndex: 0,
     currentPhase: {
       type: "draw",
       phase: "notInGameYet",
@@ -89,7 +110,6 @@ const gameSlice = createSlice({
         gamePhases[type as keyof typeof gamePhases],
       ) as GamePhaseType[];
       const currentIndex = phaseSequence.indexOf(phase as GamePhaseType);
-
       if (currentIndex === -1) {
         state.currentMatch.currentPhase.phase = phaseSequence[0];
       } else if (currentIndex < phaseSequence.length - 1) {
@@ -101,7 +121,6 @@ const gameSlice = createSlice({
     checkAndRefillDeck: (state) => {
       const { deck, numberOfDecks } = state.currentMatch;
       const threshold = 15;
-
       if (deck.length < threshold) {
         const freshCards = generateDeck(numberOfDecks);
         const shuffledCards = shuffleDeck(freshCards);
@@ -118,16 +137,12 @@ const gameSlice = createSlice({
     ) => {
       const { deck } = state.currentMatch;
       const { target, index, side } = action.payload;
-
       const card = deck.pop();
-      if (!card) return; // Guard against empty deck
-
-      // Prepare the card with metadata (consistent with dealRound)
+      if (!card) return;
       const dealtCard = { ...card, side };
-
       if (target === "hero") {
         dealtCard.currentLocation = "p1";
-        state.currentMatch.herosHand.push(dealtCard);
+        state.currentMatch.hero.currentHand.push(dealtCard);
       } else if (target === "dealer") {
         dealtCard.currentLocation = "dealer";
         state.currentMatch.dealersHand.push(dealtCard);
@@ -146,39 +161,33 @@ const gameSlice = createSlice({
       const config = typedMap[type]?.[phase];
 
       if (!config || config.cards === 0) return;
-
-      // --- 1. HANDLE HERO DRAW/SWAP ---
       if (config.hero) {
         if (phase === "draw") {
-          // Filter out cards marked for discard
-          state.currentMatch.herosHand = state.currentMatch.herosHand.filter(
-            (card) => !card.isDiscarded,
-          );
-
-          // Calculate how many new ones we need to get back to 5
-          const needs = 5 - state.currentMatch.herosHand.length;
-
+          state.currentMatch.hero.currentHand =
+            state.currentMatch.hero.currentHand.filter(
+              (card) => !card.isDiscarded,
+            );
+          const needs = 5 - state.currentMatch.hero.currentHand.length;
           for (let i = 0; i < needs; i++) {
             const card = state.currentMatch.deck.pop();
             if (card) {
-              state.currentMatch.herosHand.push({
+              state.currentMatch.hero.currentHand.push({
                 ...card,
                 side: config.hero,
                 currentLocation: "p1",
-                isDiscarded: false, // Ensure new card isn't pre-discarded
+                isDiscarded: false,
               });
             }
           }
         } else {
-          // Standard initial deal logic (what you had before)
           const needs =
             config.cards === "variable"
-              ? 5 - state.currentMatch.herosHand.length
+              ? 5 - state.currentMatch.hero.currentHand.length
               : (config.cards as number);
           for (let i = 0; i < needs; i++) {
             const card = state.currentMatch.deck.pop();
             if (card) {
-              state.currentMatch.herosHand.push({
+              state.currentMatch.hero.currentHand.push({
                 ...card,
                 side: config.hero,
                 currentLocation: "p1",
@@ -188,13 +197,9 @@ const gameSlice = createSlice({
           }
         }
       }
-
-      // --- 2. HANDLE OPPONENT DRAW (AI) ---
       if (config.opp) {
         state.currentMatch.opponents.forEach((opp, idx) => {
           if (phase === "draw") {
-            // Simple AI: Discard nothing for now (Stand Pat)
-            // You can add AI logic here later!
             opp.currentHand = opp.currentHand.filter(
               (card) => !card.isDiscarded,
             );
@@ -210,7 +215,6 @@ const gameSlice = createSlice({
               }
             }
           } else {
-            // Standard initial deal
             const needs =
               config.cards === "variable"
                 ? 5 - opp.currentHand.length
@@ -241,8 +245,106 @@ const gameSlice = createSlice({
     goToSettings: (state) => {
       state.currentlyDisplayed = "settings";
     },
+    performAnteUp: (
+      state,
+      action: PayloadAction<{ location: MatchLocationType }>,
+    ) => {
+      const { location } = action.payload;
+      const match = state.currentMatch;
+      const amount = pickAnteAmount(location);
+
+      match.hero.money -= amount;
+      match.pot += amount;
+
+      match.opponents.forEach((opp) => {
+        opp.money -= amount;
+        match.pot += amount;
+      });
+    },
+    prepareNextHand: (state) => {
+      const match = state.currentMatch;
+
+      delete match.winnerId;
+      delete match.winningHand;
+
+      match.pot = 0;
+      match.hero.currentHand = [];
+      match.opponents.forEach((opp) => {
+        opp.currentHand = [];
+        opp.isFolded = false;
+      });
+    },
+    processBet: (
+      state,
+      action: PayloadAction<{
+        playerId: string;
+        amount: number;
+        type: BettingActionType;
+      }>,
+    ) => {
+      const { playerId, amount, type } = action.payload;
+      const match = state.currentMatch;
+
+      if (type === "fold") {
+        handleFoldLogic(state, playerId);
+      }
+      if (type === "call" || type === "raise") {
+        if (playerId === state.currentMatch.hero.id) {
+          match.hero.money -= amount;
+        } else {
+          const opponent = match.opponents.find((o) => o.id === playerId);
+          if (opponent) {
+            opponent.money -= amount;
+          }
+        }
+        match.pot += amount;
+        if (type === "raise") {
+          match.currentBet = amount;
+          match.lastRaiserId = playerId;
+        }
+      }
+      match.activePlayerIndex =
+        (match.activePlayerIndex + 1) % (match.opponents.length + 1);
+    },
     quitPlaying: (state) => {
       state.isPlaying = false;
+    },
+    resetGame: () => {
+      return initialGameState;
+    },
+    resolveShowdown: (state) => {
+      const match = state.currentMatch;
+      const heroResult = evaluatePokerHand(match.hero.currentHand);
+      const results = match.opponents
+        .filter((opp) => !opp.isFolded)
+        .map((opp) => ({
+          id: opp.id,
+          name: opp.name,
+          rankValue: evaluatePokerHand(opp.currentHand).value, // Assuming handRanks has a .value (0-10)
+          handName: evaluatePokerHand(opp.currentHand).label,
+        }));
+      results.push({
+        id: match.hero.id,
+        name: "Hero",
+        rankValue: heroResult.value,
+        handName: heroResult.label,
+      });
+      const winner = results.reduce((prev, current) =>
+        prev.rankValue > current.rankValue ? prev : current,
+      );
+      if (winner.id === match.hero.id) {
+        match.hero.money += match.pot;
+        console.log(`Hero wins ${match.pot} with a ${winner.handName}!`);
+      } else {
+        const winningOpp = match.opponents.find((o) => o.id === winner.id);
+        if (winningOpp) {
+          winningOpp.money += match.pot;
+          console.log(
+            `${winningOpp.name} wins ${match.pot} with a ${winner.handName}!`,
+          );
+        }
+      }
+      match.pot = 0;
     },
     startMatch: (state, action: PayloadAction<GamePayloadInterface>) => {
       const {
@@ -250,30 +352,41 @@ const gameSlice = createSlice({
         levelOfDifficulty,
         matchLocation,
         numberOfDecks,
+        hero,
       } = action.payload;
-      state.currentMatch.numberOfDecks = numberOfDecks;
+
       state.isPlaying = true;
       state.currentlyDisplayed = "match";
+      state.currentMatch.numberOfDecks = numberOfDecks;
       state.currentMatch.numberOfOpponents = numberOfOpponents;
       state.currentMatch.difficultyLevel = levelOfDifficulty;
       state.currentMatch.matchLocation = matchLocation;
+      state.currentMatch.hero.id = hero.id;
+      state.currentMatch.hero.money = hero.money;
+      state.currentMatch.hero.chips = hero.chips;
+
       state.currentMatch.deck = shuffleDeck(generateDeck(numberOfDecks));
 
-      const count = numberOfOpponents === "tbd" ? 1 : numberOfOpponents;
+      const count =
+        numberOfOpponents === "tbd" ? 1 : (numberOfOpponents as number);
       const availableThemes = matchMap[matchLocation] || ["classic"];
-      const selectedTheme = availableThemes[0]; // Or your weighted pick logic
-      const namePool = [...villainPool[selectedTheme]];
+      const selectedTheme =
+        availableThemes[Math.floor(Math.random() * availableThemes.length)];
 
-      for (let i = namePool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [namePool[i], namePool[j]] = [namePool[j], namePool[i]];
+      const newOpponents: PlayerInterface[] = [];
+      const usedNames = new Set<string>();
+
+      while (newOpponents.length < count) {
+        const candidate = createVillain(selectedTheme);
+
+        if (!usedNames.has(candidate.name)) {
+          newOpponents.push(candidate);
+          usedNames.add(candidate.name);
+        }
       }
-      state.currentMatch.opponents = Array.from({ length: count }).map(
-        (_, index) => {
-          const uniqueName = namePool[index] || `Outlaw ${index + 1}`;
-          return createVillain(selectedTheme, uniqueName);
-        },
-      );
+
+      state.currentMatch.opponents = newOpponents;
+
       const gameType = state.currentMatch.currentPhase.type;
       const phaseSequence = Object.keys(
         gamePhases[gameType],
@@ -296,7 +409,7 @@ const gameSlice = createSlice({
     toggleDiscard: (state, action: PayloadAction<number>) => {
       const cardIndex = action.payload;
 
-      const card = state.currentMatch.herosHand[cardIndex];
+      const card = state.currentMatch.hero.currentHand[cardIndex];
 
       if (card) {
         card.isDiscarded = !card.isDiscarded;
@@ -315,7 +428,12 @@ export const {
   goToMainMenu,
   goToPreGame,
   goToSettings,
+  performAnteUp,
+  prepareNextHand,
+  processBet,
   quitPlaying,
+  resetGame,
+  resolveShowdown,
   startMatch,
   startPlaying,
   subtractOpponentMoney,

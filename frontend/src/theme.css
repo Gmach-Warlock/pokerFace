@@ -36,3 +36,9 @@
   /* We just drop the lightness from 50% to 40% to make it darker! */
   background-color: hsl(183, 100%, 40%);
 }
+
+.btn--settings {
+  background-color: transparent;
+  border: none;
+  float: right;
+}

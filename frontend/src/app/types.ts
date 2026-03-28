@@ -1,4 +1,5 @@
 export type AttributeValueType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type BettingActionType = "call" | "raise" | "fold" | "check";
 export type CardValueType =
   | 2
   | 3
@@ -115,6 +116,7 @@ export type NextLevelXpType =
   | 500;
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
+export type PlayStyleType = "passive" | "loose" | "tight" | "aggressive";
 export type IconSizeType = "small" | "medium" | "large";
 export type VillainThemeType =
   | "classic"
@@ -196,13 +198,20 @@ export interface PlayerInterface {
   preferredDifficulty?: DifficultyType;
   currentHand: CardInterface[];
   isDiscarding?: boolean;
+  isFolded: boolean;
   money: number;
   chips: ChipMapInterface;
   comments?: Partial<Record<CurrentSituationType, string[]>> | null;
+  personality?: {
+    isTroll: boolean;
+    bluffModifier: number;
+    thinkTime: number;
+  };
   level?: number | null;
   xp?: number | null;
   nextLevel?: number | null;
   availableDecks?: DeckStyleType[] | null;
   currentDeckChoice?: DeckStyleType | null;
   plei?: number | null;
+  isSpecial?: boolean;
 }

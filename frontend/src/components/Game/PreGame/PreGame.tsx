@@ -41,6 +41,11 @@ export default function PreGame() {
         levelOfDifficulty: difficulty,
         matchLocation: location,
         numberOfDecks: numberOfDecks,
+        hero: {
+          ...playerData,
+          isFolded: false,
+          currentHand: [],
+        },
       }),
     );
     navigate(`/game/match/${location}`);

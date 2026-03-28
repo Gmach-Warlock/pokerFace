@@ -14,15 +14,51 @@
   background-image: url("/theFlyingCow.png");
 }
 
+/* The base card container */
 .opponent__card {
-  grid-column: span 4; /* 3 opponents per row */
-  aspect-ratio: 1 / 1.2;
-  background: hsla(261, 40%, 20%, 0.4);
-  border: 1px solid hsla(261, 20%, 40%, 0.3);
-  font-size: 0.9rem;
-  padding: 0.5rem;
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.1); /* Subtle default border */
+  border-radius: 12px;
+  padding: 10px;
+  transition: all 0.3s ease-in-out;
+  background: rgba(20, 20, 30, 0.6); /* Darker backing */
 }
 
-.opponent {
-  max-width: 50%;
+/* 1. Active State (Similar to folded, but "Alive") */
+.opponent__card:not(.opponent__card--folded) {
+  border: 2px solid #4ade80; /* A nice "Active" green or use #00d2ff for cyan */
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+/* 2. The Folded State (Keep your existing rotate/gray logic) */
+.opponent__card--folded {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  transform: scale(0.9) rotate(-3deg); /* Slight tilt for the "discarded" look */
+  border: 2px solid #666;
+  box-shadow: none;
+}
+
+/* Big "FOLDED" stamp - slightly improved */
+.opponent__fold-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.opponent__fold-overlay span {
+  background: rgba(0, 0, 0, 0.7);
+  color: #ff4d4d;
+  padding: 4px 12px;
+  border: 2px solid #ff4d4d;
+  font-weight: 900;
+  text-transform: uppercase;
+  transform: rotate(-20deg);
+  border-radius: 4px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
 }

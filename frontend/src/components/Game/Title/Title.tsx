@@ -1,25 +1,36 @@
 import { useNavigate } from "react-router";
 import { royalFlush } from "../../../app/assets";
 import { useAppDispatch } from "../../../app/hooks";
-import { goToPreGame } from "../../../features/game/gameSlice";
+import { goToMainMenu } from "../../../features/game/gameSlice";
 import Hand from "../../Hand/Hand";
 import "./Title.css";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Title() {
+  const [isExiting, setIsExiting] = useState(false);
   const winningHand = royalFlush;
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const navToPreGame = useCallback(() => {
-    dispatch(goToPreGame());
-    navigate("/game/preGame");
-  }, [dispatch, navigate]); // 3. Add dispatch and navigate as dependencies
+  const hitAudio = "/pokerFaceTitleHit.wav";
+
+  const navToMainMenu = useCallback(() => {
+    if (isExiting) return;
+
+    setIsExiting(true);
+    const titleHit = new Audio(hitAudio);
+    titleHit.play().catch((e) => console.log(e));
+
+    setTimeout(() => {
+      dispatch(goToMainMenu());
+      navigate("/game/mainMenu");
+    }, 1500);
+  }, [dispatch, navigate, isExiting]);
 
   useEffect(() => {
     const handleInteraction = (e: Event) => {
       if (e.type === "contextmenu") e.preventDefault();
-      navToPreGame();
+      navToMainMenu();
     };
 
     const events = ["keydown", "click" /*, "touchstart", "contextmenu" */];
@@ -31,10 +42,10 @@ export default function Title() {
         window.removeEventListener(type, handleInteraction),
       );
     };
-  }, [navToPreGame]);
+  }, [navToMainMenu]);
 
   return (
-    <div className="title">
+    <div className={`title ${isExiting ? "title--exit" : ""}`}>
       <h1 className="title__title manga-outline neon-glow-cyan">Poker Face</h1>
 
       <div className="title__hand-container">
@@ -46,7 +57,9 @@ export default function Title() {
         />
       </div>
 
-      <p className="text-shadow">Hit any key to continue</p>
+      <p className="text-shadow">
+        {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
+      </p>
     </div>
   );
 }
