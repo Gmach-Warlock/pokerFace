@@ -15,7 +15,6 @@ export default function Card({
   const isRed = suit === "heart" || suit === "diamond";
   const suitColor = isRed ? "red" : "black";
   const cardClass = `card-face ${isDiscarded ? "card-discarded" : ""}`;
-  // --- Helper Sub-renderers ---
 
   const renderSuitIcon = (size: IconSizeType) => (
     <img

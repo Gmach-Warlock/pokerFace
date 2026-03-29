@@ -1,5 +1,6 @@
 import type {
   CardInterface,
+  CardSuitType,
   ChipMapInterface,
   FetchInterface,
   MatchMapInterface,
@@ -120,7 +121,7 @@ export const archetypeRanges = {
     ],
   },
 };
-export const cardSuitIcons = {
+export const cardSuitIcons: Record<CardSuitType, string> = {
   club: "/club.png",
   diamond: "/diamond.png",
   heart: "/heart.png",
@@ -306,6 +307,7 @@ export const royalFlush: CardInterface[] = [
     side: "face-up",
     currentLocation: "demo",
     isDiscarded: false,
+    deckDesign: deckDesigns.arrowBolt,
   },
   {
     value: "K",
@@ -313,6 +315,7 @@ export const royalFlush: CardInterface[] = [
     side: "face-up",
     currentLocation: "demo",
     isDiscarded: false,
+    deckDesign: deckDesigns.arrowBolt,
   },
   {
     value: "Q",
@@ -320,6 +323,7 @@ export const royalFlush: CardInterface[] = [
     side: "face-up",
     currentLocation: "demo",
     isDiscarded: false,
+    deckDesign: deckDesigns.arrowBolt,
   },
   {
     value: "J",
@@ -327,6 +331,7 @@ export const royalFlush: CardInterface[] = [
     side: "face-up",
     currentLocation: "demo",
     isDiscarded: false,
+    deckDesign: deckDesigns.arrowBolt,
   },
   {
     value: 10,
@@ -334,6 +339,7 @@ export const royalFlush: CardInterface[] = [
     side: "face-up",
     currentLocation: "demo",
     isDiscarded: false,
+    deckDesign: deckDesigns.arrowBolt,
   },
 ];
 export const startingChips: ChipMapInterface = {
@@ -441,3 +447,13 @@ export const suffixes = [
   "of the West",
   "Smooth",
 ];
+
+export const gameAudio = {
+  hit: "/pokerFaceTitleHit.wav",
+  hover: "/ui-tick.wav",
+  shuffle: "/card-shuffle.wav",
+  deal: "/card-deal.wav",
+  chip: "/chip-clink.wav",
+} as const;
+
+export type SoundEffectType = keyof typeof gameAudio;

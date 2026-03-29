@@ -1,129 +1,119 @@
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { startMatch } from "../../../features/game/gameSlice";
-import type {
-  NumberOfOpponentsType,
-  DifficultyType,
-  MatchLocationType,
-  DeckNumberType,
-} from "../../../app/types";
+import {
+  selectAvailableDecks,
+  selectAvailableLocations,
+  selectInitialHeroState,
+} from "../../../features/game/gameSelectors";
 import "./PreGame.css";
 import { useNavigate } from "react-router";
+import type {
+  DeckNumberType,
+  DeckStyleType,
+  DifficultyType,
+  MatchLocationType,
+  MatchType,
+  NumberOfOpponentsType,
+} from "../../../app/types";
 
 export default function PreGame() {
-  const playerData = useAppSelector((state) => state.profile.playerData);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const formatOptionText = (text: string) => {
-    return text
-      .split("-") // Split "low-vault-lounge" into ["low", "vault", "lounge"]
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // ["Low", "Vault", "Lounge"]
-      .join(" "); // "Low Vault Lounge"
-  };
+  // Atomic Selectors
+  const availableDecks = useAppSelector(selectAvailableDecks);
+  const locations = useAppSelector(selectAvailableLocations);
+  const initialHero = useAppSelector(selectInitialHeroState);
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const formatLocation = (text: string) =>
+    text
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const opponents = Number(
-      formData.get("opponentNumber"),
-    ) as NumberOfOpponentsType;
-    const difficulty = formData.get("difficulty-level") as DifficultyType;
-    const location = formData.get("match-area-select") as MatchLocationType;
+    const numDecks = Number(formData.get("number-of-decks"));
+    const matchType = formData.get("matchType") as MatchType;
 
-    const rawValue = formData.get("deck-number-select");
-    const parsed = Number(rawValue);
-
-    const numberOfDecks: DeckNumberType =
-      parsed >= 1 && parsed <= 5 ? (parsed as DeckNumberType) : 1;
     dispatch(
       startMatch({
-        numberOfOpponents: opponents,
-        levelOfDifficulty: difficulty,
-        matchLocation: location,
-        numberOfDecks: numberOfDecks,
-        hero: {
-          ...playerData,
-          isFolded: false,
-          currentHand: [],
-        },
+        numberOfOpponents: Number(
+          formData.get("number-of-opponents"),
+        ) as NumberOfOpponentsType,
+        levelOfDifficulty: formData.get("difficulty-level") as DifficultyType,
+        matchLocation: formData.get("match-area-select") as MatchLocationType,
+        matchType: matchType,
+        numberOfDecks: numDecks as DeckNumberType,
+        deckStyle: formData.get("deck-style") as DeckStyleType,
+
+        hero: initialHero, // Data comes ready-to-go from selector
       }),
     );
-    navigate(`/game/match/${location}`);
+
+    navigate(`/game/match/${formData.get("match-area-select")}`);
   };
 
   return (
     <div className="preGame-container">
-      {" "}
       <div className="preGame-menu">
         <h2 className="menu-title">Match Info</h2>
-
-        <form action="#" className="preGame-form" onSubmit={handleSubmit}>
+        <form className="preGame-form" onSubmit={handleSubmit}>
           <div className="setting">
-            <label htmlFor="opponentNumber">How many Opponents?</label>
-            <select name="opponentNumber" id="opponentNumber">
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
+            <label>Game Type</label>
+            <select name="matchType" title="select game type">
+              <option value="draw">5-Card Draw</option>
+              <option value="holdem">Texas Hold'em</option>
+              <option value="stud">7-Card Stud</option>
             </select>
           </div>
 
           <div className="setting">
-            <label htmlFor="deck-style">
-              Which deck style do you want to use?
-            </label>
-            <select name="deck-style" id="deck-style">
-              {playerData.availableDecks.map((item, index) => (
-                <option key={`${item}${index}`} value={item}>
-                  {item}
+            <label>Opponents</label>
+            <select name="number-of-opponents" title="number of opponents">
+              {[2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="setting">
-            <label htmlFor="difficulty-level">
-              Choose your level of difficulty
-            </label>
-            <select
-              name="difficulty-level"
-              id="difficulty-level"
-              title="difficulty-level"
-            >
-              <option value="easy">Easy</option>
-              <option value="normal">Normal</option>
-              <option value="difficult">Difficult</option>
-            </select>
-          </div>
-
-          <div className="setting">
-            <label htmlFor="match-area-select">
-              Where do you want to play at?
-            </label>
-            <select
-              name="match-area-select"
-              id="match-area-select"
-              title="match-area-select"
-            >
-              {playerData.availableLocations.map((area, index) => (
-                <option
-                  key={area + index}
-                  value={area}
-                >{`The ${formatOptionText(area.trim())}`}</option>
+            <label>Decks</label>
+            <select name="number-of-decks" title="number of decks">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
               ))}
             </select>
           </div>
 
           <div className="setting">
-            <label htmlFor="deck-number-select">How many decks?</label>
-            <select name="deck-number-select" id="deck-number-select">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
+            <label>Deck Style</label>
+            <select name="deck-style" title="deck style name">
+              {availableDecks.map((deck) => (
+                <option key={deck} value={deck}>
+                  {deck}
+                </option>
+              ))}
             </select>
           </div>
+
+          <div className="setting">
+            <label>Location</label>
+            <select name="match-area-select" title="match area select">
+              {locations.map((area) => (
+                <option key={area} value={area}>
+                  {`The ${formatLocation(area)}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* ... other settings ... */}
 
           <div className="matchStartButton">
             <button type="submit">Start Match</button>

@@ -4,13 +4,16 @@ import Card from "../Card/Card";
 import "./Hand.css";
 import { toggleDiscard } from "../../features/game/gameSlice";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { selectDeckStyle } from "../../features/game/gameSelectors";
 
 export default function Hand(props: HandInterface) {
-  const { matchType, cards, currentLocation } = props;
+  const { matchType, cards, currentLocation, isTitle } = props;
   const dispatch = useAppDispatch();
   const phase = useAppSelector(
     (state) => state.game.currentMatch.currentPhase.phase,
   );
+
+  const design = useAppSelector(selectDeckStyle);
 
   // Helper flags
   const isHero = currentLocation === "p1";
@@ -24,7 +27,7 @@ export default function Hand(props: HandInterface) {
   };
 
   const renderDrawHand = () => (
-    <div className="hand-draw place-center w-full">
+    <div className={`hand-draw ${isTitle ? "hand-draw--animated" : ""}`}>
       {cards.map((card, index) => {
         // Construct the class string dynamically
         const wrapperClass = [
@@ -46,6 +49,7 @@ export default function Hand(props: HandInterface) {
               side={card.side}
               currentLocation={currentLocation}
               isDiscarded={card.isDiscarded}
+              deckDesign={design}
             />
           </div>
         );
@@ -58,13 +62,16 @@ export default function Hand(props: HandInterface) {
       {/* Hold'em usually only shows 2 hole cards */}
       {cards.slice(0, 2).map((card, index) => (
         <div key={index} className={`hand-holdem-card${index + 1}`}>
-          <Card {...card} currentLocation={currentLocation} />
+          <Card
+            {...card}
+            currentLocation={currentLocation}
+            deckDesign={design}
+          />
         </div>
       ))}
     </div>
   );
 
-  // 2. The "Switcher" logic
   const renderContent = () => {
     switch (matchType) {
       case "draw":

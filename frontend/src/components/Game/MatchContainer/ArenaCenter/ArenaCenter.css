@@ -71,6 +71,7 @@
 
 .arena-center__centerpiece {
   grid-column: 5 / span 3;
+  grid-row: 1 / span 2;
   place-content: center;
 }
 

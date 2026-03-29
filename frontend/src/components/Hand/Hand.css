@@ -12,16 +12,17 @@
   margin: 1rem;
   position: relative;
   width: 100%;
+  justify-content: center;
 }
 .hand-draw-card1 {
   z-index: 1;
   position: absolute;
-  transform: translateX(-3rem);
+  transform: translateX(-8rem);
 }
 .hand-draw-card2 {
   z-index: 2;
   position: absolute;
-  transform: translateX(-1.5rem);
+  transform: translateX(-4rem);
 }
 .hand-draw-card3 {
   z-index: 3;
@@ -30,12 +31,12 @@
 .hand-draw-card4 {
   z-index: 4;
   position: absolute;
-  transform: translateX(1.5rem);
+  transform: translateX(4rem);
 }
 .hand-draw-card5 {
   z-index: 5;
   position: absolute;
-  transform: translateX(3rem);
+  transform: translateX(8rem);
 }
 
 .hand-draw-card1,
@@ -43,7 +44,6 @@
 .hand-draw-card3,
 .hand-draw-card4,
 .hand-draw-card5 {
-  /* Common transition for smooth movements */
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
@@ -54,9 +54,107 @@
   cursor: pointer;
 }
 
-/* Optional: Add a slight lift when hovering over a clickable card */
 .card-interactive:hover {
   filter: brightness(1.1);
-  /* This moves the card up slightly relative to its current stack position */
   z-index: 10;
+  transform: scale(1.05);
+}
+
+/* Individual card horizontal offsets for the "Fan Out" phase */
+.hand-draw-card1 {
+  z-index: 1;
+  --offset: -8rem;
+}
+.hand-draw-card2 {
+  z-index: 2;
+  --offset: -4rem;
+}
+.hand-draw-card3 {
+  z-index: 3;
+  --offset: 0rem;
+}
+.hand-draw-card4 {
+  z-index: 4;
+  --offset: 4rem;
+}
+.hand-draw-card5 {
+  z-index: 5;
+  --offset: 8rem;
+}
+
+.hand-draw--animated [class^="hand-draw-card"] {
+  position: absolute;
+  animation: cardIntroLoop 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hand-draw:not(.hand-draw--animated) [class^="hand-draw-card"] {
+  position: absolute;
+  /* No animation here! */
+}
+
+/* Individual Offsets */
+.hand-draw-card1 {
+  z-index: 1;
+  --offset: -10rem;
+}
+.hand-draw-card2 {
+  z-index: 2;
+  --offset: -5rem;
+}
+.hand-draw-card3 {
+  z-index: 3;
+  --offset: 0rem;
+}
+.hand-draw-card4 {
+  z-index: 4;
+  --offset: 5rem;
+}
+.hand-draw-card5 {
+  z-index: 5;
+  --offset: 10rem;
+}
+
+.hand-container.is-exiting [class^="hand-draw-card"] {
+  animation: cardExitExplode 0.8s forwards ease-in;
+}
+
+/* Scatter Override */
+.is-scattering [class^="hand-draw-card"] {
+  /* We use a shorter duration (0.8s) to feel snappy */
+  animation: cardScatter 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+  pointer-events: none;
+}
+
+/* Stagger the exit slightly for a "shuffling" explosion effect */
+.is-scattering .hand-draw-card1 {
+  animation-delay: 0s;
+}
+.is-scattering .hand-draw-card2 {
+  animation-delay: 0.05s;
+}
+.is-scattering .hand-draw-card3 {
+  animation-delay: 0.1s;
+}
+.is-scattering .hand-draw-card4 {
+  animation-delay: 0.15s;
+}
+.is-scattering .hand-draw-card5 {
+  animation-delay: 0.2s;
+}
+
+[class^="hand-draw-card"] {
+  position: absolute;
+  /* Add a standard transition for manual moves, but NO infinite animation */
+  transition: transform 0.3s ease-out;
+}
+
+/* Animated state: used ONLY on the Title screen */
+.hand-draw--animated [class^="hand-draw-card"] {
+  animation: cardIntroLoop 6s ease-in-out infinite;
+}
+
+/* Scatter state: triggered by your isExiting logic */
+.hand-draw--animated.is-scattering [class^="hand-draw-card"] {
+  animation: cardScatter 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
 }

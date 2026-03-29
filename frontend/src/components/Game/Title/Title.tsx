@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { royalFlush } from "../../../app/assets";
-import { useAppDispatch } from "../../../app/hooks";
+import { useAppDispatch, useSound } from "../../../app/hooks";
 import { goToMainMenu } from "../../../features/game/gameSlice";
 import Hand from "../../Hand/Hand";
 import "./Title.css";
@@ -12,20 +12,19 @@ export default function Title() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const hitAudio = "/pokerFaceTitleHit.wav";
+  const { playSound } = useSound();
 
   const navToMainMenu = useCallback(() => {
     if (isExiting) return;
 
     setIsExiting(true);
-    const titleHit = new Audio(hitAudio);
-    titleHit.play().catch((e) => console.log(e));
+    playSound("hit", 0.4);
 
     setTimeout(() => {
       dispatch(goToMainMenu());
       navigate("/game/mainMenu");
     }, 1500);
-  }, [dispatch, navigate, isExiting]);
+  }, [dispatch, navigate, isExiting, playSound]);
 
   useEffect(() => {
     const handleInteraction = (e: Event) => {
@@ -48,12 +47,15 @@ export default function Title() {
     <div className={`title ${isExiting ? "title--exit" : ""}`}>
       <h1 className="title__title manga-outline neon-glow-cyan">Poker Face</h1>
 
-      <div className="title__hand-container">
+      <div
+        className={`title__hand-container ${isExiting ? "is-scattering" : ""}`}
+      >
         <Hand
           matchType="draw"
           cards={winningHand}
           currentLocation="demo"
           hand="tbd"
+          isTitle={true}
         />
       </div>
 

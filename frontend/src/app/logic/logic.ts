@@ -131,22 +131,24 @@ export const getNPCAction = (
   evaluation: EvaluatedHand,
   currentDifficulty: DifficultyType,
   currentPot: number,
+  currentBet: number,
 ) => {
   const { rankValue, strength } = evaluation;
+  const isBetActive = currentBet > 0;
 
   switch (currentDifficulty) {
     case "easy":
       // Easy NPCs are transparent. They only bet on rank.
       if (rankValue >= 2) return "RAISE"; // Two-pair or better
       if (rankValue >= 1) return "CALL"; // Any pair
-      return "FOLD";
+      return isBetActive ? "fold" : "call";
 
     case "normal":
       // Normal NPCs use the 'strength' property you built.
       // A high-strength 'High Card' might still call.
       if (rankValue >= 2 || strength > 70) return "RAISE";
       if (strength > 40) return "CALL";
-      return "FOLD";
+      return isBetActive ? "fold" : "call";
 
     case "hard": {
       // The "Pro" logic. They check for "Troll" personality traits
@@ -161,11 +163,11 @@ export const getNPCAction = (
 
       if (rankValue >= 3 || strength + potCommitment > 85) return "RAISE";
       if (strength + potCommitment > 50) return "CALL";
-      return "FOLD";
+      return isBetActive ? "fold" : "call";
     }
 
     default:
-      return "CHECK";
+      return "call";
   }
 };
 

@@ -6,6 +6,7 @@ import type {
   CardInterface,
   CardValueType,
   CurrentLocationType,
+  DeckStyleType,
 } from "../../app/types";
 import { villainPool, cardSuitIcons, cardRankValues } from "../../app/assets";
 import { generateRandomString } from "../utils/utils";
@@ -46,6 +47,10 @@ export const createPlayer = (
     isFolded: false,
     money: startingPot,
     chips: newChipMap,
+    currentBet: 0,
+    hasActed: false,
+    lastAction: null,
+    isAllin: false,
     level: 1,
     xp: 0,
     nextLevel: 5,
@@ -68,7 +73,7 @@ export const createVillain = (
   const chipMap = createChips(500);
 
   const newVillain: PlayerInterface = {
-    id: `${newVillainName}-${generateRandomString(4)}`,
+    id: generateRandomString(8),
     name: newVillainName,
     type: "computer",
     difficulty: "normal",
@@ -76,12 +81,18 @@ export const createVillain = (
     isFolded: false,
     money: 500,
     chips: chipMap,
+    currentBet: 0,
+    hasActed: false,
+    isAllin: false,
     comments: null,
   };
 
   return newVillain;
 };
-export const generateDeck = (count: number = 1): CardInterface[] => {
+export const generateDeck = (
+  count: number = 1,
+  design: DeckStyleType,
+): CardInterface[] => {
   const deck: CardInterface[] = [];
   const suits = Object.keys(cardSuitIcons) as (keyof typeof cardSuitIcons)[];
   const ranks = Object.keys(cardRankValues);
@@ -97,6 +108,7 @@ export const generateDeck = (count: number = 1): CardInterface[] => {
           side: "face-down",
           currentLocation: "deck" as CurrentLocationType,
           isDiscarded: false,
+          deckDesign: design,
         });
       });
     });

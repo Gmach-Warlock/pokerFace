@@ -16,6 +16,10 @@ export const processArenaAction = createAsyncThunk(
         dispatch(performAnteUp({ location: matchLocation }));
         dispatch(advancePhase());
         break;
+      case "deal":
+        dispatch(dealRound());
+        dispatch(advancePhase());
+        break;
       case "draw":
         dispatch(dealRound());
         dispatch(advancePhase());

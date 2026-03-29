@@ -1,34 +1,29 @@
 import { type PlayerInterface } from "../../../../../app/types";
 import "./Opponent.css";
-import { useAppSelector } from "../../../../../app/hooks";
+import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
-import { useEffect, useState } from "react";
+import {
+  selectDeckStyle,
+  selectOpponentStatusClass,
+  selectPlayerChips,
+  selectPlayerName,
+  selectPlayerMoney,
+} from "../../../../../features/game/gameSelectors";
 
 interface OpponentPropsInterface {
   data: PlayerInterface;
 }
 
 export default function Opponent({ data }: OpponentPropsInterface) {
-  const designKey = useAppSelector(
-    (state) => state.game.currentMatch.deckStyle,
+  const playerId = data.id;
+  const name = useAppSelector((state) => selectPlayerName(state, playerId));
+  const money = useAppSelector((state) => selectPlayerMoney(state, playerId));
+  const chipMap = useAppSelector((state) => selectPlayerChips(state, playerId));
+  const designKey = useAppSelector(selectDeckStyle);
+  const cardStatusClass = useAppSelector((state) =>
+    selectOpponentStatusClass(state, playerId),
   );
-
-  const cardStatusClass = data.isFolded ? "opponent__card--folded" : "";
-  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
-
-  useEffect(() => {
-    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
-    const mediaQuery = window.matchMedia(`(min-width: 1024px)`);
-
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
-  const chipMap = data.chips;
-
-  const handleClick = () => {
-    console.log(data);
-  };
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   return (
     <div
@@ -37,31 +32,30 @@ export default function Opponent({ data }: OpponentPropsInterface) {
     >
       {isLargeScreen && (
         <div className="opponent__chips">
-          <ChipStacks
-            white={chipMap.white}
-            red={chipMap.red}
-            blue={chipMap.blue}
-            green={chipMap.green}
-            black={chipMap.black}
-          />
+          <ChipStacks {...chipMap} />
         </div>
       )}
 
       <div className="opponent__info">
-        <h3 className="opponent__name">{data.name}</h3>
-        <p className="opponent__stats">${data.money}</p>
+        <h3 className="opponent__name">{name}</h3>
+        <p className="opponent__stats">${money}</p>
+        <p>{playerId}</p>
       </div>
+
+      {/* Note: You could even move data.isFolded to a selector if you want to be 100% Redux-led! */}
       {data.isFolded && (
         <div className="opponent__fold-overlay">
           <span>FOLDED</span>
         </div>
       )}
-      <div className="opponent__bubble"></div>
-      <div>
-        <button type="button" onClick={handleClick}>
-          check state
-        </button>
-      </div>
+
+      <div className="opponent__bubble" />
+      <button
+        type="button"
+        onClick={() => console.log("Debug Player ID:", playerId, data)}
+      >
+        check state
+      </button>
     </div>
   );
 }

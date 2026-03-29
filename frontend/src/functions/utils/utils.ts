@@ -1,4 +1,9 @@
-import type { CardInterface, MatchLocationType } from "../../app/types";
+import type {
+  CardInterface,
+  MatchInterface,
+  MatchLocationType,
+  PlayerInterface,
+} from "../../app/types";
 import { AnteMap, handRanks } from "../../app/assets";
 import { type GameInterface } from "../../features/game/gameSlice";
 
@@ -16,7 +21,6 @@ export function generateRandomString(length: number) {
 export const evaluatePokerHand = (hand: CardInterface[]) => {
   if (hand.length < 5) return handRanks.highCard;
 
-  // 1. Normalize values (J=11, Q=12, K=13, A=14)
   const getVal = (v: string | number): number => {
     if (typeof v === "number") return v;
     const map: Record<string, number> = { J: 11, Q: 12, K: 13, A: 14 };
@@ -26,9 +30,12 @@ export const evaluatePokerHand = (hand: CardInterface[]) => {
   const values = hand.map((c) => getVal(c.value)).sort((a, b) => a - b);
   const suits = hand.map((c) => c.suit);
 
-  // 2. Checks
   const isFlush = new Set(suits).size === 1;
-  const isStraight = values.every((v, i) => i === 0 || v === values[i - 1] + 1);
+  let isStraight = values.every((v, i) => i === 0 || v === values[i - 1] + 1);
+
+  const isWheel = JSON.stringify(values) === JSON.stringify([2, 3, 4, 5, 14]);
+
+  if (isWheel) isStraight = true;
 
   const counts: Record<number, number> = {};
   values.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
@@ -52,10 +59,7 @@ export const evaluatePokerHand = (hand: CardInterface[]) => {
 export const handleFoldLogic = (state: GameInterface, playerId: string) => {
   const match = state.currentMatch;
 
-  // 1. Mark the player as folded
   if (playerId === match.hero.id) {
-    // We can't really "fold" the hero and keep playing,
-    // so we usually jump to post-game or show a "You Folded" state.
     state.currentlyDisplayed = "postGame";
     return;
   } else {
@@ -63,18 +67,15 @@ export const handleFoldLogic = (state: GameInterface, playerId: string) => {
     if (opponent) opponent.isFolded = true;
   }
 
-  // 2. CHECK FOR WINNER (Is only 1 player left who hasn't folded?)
   const activeOpponents = match.opponents.filter((opp) => !opp.isFolded);
-  const heroFolded = state.currentlyDisplayed === "postGame"; // or your hero-specific flag
+  const heroFolded = state.currentlyDisplayed === "postGame";
 
   if (activeOpponents.length === 0 && !heroFolded) {
-    // HERO WINS BY DEFAULT
     match.hero.money += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
     // You could also set a "winner" state here to show a toast/message
   } else if (activeOpponents.length === 1 && heroFolded) {
-    // LAST REMAINING OPPONENT WINS
     activeOpponents[0].money += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
@@ -85,4 +86,51 @@ export const pickAnteAmount = (location: MatchLocationType) => {
   const amount = AnteMap[location as keyof typeof AnteMap];
 
   return amount;
+};
+
+export const processBet = (playerId: string, amount: number) => {
+  return {
+    type: "BETS/SUBMIT_BET",
+    payload: {
+      playerId,
+      amount,
+      timestamp: Date.now(),
+    },
+  };
+};
+
+export const calculateBetResults = (
+  player: PlayerInterface,
+  amount: number,
+  currentPot: number,
+) => {
+  // 1. Validation Logic
+  if (amount > player.money) {
+    throw new Error("Insufficient chips");
+  }
+
+  return {
+    newPlayerChips: player.money - amount,
+    newPot: currentPot + amount,
+    betConfirmed: true,
+  };
+};
+
+export const getNextActivePlayerIndex = (match: MatchInterface) => {
+  const totalPlayers = match.opponents.length + 1; // Hero + NPCs
+  let nextIndex = (match.activePlayerIndex + 1) % totalPlayers;
+
+  // Loop through players to find the next one capable of acting
+  for (let i = 0; i < totalPlayers; i++) {
+    const player =
+      nextIndex === 0 ? match.hero : match.opponents[nextIndex - 1];
+
+    if (!player.isFolded && !player.isAllin) {
+      return nextIndex;
+    }
+    // If this player can't act, try the next one
+    nextIndex = (nextIndex + 1) % totalPlayers;
+  }
+
+  return match.activePlayerIndex; // Fallback
 };

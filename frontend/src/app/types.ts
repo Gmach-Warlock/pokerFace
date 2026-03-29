@@ -131,6 +131,7 @@ export interface CardInterface {
   side: CardSideType;
   currentLocation: CurrentLocationType;
   isDiscarded: boolean;
+  deckDesign: string;
 }
 export interface ChipInterface {
   color: ChipColorType;
@@ -163,6 +164,7 @@ export interface HandInterface {
   cards: CardInterface[];
   currentLocation: CurrentLocationType;
   hand: HandType;
+  isTitle?: boolean;
 }
 export interface HandResultInterface {
   playerId: string;
@@ -183,6 +185,23 @@ export interface MatchMapInterface {
   atrium: ["classic", "pro", "modern", "classy"];
   zenith: ["classic", "gritty", "modern", "classy", "pro"];
 }
+export interface MatchInterface {
+  numberOfOpponents: NumberOfOpponentsType;
+  deckStyle: DeckStyleType;
+  difficultyLevel: DifficultyType;
+  matchLocation: MatchLocationType;
+  matchType: MatchType;
+  numberOfDecks: DeckNumberType;
+  opponents: PlayerInterface[];
+  hero: PlayerInterface;
+  dealersHand: CardInterface[];
+  deck: CardInterface[];
+  pot: number;
+  currentBet: number;
+  activePlayerIndex: number;
+  lastRaiserId: string | null;
+  currentPhase: GamePhaseInterface;
+}
 // app/types.ts (or wherever you defined this)
 export interface PhaseInstruction {
   cards: number | "variable";
@@ -201,6 +220,10 @@ export interface PlayerInterface {
   isFolded: boolean;
   money: number;
   chips: ChipMapInterface;
+  currentBet: number;
+  hasActed: boolean;
+  lastAction?: "check" | "call" | "raise" | "fold" | "ante" | null;
+  isAllin: boolean;
   comments?: Partial<Record<CurrentSituationType, string[]>> | null;
   personality?: {
     isTroll: boolean;

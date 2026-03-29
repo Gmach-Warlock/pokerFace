@@ -1,54 +1,63 @@
 import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
-import Hand from "../../../../Hand/Hand";
 import "./OurHero.css";
-import { selectHeroHandEval } from "../../../../../app/middleware";
+import {
+  selectHeroName,
+  selectHeroMoney,
+  selectHeroHand,
+  selectHeroChips,
+  selectHeroIsFolded,
+  selectDeckStyle,
+  selectHeroHandRank,
+} from "../../../../../features/game/gameSelectors";
+import Hand from "../../../../Hand/Hand";
 
-export default function OurHero() {
+export default function Hero() {
+  const name = useAppSelector(selectHeroName);
+  const money = useAppSelector(selectHeroMoney);
+  const chipMap = useAppSelector(selectHeroChips);
+  const hand = useAppSelector(selectHeroHand);
+  const isFolded = useAppSelector(selectHeroIsFolded);
+  const designKey = useAppSelector(selectDeckStyle);
+  const handRank = useAppSelector(selectHeroHandRank);
+  const matchType = useAppSelector(
+    (state) => state.game.currentMatch.matchType,
+  );
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
-  const hero = useAppSelector((state) => state.game.currentMatch.hero);
-
-  const heroHand = useAppSelector(
-    (state) => state.game.currentMatch.hero.currentHand ?? [],
-  );
-  const heroChips = useAppSelector(
-    (state) => state.game.currentMatch.hero.chips,
-  );
-  const heroEval = useAppSelector(selectHeroHandEval);
 
   return (
-    <div className="our-hero">
-      <div className="our-hero__info">
-        <div className="our-hero__title-row">
-          <p className="our-hero__name">{hero.name}</p>
+    <div
+      className={`hero__container ${isFolded ? "hero--folded" : ""}`}
+      data-design={designKey}
+    >
+      <div className="hero__visuals">
+        <div className="hero__info">
+          <div className="hero__identity">
+            <h2 className="hero__name">{name}</h2>
+            <p className="hero__amount">${money}</p>
+
+            {!isFolded && hand.length >= 5 && (
+              <span className="hero__hand-rank">{handRank.label}</span>
+            )}
+          </div>
         </div>
-        <div className="our-hero__money">{`$${hero.money}`}</div>
-        <div>
-          {" "}
-          <span className="our-hero__hand-label">{heroEval.displayName}</span>
-        </div>
-      </div>
-      <div className="our-hero__grid">
-        <div className="our-hero__hand-container">
+        <div className="hero__hand">
           <Hand
-            matchType="draw"
-            cards={heroHand}
+            matchType={matchType}
+            cards={hand}
+            hand="tbd"
             currentLocation="p1"
-            hand={heroEval.handType}
           />
         </div>
+
         {isLargeScreen && (
-          <div className="our-hero__chips">
-            <ChipStacks
-              white={heroChips.white}
-              green={heroChips.green}
-              red={heroChips.red}
-              blue={heroChips.blue}
-              black={heroChips.black}
-            />
+          <div className="hero__chips">
+            <ChipStacks {...chipMap} />
           </div>
         )}
       </div>
+
+      {isFolded && <div className="hero__status-tag">FOLDED</div>}
     </div>
   );
 }
