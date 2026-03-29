@@ -1,0 +1,55 @@
+/* Base container setup */
+.deck-container {
+  --offset: 100px;
+}
+
+.card {
+  /* Common animation settings - rhythmic timing must match! */
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+/* Update the attribute name to match the JSX */
+/* Add .hand-draw--animated to the selector to increase priority */
+[data-animation-pattern="standard"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroLoop;
+}
+
+[data-animation-pattern="mirror"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroMirror;
+}
+
+[data-animation-pattern="glitch"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroGlitch;
+}
+
+[data-animation-pattern="twist"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroTwist;
+}
+
+[data-animation-pattern="twist-mirror"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroTwistMirror;
+}
+
+[data-animation-pattern="high-rise"]
+  .hand-draw--animated
+  [class^="hand-draw-card"] {
+  animation-name: cardIntroHighRise;
+}
+/* Base animation settings for all patterns */
+.hand-draw--animated [class^="hand-draw-card"] {
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}

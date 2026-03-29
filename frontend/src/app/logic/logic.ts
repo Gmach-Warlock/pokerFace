@@ -1,10 +1,13 @@
 import type {
+  BettingActionType,
   CardInterface,
   DifficultyType,
   HandType,
   PlayerInterface,
+  MatchInterface,
 } from "../types";
 import { cardRankValues } from "../assets";
+import { evaluatePokerHand } from "../../functions/utils/utils";
 
 export interface EvaluatedHand {
   rankValue: number;
@@ -12,6 +15,53 @@ export interface EvaluatedHand {
   displayName: string;
   strength: number;
 }
+
+export const calculateShowdown = (
+  match: MatchInterface,
+  isFirstMatch: boolean,
+  isFirstWin: boolean,
+) => {
+  const activePlayers = match.players.filter((p) => !p.isFolded);
+  if (activePlayers.length === 0) return;
+
+  // 1. Evaluate all hands
+  const evaluations = activePlayers.map((p) => ({
+    id: p.id,
+    ...evaluatePokerHand(p.currentHand),
+  }));
+
+  // 2. Determine Winner and assign to match object
+  const winner = evaluations.reduce((prev, curr) =>
+    curr.value > prev.value ? curr : prev,
+  );
+
+  match.winnerId = winner.id ?? ""; // Assign to the match object
+  match.winningHand = winner.label;
+
+  // 3. Reward Logic for the Hero
+  const hero = match.players.find((p) => p.type === "human");
+
+  // Check if the winner we just found is the Hero
+  if (match.winnerId === hero?.id && hero) {
+    const xpGained = Math.floor(match.pot * 0.1) + 50;
+    const currentLevel = hero.level ?? 1;
+    const currentXp = hero.xp ?? 0;
+
+    const thresholds = [5, 20, 45, 80, 125, 180, 245, 320, 405, 500];
+    const nextThreshold = thresholds[currentLevel - 1] ?? 999;
+
+    const didLevelUp = currentXp + xpGained >= nextThreshold;
+
+    match.rewards = {
+      xp: xpGained,
+      plei: match.pot,
+      bonuses: [],
+      isFirstMatch,
+      isFirstWin,
+      isLevelUp: didLevelUp,
+    };
+  }
+};
 
 export const evaluateHand = (cards: CardInterface[]): EvaluatedHand => {
   if (!cards || cards.length === 0) {
@@ -132,42 +182,38 @@ export const getNPCAction = (
   currentDifficulty: DifficultyType,
   currentPot: number,
   currentBet: number,
-) => {
+): BettingActionType => {
   const { rankValue, strength } = evaluation;
+
+  // Logic: If there is no bet to meet, the NPC "Checks" instead of "Calls"
   const isBetActive = currentBet > 0;
+  const defaultPassAction: BettingActionType = isBetActive ? "call" : "check";
+  const defaultFailAction: BettingActionType = isBetActive ? "fold" : "check";
 
   switch (currentDifficulty) {
     case "easy":
-      // Easy NPCs are transparent. They only bet on rank.
-      if (rankValue >= 2) return "RAISE"; // Two-pair or better
-      if (rankValue >= 1) return "CALL"; // Any pair
-      return isBetActive ? "fold" : "call";
+      if (rankValue >= 2) return "raise";
+      if (rankValue >= 1) return "call";
+      return defaultFailAction;
 
     case "normal":
-      // Normal NPCs use the 'strength' property you built.
-      // A high-strength 'High Card' might still call.
-      if (rankValue >= 2 || strength > 70) return "RAISE";
-      if (strength > 40) return "CALL";
-      return isBetActive ? "fold" : "call";
+      if (rankValue >= 2 || strength > 70) return "raise";
+      if (strength > 40) return "call";
+      return defaultFailAction;
 
     case "hard": {
-      // The "Pro" logic. They check for "Troll" personality traits
-      // and factor in the pot size.
       const isTroll = npc.personality?.isTroll;
+      if (isTroll && Math.random() < 0.3) return "raise";
 
-      // Trolls bluff 30% of the time even with garbage hands
-      if (isTroll && Math.random() < 0.3) return "RAISE";
-
-      // Pot Odds: If the pot is huge, they are less likely to fold a decent hand
       const potCommitment = currentPot > 500 ? 10 : 0;
 
-      if (rankValue >= 3 || strength + potCommitment > 85) return "RAISE";
-      if (strength + potCommitment > 50) return "CALL";
-      return isBetActive ? "fold" : "call";
+      if (rankValue >= 3 || strength + potCommitment > 85) return "raise";
+      if (strength + potCommitment > 50) return "call";
+      return defaultFailAction;
     }
 
     default:
-      return "call";
+      return defaultPassAction;
   }
 };
 

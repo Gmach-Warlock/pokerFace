@@ -15,7 +15,6 @@ export default function Hand(props: HandInterface) {
 
   const design = useAppSelector(selectDeckStyle);
 
-  // Helper flags
   const isHero = currentLocation === "p1";
   const isDrawPhase = phase === "draw";
   const canDiscard = isHero && isDrawPhase;
@@ -29,7 +28,6 @@ export default function Hand(props: HandInterface) {
   const renderDrawHand = () => (
     <div className={`hand-draw ${isTitle ? "hand-draw--animated" : ""}`}>
       {cards.map((card, index) => {
-        // Construct the class string dynamically
         const wrapperClass = [
           `hand-draw-card${index + 1}`,
           canDiscard ? "card-interactive" : "",
@@ -59,7 +57,6 @@ export default function Hand(props: HandInterface) {
 
   const renderHoldemHand = () => (
     <div className="hand-holdem place-center w-full">
-      {/* Hold'em usually only shows 2 hole cards */}
       {cards.slice(0, 2).map((card, index) => (
         <div key={index} className={`hand-holdem-card${index + 1}`}>
           <Card

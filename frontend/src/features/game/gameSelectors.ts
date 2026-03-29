@@ -44,37 +44,39 @@ export const selectIsBettingPhase = createSelector(
 export const selectCurrentMaxBet = createSelector(
   [selectCurrentMatch],
   (match) => {
-    const allBets = [
-      match.hero.currentBet,
-      ...match.opponents.map((p) => p.currentBet),
-    ];
+    const allBets = match.players.map((p) => p.currentBet ?? 0);
     return Math.max(...allBets, 0);
   },
 );
-
 /**
  * ============================================================
  * HERO SELECTORS (Specific to the Human Player)
  * ============================================================
  */
-export const selectHero = createSelector([selectCurrentMatch], (m) => m.hero);
-export const selectHerosId = createSelector([selectHero], (h) => h.id);
-export const selectHeroName = createSelector([selectHero], (h) => h.name);
-export const selectHeroMoney = createSelector([selectHero], (h) => h.money);
+export const selectHero = (state: RootState) =>
+  state.game.currentMatch.players.find((p) => p.type === "human");
+export const selectHerosId = createSelector([selectHero], (h) => h?.id ?? "");
+export const selectHeroName = createSelector(
+  [selectHero],
+  (h) => h?.name ?? "Unknown",
+);
+export const selectHeroMoney = createSelector(
+  [selectHero],
+  (h) => h?.money ?? 0,
+);
 export const selectHeroIsFolded = createSelector(
   [selectHero],
-  (h) => h.isFolded,
+  (h) => h?.isFolded ?? false,
 );
 export const selectHeroHand = createSelector(
   [selectHero],
-  (h) => h.currentHand,
+  (h) => h?.currentHand ?? [],
 );
 export const selectHeroCurrentBet = createSelector(
   [selectHero],
-  (h) => h.currentBet,
+  (h) => h?.currentBet ?? 0,
 );
 
-// Derived Hero Data
 export const selectHeroChips = createSelector([selectHeroMoney], (money) =>
   createChips(money),
 );
@@ -85,7 +87,9 @@ export const selectHeroHandRank = createSelector([selectHeroHand], (hand) =>
 
 export const selectHeroAmountToCall = createSelector(
   [selectHeroCurrentBet, selectCurrentMaxBet],
-  (myBet, maxBet) => Math.max(maxBet - myBet, 0),
+  (heroBet, maxBet) => {
+    return Math.max(maxBet - heroBet, 0);
+  },
 );
 
 /**
@@ -100,8 +104,7 @@ export const selectPlayerById = createSelector(
   ],
   (match, playerId) => {
     if (!playerId) return null;
-    if (match.hero.id === playerId) return match.hero;
-    return match.opponents.find((p) => p.id === playerId) || null;
+    return match.players.find((p) => p.id === playerId) || null;
   },
 );
 
@@ -174,6 +177,8 @@ export const selectActionButtonLabel = createSelector(
       case "bettingOne":
       case "bettingTwo":
         return "Confirm Bet";
+      case "showdown":
+        return "Finish Match";
       default:
         return "Next Phase";
     }

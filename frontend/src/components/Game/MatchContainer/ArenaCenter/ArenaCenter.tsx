@@ -12,14 +12,19 @@ import {
   selectIsBettingPhase,
   selectPot,
 } from "../../../../features/game/gameSelectors";
-
-import { advancePhase, processBet } from "../../../../features/game/gameSlice";
+import {
+  completeDrawPhase,
+  processBet,
+} from "../../../../features/game/gameSlice";
 import { processArenaAction } from "../../../../features/game/gameThunks";
 import BettingForm from "../BettingForm/BettingForm";
 import "./ArenaCenter.css";
+import DrawButton from "./buttons/DrawButton/DrawButton";
+import DealButton from "./buttons/DealButton/DealButton";
 
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
+
   const currentMatch = useAppSelector(selectCurrentMatch);
   const deck = useAppSelector(selectDeck);
   const designKey = useAppSelector(selectDeckStyle);
@@ -30,25 +35,53 @@ export default function ArenaCenter() {
   const discardCount = useAppSelector(selectDiscardCount);
   const isBettingPhase = useAppSelector(selectIsBettingPhase);
   const buttonLabel = useAppSelector(selectActionButtonLabel);
+  const currentPlayerIndex = useAppSelector(
+    (state) => state.game.currentMatch.activePlayerIndex,
+  );
 
-  const handleAction = () => dispatch(processArenaAction());
+  const cleanedKey = designKey.replace("/", "").replace(".png", "");
+
+  const handleAction = () => {
+    if (phase === "draw" && discardCount === 0) {
+      dispatch(completeDrawPhase());
+    } else {
+      dispatch(processArenaAction());
+    }
+  };
 
   const handleBetFinalized = (amount: number, type: BettingActionType) => {
     if (!herosId) return;
+    dispatch(processBet({ playerId: herosId, amount, type }));
+  };
 
-    dispatch(
-      processBet({
-        playerId: herosId,
-        amount: amount,
-        type: type,
-      }),
-    );
-    dispatch(advancePhase());
+  const renderActionArea = () => {
+    if (isBettingPhase) {
+      return (
+        <BettingForm
+          currentPot={pot}
+          heroMoney={heroMoney}
+          onConfirm={handleBetFinalized}
+        />
+      );
+    }
+
+    if (phase === "draw") {
+      return (
+        <DrawButton
+          onClick={handleAction}
+          label={buttonLabel}
+          isConfirming={discardCount > 0}
+        />
+      );
+    }
+
+    return <DealButton onClick={handleAction} label={buttonLabel} />;
   };
 
   return (
     <div className="arena-center">
-      <div className="deck-stack" data-design={designKey}>
+      {/* Deck Stack Visuals */}
+      <div className="deck-stack" data-design={cleanedKey}>
         {deck.slice(-8).map((_, index) => (
           <div key={index} className={`card-back layer-${index}`} />
         ))}
@@ -56,13 +89,9 @@ export default function ArenaCenter() {
       </div>
 
       <div className="arena-center__centerpiece">
-        <div>
-          <button
-            type="button"
-            onClick={() => {
-              console.log(currentMatch);
-            }}
-          >
+        <div className="debug-info">
+          <span>Player: {currentPlayerIndex}</span>
+          <button type="button" onClick={() => console.log(currentMatch)}>
             State
           </button>
         </div>
@@ -76,22 +105,9 @@ export default function ArenaCenter() {
           <span>{pot}</span>
         </div>
 
-        <div className="arena-center__deal">
-          {isBettingPhase ? (
-            <BettingForm
-              currentPot={pot}
-              heroMoney={heroMoney}
-              onConfirm={handleBetFinalized}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={handleAction}
-              className={discardCount > 0 ? "btn-confirm-draw" : "btn-standard"}
-            >
-              {buttonLabel}
-            </button>
-          )}
+        {/* This container now cleanly swaps between Form and Buttons */}
+        <div className="arena-center__action-container">
+          {renderActionArea()}
         </div>
       </div>
     </div>

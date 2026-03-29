@@ -13,12 +13,12 @@ export default function MainMenu() {
     navigate("/game/preGame");
   };
   const handlePlay = () => {
-    playSound("hover", 0.5);
+    playSound("hit1", 0.5);
     navToPregame();
   };
 
   const handleQuit = () => {
-    playSound("hover", 0.5);
+    playSound("hit1", 0.5);
     quitPlaying();
   };
 

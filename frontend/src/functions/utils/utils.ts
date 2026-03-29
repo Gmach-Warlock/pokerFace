@@ -3,6 +3,7 @@ import type {
   MatchInterface,
   MatchLocationType,
   PlayerInterface,
+  NextLevelXpType,
 } from "../../app/types";
 import { AnteMap, handRanks } from "../../app/assets";
 import { type GameInterface } from "../../features/game/gameSlice";
@@ -99,6 +100,22 @@ export const processBet = (playerId: string, amount: number) => {
   };
 };
 
+export const calculateShowdown = (match: MatchInterface) => {
+  const activePlayers = match.players.filter((p) => !p.isFolded);
+  const evaluations = activePlayers.map((p) => ({
+    id: p.id,
+    ...evaluatePokerHand(p.currentHand),
+  }));
+
+  const winner = evaluations.reduce((prev, curr) =>
+    curr.value > prev.value ? curr : prev,
+  );
+
+  // Directly mutate the 'match' object provided by Immer
+  match.winnerId = winner.id ?? "";
+  match.winningHand = winner.label;
+};
+
 export const calculateBetResults = (
   player: PlayerInterface,
   amount: number,
@@ -133,4 +150,28 @@ export const getNextActivePlayerIndex = (match: MatchInterface) => {
   }
 
   return match.activePlayerIndex; // Fallback
+};
+
+const LEVEL_THRESHOLDS: NextLevelXpType[] = [
+  5, 20, 45, 80, 125, 180, 245, 320, 405, 500,
+];
+
+export const checkLevelUp = (currentLevel: number, currentXp: number) => {
+  // Find the required XP for the NEXT level
+  // level 1 looks at index 0, level 2 looks at index 1, etc.
+  const requiredXp = LEVEL_THRESHOLDS[currentLevel - 1] ?? 999999;
+
+  if (currentXp >= requiredXp) {
+    return {
+      didLevelUp: true,
+      newLevel: currentLevel + 1,
+      nextThreshold: LEVEL_THRESHOLDS[currentLevel] ?? null,
+    };
+  }
+
+  return {
+    didLevelUp: false,
+    newLevel: currentLevel,
+    nextThreshold: requiredXp,
+  };
 };

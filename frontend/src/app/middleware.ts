@@ -8,7 +8,9 @@ import {
   dealRound,
   dealCard,
   checkAndRefillDeck,
+  completeDrawPhase,
   processBet,
+  resolveShowdown,
 } from "../features/game/gameSlice";
 import type { RootState } from "./store";
 import { evaluateHand, getNPCAction } from "./logic/logic";
@@ -16,6 +18,19 @@ import type { BettingActionType } from "./types";
 
 const deckListener = createListenerMiddleware();
 
+// 1. Memoized Evaluation: Now points to the 'players' array
+export const selectPlayerHandEval = createSelector(
+  [
+    (state: RootState) => state.game.currentMatch.players,
+    (_state: RootState, index: number) => index,
+  ],
+  (players, index) => {
+    const hand = players[index]?.currentHand || [];
+    return evaluateHand(hand);
+  },
+);
+
+// 2. Deck Management
 deckListener.startListening({
   matcher: isAnyOf(dealCard, dealRound),
   effect: async (_, listenerApi) => {
@@ -27,103 +42,92 @@ deckListener.startListening({
   },
 });
 
+// 3. GAME FLOW & NPC STRATEGY MANAGER
+// 3. GAME FLOW & NPC STRATEGY MANAGER
 deckListener.startListening({
-  predicate: (_action, currentState, previousState) => {
-    const currIndex = (currentState as RootState).game.currentMatch
-      .activePlayerIndex;
-    const prevIndex = (previousState as RootState).game.currentMatch
-      .activePlayerIndex;
-    return currIndex !== prevIndex && currIndex > 0;
-  },
-  effect: async (_, listenerApi) => {
-    console.log("listen here");
-
+  matcher: isAnyOf(processBet, advancePhase, dealRound, completeDrawPhase),
+  effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
-    const { activePlayerIndex, opponents, difficultyLevel, pot, currentBet } =
+    const { activePlayerIndex, players, currentBet, currentPhase } =
       state.game.currentMatch;
 
-    const npcIndex = activePlayerIndex - 1;
-    const npc = opponents[npcIndex];
-    if (!npc || npc.isFolded || npc.isAllin) return;
-
-    const thinkTime = npc.personality?.thinkTime || 1000;
-
-    await listenerApi.delay(thinkTime);
-
-    const evaluation = selectOpponentHandEval(state, npcIndex);
-    const decision = getNPCAction(
-      npc,
-      evaluation,
-      difficultyLevel,
-      pot,
-      currentBet,
+    // --- 1. THE PLAYER CONTROL GUARD ---
+    // If it's a phase that requires Hero input and it's the Hero's turn, we STOP.
+    const isManualPhase = ["bettingOne", "bettingTwo", "draw"].includes(
+      currentPhase.phase,
     );
-    const normalizedDecision = decision.toLowerCase();
-    const type = decision.toLowerCase() as BettingActionType;
-
-    let amountToSend = 0;
-    if (type === "call") {
-      // If currentBet is 10 and NPC already put in 5, they only owe 5.
-      amountToSend = Math.max(0, currentBet - (npc.currentBet || 0));
-    } else if (type === "raise") {
-      // Raise to currentBet + a fixed amount (e.g., 50)
-      const totalTargetBet = currentBet + 50;
-      amountToSend = totalTargetBet - (npc.currentBet || 0);
+    if (isManualPhase && activePlayerIndex === 0) {
+      return;
     }
-    console.log(normalizedDecision, amountToSend, type);
-    listenerApi.dispatch(
-      processBet({
-        playerId: npc.id ?? "unknown-npc",
-        type: normalizedDecision as BettingActionType,
-        amount: amountToSend,
-      }),
-    );
-  },
-});
 
-const selectHeroCards = (state: RootState) =>
-  state.game.currentMatch.hero.currentHand;
+    // --- 2. PHASE ADVANCEMENT & SHOWDOWN TRIGGER ---
+    const activePlayers = players.filter((p) => !p.isFolded && !p.isAllin);
+    const everyoneActed = activePlayers.every((p) => p.hasActed);
+    const betsEqual = activePlayers.every((p) => p.currentBet === currentBet);
 
-// Memoized Hero Eval
-export const selectHeroHandEval = createSelector([selectHeroCards], (cards) =>
-  evaluateHand(cards),
-);
+    if (everyoneActed && betsEqual && currentPhase.phase !== "showdown") {
+      // Safety: If the action that triggered this was already a phase change,
+      // don't double-advance. This prevents skipping rounds.
+      if (
+        action.type === advancePhase.type ||
+        action.type === completeDrawPhase.type ||
+        action.type === dealRound.type
+      ) {
+        return;
+      }
 
-// Memoized Opponent Eval (handles the index)
-export const selectOpponentHandEval = createSelector(
-  [
-    (state: RootState) => state.game.currentMatch.opponents,
-    (_state: RootState, index: number) => index,
-  ],
-  (opponents, index) => {
-    // We only want to run evaluateHand if THIS specific hand changed
-    const hand = opponents[index]?.currentHand || [];
-    return evaluateHand(hand);
-  },
-);
-
-// Add this to your deckListener.ts
-deckListener.startListening({
-  actionCreator: processBet,
-  effect: async (_, listenerApi) => {
-    const state = listenerApi.getState() as RootState;
-    const match = state.game.currentMatch;
-
-    const everyoneActed =
-      match.hero.hasActed &&
-      match.opponents.every((o) => o.isFolded || o.hasActed);
-
-    // Check if bets are equal (everyone called the highest bet)
-    const activePlayers = [match.hero, ...match.opponents].filter(
-      (p) => !p.isFolded,
-    );
-    const betsEqual = activePlayers.every(
-      (p) => p.currentBet === match.currentBet,
-    );
-
-    if (everyoneActed && betsEqual) {
-      await listenerApi.delay(500);
+      await listenerApi.delay(1000);
       listenerApi.dispatch(advancePhase());
+
+      // CRITICAL: Check the NEW state immediately after advancing
+      const newState = listenerApi.getState() as RootState;
+      if (newState.game.currentMatch.currentPhase.phase === "showdown") {
+        // This triggers the calculation and the winning message
+        listenerApi.dispatch(resolveShowdown());
+      }
+      return;
+    }
+
+    // --- 3. NPC ACTION LOGIC ---
+    const currentWaitPlayer = players[activePlayerIndex];
+
+    // Only run if it's a computer's turn and they haven't moved yet
+    if (
+      currentWaitPlayer &&
+      currentWaitPlayer.type === "computer" &&
+      !currentWaitPlayer.hasActed
+    ) {
+      await listenerApi.delay(currentWaitPlayer.personality?.thinkTime || 1000);
+
+      const evaluation = selectPlayerHandEval(state, activePlayerIndex);
+      const decision = getNPCAction(
+        currentWaitPlayer,
+        evaluation,
+        state.game.currentMatch.difficultyLevel,
+        state.game.currentMatch.pot,
+        currentBet,
+      );
+
+      const type = decision as BettingActionType;
+
+      let amountToSend = 0;
+      if (type === "call") {
+        amountToSend = Math.max(
+          0,
+          currentBet - (currentWaitPlayer.currentBet || 0),
+        );
+      } else if (type === "raise") {
+        // Raise current table bet by 50
+        amountToSend = currentBet + 50 - (currentWaitPlayer.currentBet || 0);
+      }
+
+      listenerApi.dispatch(
+        processBet({
+          playerId: currentWaitPlayer.id ?? "unknown",
+          type,
+          amount: amountToSend,
+        }),
+      );
     }
   },
 });

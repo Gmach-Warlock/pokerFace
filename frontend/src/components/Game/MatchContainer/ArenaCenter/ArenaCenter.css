@@ -1,17 +1,17 @@
 /* 1. Map the Designs */
-.deck-design[data-design="arrowBolt"] .card-back {
+.deck-stack[data-design="arrowBolt"] .card-back {
   background-image: url("/arrowBolt.png");
 }
-.deck-design[data-design="explodingFace"] .card-back {
+.deck-stack[data-design="explodingFace"] .card-back {
   background-image: url("/explodingFace.png");
 }
-.deck-design[data-design="inBloom"] .card-back {
+.deck-stack[data-design="inBloom"] .card-back {
   background-image: url("/inBloom.png");
 }
-.deck-design[data-design="redFire"] .card-back {
+.deck-stack[data-design="redFire"] .card-back {
   background-image: url("/redFire.png");
 }
-.deck-design[data-design="theFlyingCow"] .card-back {
+.deck-stack[data-design="theFlyingCow"] .card-back {
   background-image: url("/theFlyingCow.png");
 }
 
@@ -90,4 +90,10 @@
   position: relative;
   width: 120px;
   height: 180px;
+}
+.arena-center__action-container {
+  min-height: 150px; /* Adjust based on your BettingForm height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

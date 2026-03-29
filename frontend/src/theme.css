@@ -26,14 +26,12 @@
   font-size: var(--text-md);
 }
 
-/* Why HSL is great: Easy Hover States */
 .btn-neon {
   background-color: var(--neon-blue);
   transition: background-color 0.2s;
 }
 
 .btn-neon:hover {
-  /* We just drop the lightness from 50% to 40% to make it darker! */
   background-color: hsl(183, 100%, 40%);
 }
 
@@ -49,48 +47,5 @@
   }
   to {
     opacity: 1;
-  }
-}
-@keyframes cardIntroLoop {
-  0%,
-  10% {
-    transform: translateX(0) translateY(0) rotate(0deg);
-  }
-  25%,
-  40% {
-    transform: translateX(var(--offset)) translateY(0) rotate(0deg);
-  }
-  50%,
-  55% {
-    transform: translateX(0) translateY(0) rotate(0deg);
-  }
-  70%,
-  85% {
-    transform: translateX(0) translateY(calc(var(--offset) / 2.5)) rotate(90deg);
-  }
-  95%,
-  100% {
-    transform: translateX(0) translateY(0) rotate(0deg);
-  }
-}
-
-@keyframes cardExitExplode {
-  to {
-    opacity: 0;
-    transform: translateX(calc(var(--offset) * 3)) translateY(-500px)
-      rotate(360deg) scale(0.5);
-  }
-}
-
-@keyframes cardScatter {
-  0% {
-    transform: translateX(var(--offset)) translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    /* Cards fly out, rotate wildly, and shrink */
-    transform: translateX(calc(var(--offset) * 5)) translateY(-100vh)
-      rotate(720deg) scale(0);
-    opacity: 0;
   }
 }

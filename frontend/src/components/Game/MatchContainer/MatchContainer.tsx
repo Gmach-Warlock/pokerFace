@@ -3,7 +3,7 @@ import "./MatchContainer.css";
 import { useAppSelector } from "../../../app/hooks";
 import { useEffect } from "react";
 import PhaseAlert from "./PhaseAlert/PhaseAlert";
-import WinnerOverlay from "./WinnerOverlay/WinnerOverlay";
+import WinnerOverlay from "./WinnerOverlay/MatchResultsOverlay";
 
 export default function MatchContainer() {
   const opponents = useAppSelector(

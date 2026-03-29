@@ -125,6 +125,12 @@ export type VillainThemeType =
   | "classy"
   | "pro";
 
+export interface ButtonPropsInterface {
+  onClick: () => void;
+  label: string;
+  isConfirming?: boolean; // Optional, only needed for DrawButton
+}
+
 export interface CardInterface {
   value: CardValueType;
   suit: CardSuitType;
@@ -194,6 +200,7 @@ export interface MatchInterface {
   numberOfDecks: DeckNumberType;
   opponents: PlayerInterface[];
   hero: PlayerInterface;
+  players: PlayerInterface[];
   dealersHand: CardInterface[];
   deck: CardInterface[];
   pot: number;
@@ -201,6 +208,22 @@ export interface MatchInterface {
   activePlayerIndex: number;
   lastRaiserId: string | null;
   currentPhase: GamePhaseInterface;
+  winnerId?: string;
+  winningHand?: string;
+  isGameOver?: boolean;
+  handHistory?: {
+    playerId: string;
+    finalHandName: string;
+    wasBluff: boolean;
+  }[];
+  rewards?: {
+    xp: number;
+    plei: number;
+    bonuses: string[];
+    isFirstMatch?: boolean;
+    isFirstWin?: boolean;
+    isLevelUp?: boolean;
+  };
 }
 // app/types.ts (or wherever you defined this)
 export interface PhaseInstruction {

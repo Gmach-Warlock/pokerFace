@@ -449,11 +449,10 @@ export const suffixes = [
 ];
 
 export const gameAudio = {
-  hit: "/pokerFaceTitleHit.wav",
-  hover: "/ui-tick.wav",
-  shuffle: "/card-shuffle.wav",
-  deal: "/card-deal.wav",
-  chip: "/chip-clink.wav",
+  title: "/pokerFaceTitleHit.wav",
+  hit1: "/pokerFaceHit1.wav",
+  hit2: "/pokerFaceHit2.wav",
+  sprinkles: "/pokerFaceSprinkles.wav",
 } as const;
 
 export type SoundEffectType = keyof typeof gameAudio;

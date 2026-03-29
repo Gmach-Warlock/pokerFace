@@ -1,0 +1,59 @@
+.punchout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family:
+    "Courier New", Courier, monospace; /* Use a Pixel Font if you have one */
+  text-align: center;
+}
+
+.retro-text {
+  font-size: 4rem;
+  color: #f8f8f8;
+  margin-bottom: 2rem;
+  text-shadow: 4px 4px #555;
+}
+
+.blink {
+  animation: blinker 0.2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.match-details {
+  border-top: 4px solid white;
+  padding-top: 20px;
+  animation: slideUp 0.5s ease-out;
+}
+
+.location-text {
+  color: #ffeb3b;
+  font-size: 1.5rem;
+}
+.opponent-text {
+  color: #00bcd4;
+  font-size: 1.2rem;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -23,14 +23,19 @@
 
 .title--exit {
   opacity: 0;
-  transform: scale(1.1); /* Slight zoom in */
-  pointer-events: none; /* Prevent double-clicks */
+  transform: scale(1.1);
+  pointer-events: none;
 }
 
-/* Optional: Make the title text glow intensely during the exit */
 .title--exit .title__title {
   text-shadow:
     0 0 50px #0ff,
     0 0 100px #0ff;
   transition: text-shadow 2.5s ease-in;
+}
+[data-pattern="standard"] .animated-card-deck {
+  animation-name: cardIntroLoop;
+}
+[data-pattern="mirror"] .animated-card-deck {
+  animation-name: cardIntroMirror;
 }

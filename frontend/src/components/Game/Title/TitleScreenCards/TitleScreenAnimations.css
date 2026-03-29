@@ -1,0 +1,205 @@
+@keyframes cardIntroLoop {
+  0%,
+  8% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  18%,
+  28% {
+    transform: translateX(var(--offset)) translateY(0) rotate(0deg);
+  }
+
+  38%,
+  48% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  58%,
+  68% {
+    transform: translateX(0) translateY(calc(var(--offset) / 1.5)) rotate(90deg);
+  }
+
+  78%,
+  88% {
+    transform: translateX(0) translateY(0) rotate(90deg);
+  }
+
+  96%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+@keyframes cardExitExplode {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--offset) * 3)) translateY(-500px)
+      rotate(360deg) scale(0.5);
+  }
+}
+@keyframes cardIntroMirror {
+  /* PHASE 1: Neutral */
+  0%,
+  8% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  18%,
+  28% {
+    transform: translateX(calc(var(--offset) * -1)) translateY(0) rotate(0deg);
+  }
+
+  38%,
+  48% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  58%,
+  68% {
+    transform: translateX(0) translateY(calc(var(--offset) * -1.5))
+      rotate(-90deg);
+  }
+
+  78%,
+  88% {
+    transform: translateX(0) translateY(0) rotate(-90deg);
+  }
+
+  96%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+@keyframes cardIntroTwist {
+  /* PHASE 1: Neutral Start */
+  0%,
+  8% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 2: Move + Rotate (Right/Down) */
+  18%,
+  28% {
+    transform: translateX(var(--offset)) translateY(calc(var(--offset) / 2))
+      rotate(90deg);
+  }
+
+  /* PHASE 3: Collapse (Stay Rotated) */
+  38%,
+  48% {
+    transform: translateX(0) translateY(0) rotate(90deg);
+  }
+
+  /* PHASE 4: Rotate Home (Stay Center) */
+  58%,
+  68% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 5: Mirror Move (Left/Up) */
+  78%,
+  88% {
+    transform: translateX(calc(var(--offset) * -1))
+      translateY(calc(var(--offset) * -0.5)) rotate(-90deg);
+  }
+
+  /* PHASE 6: Collapse & Reset */
+  96%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes cardIntroTwistMirror {
+  /* PHASE 1: Neutral Start */
+  0%,
+  8% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 2: Move + Rotate (Left/Up - the Mirror start) */
+  18%,
+  28% {
+    transform: translateX(calc(var(--offset) * -1))
+      translateY(calc(var(--offset) * -0.5)) rotate(-90deg);
+  }
+
+  /* PHASE 3: Collapse (Stay Rotated) */
+  38%,
+  48% {
+    transform: translateX(0) translateY(0) rotate(-90deg);
+  }
+
+  /* PHASE 4: Rotate Home (Stay Center) */
+  58%,
+  68% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 5: Second Half Move (Right/Down) */
+  78%,
+  88% {
+    transform: translateX(var(--offset)) translateY(calc(var(--offset) / 2))
+      rotate(90deg);
+  }
+
+  /* PHASE 6: Collapse & Reset */
+  96%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+@keyframes cardIntroHighRise {
+  /* PHASE 1: Neutral Start */
+  0%,
+  8% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 2: Fan Out (Both X and Y) */
+  18%,
+  28% {
+    /* Moves diagonally and spreads slightly */
+    transform: translateX(var(--offset)) translateY(calc(var(--offset) * -1.2))
+      rotate(15deg);
+  }
+
+  /* PHASE 3: Rotate in Place (The "Stagger" beat) */
+  38%,
+  48% {
+    /* Stay at the fan position but twist the angle sharply */
+    transform: translateX(var(--offset)) translateY(calc(var(--offset) * -1.2))
+      rotate(-15deg);
+  }
+
+  /* PHASE 4: Collapse Back to Center */
+  58%,
+  68% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* PHASE 5: Mirror Fan (Opposite Diagonal) */
+  78%,
+  88% {
+    transform: translateX(calc(var(--offset) * -1))
+      translateY(calc(var(--offset) * -1.2)) rotate(-15deg);
+  }
+
+  /* PHASE 6: Return & Reset */
+  96%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes cardScatter {
+  0% {
+    transform: translateX(var(--offset)) translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    /* Cards fly out, rotate wildly, and shrink */
+    transform: translateX(calc(var(--offset) * 5)) translateY(-100vh)
+      rotate(720deg) scale(0);
+    opacity: 0;
+  }
+}
