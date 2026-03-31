@@ -1,0 +1,96 @@
+.match-area-halls .match-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Adds breathing room between player slots and the center button */
+  padding: 20px;
+}
+/* The Halls - Emerald & Brass Theme */
+.match__arena.halls {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a0f0d; /* Emerald Manor base color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.halls__content {
+  position: relative;
+  z-index: 10; /* Keeps the game on top */
+  width: 100%;
+}
+
+/* --- Backdrop Elements --- */
+
+.halls__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Creates a vaulted ceiling look at the top */
+.halls__ceiling-vault {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(to bottom, #111815 0%, transparent 100%);
+  border-bottom: 2px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Architectural Pillars */
+.halls__pillar {
+  position: absolute;
+  bottom: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(to right, #141d1a, #2d3331, #141d1a);
+  border-left: 1px solid rgba(212, 175, 55, 0.2);
+  border-right: 1px solid rgba(212, 175, 55, 0.2);
+  opacity: 0.6;
+}
+
+.halls__pillar.left {
+  left: 5%;
+}
+.halls__pillar.right {
+  right: 5%;
+}
+
+/* Darkens the bottom for depth */
+.halls__floor-shadow {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to top, #000 0%, transparent 100%);
+}
+.heroUi {
+  z-index: 1;
+  color: hsl(0, 0%, 100%);
+  /* A nice neon green glow using HSL */
+  text-shadow: 0 0 10px hsl(142, 70%, 58%);
+  font-weight: bold;
+  font-size: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Add this to your Halls.css to fix the layout seen in your screenshot */
+.halls .match__arena {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around; /* Distributes them evenly vertically */
+  padding: env(safe-area-inset-top) 10px;
+}
+
+/* Give the contestants some breathing room */
+.halls .player-card {
+  margin-bottom: 20px;
+  padding: 15px;
+  min-height: 120px; /* Prevents the overlap seen in your current build */
+}

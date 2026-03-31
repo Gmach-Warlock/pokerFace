@@ -1,13 +1,12 @@
 import { useAppSelector } from "../../../../app/hooks";
+import { selectOpponents } from "../../../../features/match/matchSelectors";
 import ArenaCenter from "../ArenaCenter/ArenaCenter";
 import "./Contestants.css";
 import Opponent from "./Opponent/Opponent";
 import OurHero from "./OurHero/OurHero";
 
 export default function Contestants() {
-  const opponents = useAppSelector(
-    (state) => state.game.currentMatch.opponents,
-  );
+  const opponents = useAppSelector(selectOpponents);
 
   return (
     <div className="match__contestants">

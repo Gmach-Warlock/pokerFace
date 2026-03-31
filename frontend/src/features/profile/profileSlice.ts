@@ -59,7 +59,7 @@ const initialAuthorizeState: ProfileInterface = {
     losses: 0,
     availableDecks: ["arrowBolt", "inBloom", "theFlyingCow"],
     currentDeckChoice: "arrowBolt",
-    availableLocations: ["shelter"],
+    availableLocations: ["shelter", "halls"],
     plei: 0,
   },
 };

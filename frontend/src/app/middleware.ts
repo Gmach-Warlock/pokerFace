@@ -1,34 +1,20 @@
-import {
-  createListenerMiddleware,
-  isAnyOf,
-  createSelector,
-} from "@reduxjs/toolkit";
+import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
+
 import {
   advancePhase,
-  dealRound,
-  dealCard,
   checkAndRefillDeck,
   completeDrawPhase,
+  dealCard,
+  dealRound,
   processBet,
   resolveShowdown,
-} from "../features/game/gameSlice";
+} from "../features/match/matchSlice";
 import type { RootState } from "./store";
-import { evaluateHand, getNPCAction } from "./logic/logic";
-import type { BettingActionType } from "./types";
+import { getNPCAction } from "./logic/logic";
+
+import { selectPlayerHandEval } from "../features/match/matchSelectors";
 
 const deckListener = createListenerMiddleware();
-
-// 1. Memoized Evaluation: Now points to the 'players' array
-export const selectPlayerHandEval = createSelector(
-  [
-    (state: RootState) => state.game.currentMatch.players,
-    (_state: RootState, index: number) => index,
-  ],
-  (players, index) => {
-    const hand = players[index]?.currentHand || [];
-    return evaluateHand(hand);
-  },
-);
 
 // 2. Deck Management
 deckListener.startListening({
@@ -42,89 +28,88 @@ deckListener.startListening({
   },
 });
 
-// 3. GAME FLOW & NPC STRATEGY MANAGER
-// 3. GAME FLOW & NPC STRATEGY MANAGER
+// 2. GAME FLOW & NPC STRATEGY MANAGER
 deckListener.startListening({
   matcher: isAnyOf(processBet, advancePhase, dealRound, completeDrawPhase),
   effect: async (action, listenerApi) => {
-    const state = listenerApi.getState() as RootState;
-    const { activePlayerIndex, players, currentBet, currentPhase } =
-      state.game.currentMatch;
+    // Get fresh state at the start of the effect
+    let state = listenerApi.getState() as RootState;
+    const { currentMatch, currentlyDisplayed } = state.game;
+    const { activePlayerIndex, players, currentBetOnTable, currentPhase } =
+      currentMatch;
 
-    // --- 1. THE PLAYER CONTROL GUARD ---
-    // If it's a phase that requires Hero input and it's the Hero's turn, we STOP.
-    const isManualPhase = ["bettingOne", "bettingTwo", "draw"].includes(
-      currentPhase.phase,
-    );
-    if (isManualPhase && activePlayerIndex === 0) {
-      return;
-    }
+    if (currentlyDisplayed !== "match") return;
 
-    // --- 2. PHASE ADVANCEMENT & SHOWDOWN TRIGGER ---
+    // --- PHASE ADVANCEMENT LOGIC ---
     const activePlayers = players.filter((p) => !p.isFolded && !p.isAllin);
     const everyoneActed = activePlayers.every((p) => p.hasActed);
-    const betsEqual = activePlayers.every((p) => p.currentBet === currentBet);
+    const betsEqual = activePlayers.every(
+      (p) => p.currentBet === currentBetOnTable,
+    );
 
     if (everyoneActed && betsEqual && currentPhase.phase !== "showdown") {
-      // Safety: If the action that triggered this was already a phase change,
-      // don't double-advance. This prevents skipping rounds.
-      if (
-        action.type === advancePhase.type ||
-        action.type === completeDrawPhase.type ||
-        action.type === dealRound.type
-      ) {
+      // Use isAnyOf as a type guard to check the action
+      // This removes the "string is not assignable" error completely
+      if (isAnyOf(advancePhase, completeDrawPhase, dealRound)(action)) {
         return;
       }
 
       await listenerApi.delay(1000);
       listenerApi.dispatch(advancePhase());
 
-      // CRITICAL: Check the NEW state immediately after advancing
       const newState = listenerApi.getState() as RootState;
       if (newState.game.currentMatch.currentPhase.phase === "showdown") {
-        // This triggers the calculation and the winning message
         listenerApi.dispatch(resolveShowdown());
       }
       return;
     }
 
-    // --- 3. NPC ACTION LOGIC ---
+    // --- NPC ACTION LOGIC ---
+    console.log("Checking NPC turn for index:", activePlayerIndex);
+    if (activePlayerIndex === 0) {
+      console.log("Exiting: It's the Hero's turn.");
+      return;
+    }
+
     const currentWaitPlayer = players[activePlayerIndex];
 
-    // Only run if it's a computer's turn and they haven't moved yet
-    if (
-      currentWaitPlayer &&
-      currentWaitPlayer.type === "computer" &&
-      !currentWaitPlayer.hasActed
-    ) {
-      await listenerApi.delay(currentWaitPlayer.personality?.thinkTime || 1000);
+    if (currentWaitPlayer?.type === "computer" && !currentWaitPlayer.hasActed) {
+      await listenerApi.delay(
+        currentWaitPlayer.npcTraits?.general.thinkTime || 1000,
+      );
+
+      // RE-FETCH STATE: Ensure it's still their turn after the delay
+      state = listenerApi.getState() as RootState;
+      if (state.game.currentMatch.activePlayerIndex !== activePlayerIndex)
+        return;
 
       const evaluation = selectPlayerHandEval(state, activePlayerIndex);
+
       const decision = getNPCAction(
         currentWaitPlayer,
         evaluation,
         state.game.currentMatch.difficultyLevel,
         state.game.currentMatch.pot,
-        currentBet,
+        currentBetOnTable,
       );
 
-      const type = decision as BettingActionType;
-
+      const amountToCall = Math.max(
+        0,
+        currentBetOnTable - (currentWaitPlayer.currentBet || 0),
+      );
       let amountToSend = 0;
-      if (type === "call") {
-        amountToSend = Math.max(
-          0,
-          currentBet - (currentWaitPlayer.currentBet || 0),
-        );
-      } else if (type === "raise") {
-        // Raise current table bet by 50
-        amountToSend = currentBet + 50 - (currentWaitPlayer.currentBet || 0);
-      }
 
+      if (decision === "call") amountToSend = amountToCall;
+      else if (decision === "raise") amountToSend = amountToCall + 20;
+
+      // Force check if folding is free
+      const finalType =
+        decision === "fold" && amountToCall === 0 ? "check" : decision;
+      console.log(`final type ${finalType} decision is ${decision}`);
       listenerApi.dispatch(
         processBet({
-          playerId: currentWaitPlayer.id ?? "unknown",
-          type,
+          playerId: currentWaitPlayer.id ?? "",
+          type: finalType,
           amount: amountToSend,
         }),
       );

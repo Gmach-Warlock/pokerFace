@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector, useSound } from "../../../app/hooks";
-import { startMatch } from "../../../features/game/gameSlice";
+import { startMatch } from "../../../features/match/matchSlice";
 import {
   selectAvailableDecks,
   selectAvailableLocations,
   selectInitialHeroState,
-} from "../../../features/game/gameSelectors";
+} from "../../../features/match/matchSelectors";
 import "./PreGame.css";
 import { useNavigate } from "react-router";
 import type {
@@ -110,6 +110,15 @@ export default function PreGame() {
               <option value="draw">5-Card Draw</option>
               <option value="holdem">Texas Hold'em</option>
               <option value="stud">7-Card Stud</option>
+            </select>
+          </div>
+
+          <div className="setting">
+            <label htmlFor="difficulty-level">Level of Difficulty</label>
+            <select name="difficulty-level" id="difficulty-level">
+              <option value="easy">Easy</option>
+              <option value="normal">Normal</option>
+              <option value="hard">Hard</option>
             </select>
           </div>
 

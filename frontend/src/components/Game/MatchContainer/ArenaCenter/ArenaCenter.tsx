@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
 import type { BettingActionType } from "../../../../app/types";
+
 import {
   selectActionButtonLabel,
   selectCurrentMatch,
@@ -11,12 +12,8 @@ import {
   selectHerosId,
   selectIsBettingPhase,
   selectPot,
-} from "../../../../features/game/gameSelectors";
-import {
-  completeDrawPhase,
-  processBet,
-} from "../../../../features/game/gameSlice";
-import { processArenaAction } from "../../../../features/game/gameThunks";
+} from "../../../../features/match/matchSelectors";
+import { processBet } from "../../../../features/match/matchSlice";
 import BettingForm from "../BettingForm/BettingForm";
 import "./ArenaCenter.css";
 import DrawButton from "./buttons/DrawButton/DrawButton";
@@ -41,23 +38,19 @@ export default function ArenaCenter() {
 
   const cleanedKey = designKey.replace("/", "").replace(".png", "");
 
-  const handleAction = () => {
-    if (phase === "draw" && discardCount === 0) {
-      dispatch(completeDrawPhase());
-    } else {
-      dispatch(processArenaAction());
-    }
-  };
-
   const handleBetFinalized = (amount: number, type: BettingActionType) => {
     if (!herosId) return;
     dispatch(processBet({ playerId: herosId, amount, type }));
   };
 
+  const isHerosTurn = isBettingPhase && currentPlayerIndex === 0;
   const renderActionArea = () => {
-    if (isBettingPhase) {
+    if (isHerosTurn && isBettingPhase) {
       return (
         <BettingForm
+          // Adding a key ensures the component resets whenever it's "re-opened"
+          // or when the player changes.
+          key={`betting-form-${currentPlayerIndex}-${phase}`}
           currentPot={pot}
           heroMoney={heroMoney}
           onConfirm={handleBetFinalized}
@@ -66,16 +59,10 @@ export default function ArenaCenter() {
     }
 
     if (phase === "draw") {
-      return (
-        <DrawButton
-          onClick={handleAction}
-          label={buttonLabel}
-          isConfirming={discardCount > 0}
-        />
-      );
+      return <DrawButton label={buttonLabel} isConfirming={discardCount > 0} />;
     }
 
-    return <DealButton onClick={handleAction} label={buttonLabel} />;
+    return <DealButton label={buttonLabel} />;
   };
 
   return (

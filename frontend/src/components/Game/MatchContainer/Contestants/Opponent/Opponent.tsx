@@ -8,7 +8,7 @@ import {
   selectPlayerChips,
   selectPlayerName,
   selectPlayerMoney,
-} from "../../../../../features/game/gameSelectors";
+} from "../../../../../features/match/matchSelectors";
 
 interface OpponentPropsInterface {
   data: PlayerInterface;

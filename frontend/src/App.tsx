@@ -14,6 +14,7 @@ import PreGame from "./components/Game/PreGame/PreGame";
 import MatchContainer from "./components/Game/MatchContainer/MatchContainer";
 import Shelter from "./components/Game/MatchContainer/areas/Shelter/Shelter";
 import MainMenu from "./components/Game/MainMenu/MainMenu";
+import Halls from "./components/Game/MatchContainer/areas/Halls/Halls";
 
 function App() {
   const router = createBrowserRouter(
@@ -30,6 +31,7 @@ function App() {
             <Route path="mainMenu" element={<MainMenu />} />
             <Route path="match" element={<MatchContainer />}>
               <Route path="shelter" element={<Shelter />} />
+              <Route path="halls" element={<Halls />} />
             </Route>
           </Route>
         </Route>

@@ -1,6 +1,7 @@
 import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
 import "./OurHero.css";
+
 import {
   selectHeroName,
   selectHeroMoney,
@@ -9,7 +10,7 @@ import {
   selectHeroIsFolded,
   selectDeckStyle,
   selectHeroHandRank,
-} from "../../../../../features/game/gameSelectors";
+} from "../../../../../features/match/matchSelectors";
 import Hand from "../../../../Hand/Hand";
 
 export default function Hero() {

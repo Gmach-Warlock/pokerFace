@@ -6,7 +6,7 @@ import type {
   MatchMapInterface,
 } from "./types";
 
-export const AnteMap = {
+export const anteMap = {
   shelter: 1,
   "low-vault-lounge": 5,
   "neon-alley-club": 10,
@@ -193,8 +193,8 @@ export const gamePhases = {
 };
 export const GamePhaseMap = {
   draw: {
-    ante: { cards: 0, hero: "face-up", opp: "face-down" },
-    deal: { cards: 5, hero: "face-up", opp: "face-down" },
+    notInGameYet: { cards: 5, hero: "front", opp: "back" }, // Add this!
+    ante: { cards: 5, hero: "front", opp: "back" }, // And this!    deal: { cards: 5, hero: "face-up", opp: "face-down" },
     discard: { cards: 0, hero: "face-up", opp: "face-down" },
     draw: { cards: "variable", hero: "face-up", opp: "face-down" },
   },

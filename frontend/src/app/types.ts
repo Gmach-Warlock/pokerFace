@@ -91,6 +91,8 @@ export type HandType =
   | "straight-flush"
   | "royal-flush"
   | "tbd";
+export type IconSizeType = "small" | "medium" | "large";
+export type LastResultType = "win" | "loss" | "fold " | null;
 export type MatchType = "draw" | "holdem" | "stud";
 export type MatchLocationType =
   | "shelter"
@@ -117,7 +119,14 @@ export type NextLevelXpType =
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
 export type PlayStyleType = "passive" | "loose" | "tight" | "aggressive";
-export type IconSizeType = "small" | "medium" | "large";
+export type PokerChoiceType =
+  | "ante"
+  | "call"
+  | "check"
+  | "fold"
+  | "raise"
+  | null;
+
 export type VillainThemeType =
   | "classic"
   | "gritty"
@@ -125,10 +134,23 @@ export type VillainThemeType =
   | "classy"
   | "pro";
 
+export interface DialogueInterface {
+  gritty: string[];
+  classic: string[];
+  modern: string[];
+  classy: string[];
+  pro: string[];
+}
+export interface BettingInterface {
+  currentPot?: number;
+  heroMoney?: number;
+  onConfirm: (amount: number, type: BettingActionType) => void;
+  currentTableBet?: number;
+  currentPlayerBet?: number;
+}
 export interface ButtonPropsInterface {
-  onClick: () => void;
   label: string;
-  isConfirming?: boolean; // Optional, only needed for DrawButton
+  isConfirming?: boolean;
 }
 
 export interface CardInterface {
@@ -151,15 +173,81 @@ export interface ChipMapInterface {
   green: number;
   black: number;
 }
+
 export interface DealCardPayload {
   target: ContestantType;
   side: CardSideType;
   opponentIndex?: number;
 }
+
+export interface SituationalDialogueInterface {
+  strongHand: DialogueInterface;
+  weakHand: DialogueInterface;
+  bluffing: DialogueInterface;
+  gloating: DialogueInterface;
+  sulking: DialogueInterface;
+  neutral: DialogueInterface;
+  nagging: DialogueInterface;
+  egging: DialogueInterface;
+}
+export interface EvaluatedHandInterface {
+  value: number;
+  label: string;
+  rankValue: number;
+  strength: string;
+}
 export interface FetchInterface {
   status: FetchStatusType;
   message: string;
   payload: null | object;
+}
+
+export interface GameInterface {
+  isPlaying: boolean;
+  currentlyDisplayed: GameDisplayType;
+  currentMatch: {
+    numberOfOpponents: NumberOfOpponentsType;
+    deckStyle: DeckStyleType;
+    difficultyLevel: DifficultyType;
+    matchLocation: MatchLocationType;
+    matchType: MatchType;
+    numberOfDecks: DeckNumberType;
+    players: PlayerInterface[];
+    dealersHand: CardInterface[];
+    deck: CardInterface[];
+    pot: number;
+    currentBetOnTable: number;
+    lastRaiserId: string | null;
+    activePlayerIndex: number;
+    currentPhase: GamePhaseInterface;
+    winnerId?: string;
+    winningHand?: string;
+    lastWinAmount?: number;
+    isGameOver?: boolean;
+    handHistory?: {
+      playerId: string;
+      finalHandName: string;
+      wasBluff: boolean;
+    }[];
+    rewards?: {
+      xp: number;
+      plei: number;
+      bonuses: string[];
+      isFirstMatch?: boolean;
+      isFirstWin?: boolean;
+      isLevelUp?: boolean;
+    };
+  };
+  isMatchStarted: boolean;
+}
+export interface GamePayloadInterface {
+  numberOfOpponents: NumberOfOpponentsType;
+  levelOfDifficulty: DifficultyType;
+  matchLocation: MatchLocationType;
+  matchType: MatchType;
+  numberOfDecks: DeckNumberType;
+  deckStyle: DeckStyleType;
+  hero: PlayerInterface;
 }
 export interface GamePhaseInterface {
   type: MatchType;
@@ -198,13 +286,11 @@ export interface MatchInterface {
   matchLocation: MatchLocationType;
   matchType: MatchType;
   numberOfDecks: DeckNumberType;
-  opponents: PlayerInterface[];
-  hero: PlayerInterface;
   players: PlayerInterface[];
   dealersHand: CardInterface[];
   deck: CardInterface[];
   pot: number;
-  currentBet: number;
+  currentBetOnTable: number;
   activePlayerIndex: number;
   lastRaiserId: string | null;
   currentPhase: GamePhaseInterface;
@@ -225,12 +311,12 @@ export interface MatchInterface {
     isLevelUp?: boolean;
   };
 }
-// app/types.ts (or wherever you defined this)
+
 export interface PhaseInstruction {
   cards: number | "variable";
-  hero?: CardSideType; // Added ?
-  opp?: CardSideType; // Added ?
-  community?: CardSideType; // Already optional
+  hero?: CardSideType;
+  opp?: CardSideType;
+  community?: CardSideType;
 }
 export interface PlayerInterface {
   id: string | null;
@@ -238,6 +324,8 @@ export interface PlayerInterface {
   type: PlayerType;
   difficulty?: DifficultyType;
   preferredDifficulty?: DifficultyType;
+  availableDecks?: DeckStyleType[] | null;
+  currentDeckChoice?: DeckStyleType | null;
   currentHand: CardInterface[];
   isDiscarding?: boolean;
   isFolded: boolean;
@@ -245,19 +333,33 @@ export interface PlayerInterface {
   chips: ChipMapInterface;
   currentBet: number;
   hasActed: boolean;
-  lastAction?: "check" | "call" | "raise" | "fold" | "ante" | null;
+  actionMessage: string;
+  lastAction?: PokerChoiceType;
   isAllin: boolean;
-  comments?: Partial<Record<CurrentSituationType, string[]>> | null;
-  personality?: {
-    isTroll: boolean;
-    bluffModifier: number;
-    thinkTime: number;
+  sessionStats: {
+    handsWon: number;
+    handsLost: number;
+    currentWinStreak: number;
+    currentLossStreak: number;
+    totalSessionProfit: number; // Can be negative
+    lastHandResult: LastResultType;
   };
-  level?: number | null;
-  xp?: number | null;
-  nextLevel?: number | null;
-  availableDecks?: DeckStyleType[] | null;
-  currentDeckChoice?: DeckStyleType | null;
-  plei?: number | null;
-  isSpecial?: boolean;
+  profile: {
+    level?: number | null;
+    xp?: number | null;
+    nextLevel?: number | null;
+    availableDecks?: DeckStyleType[] | null;
+    currentDeckChoice?: DeckStyleType | null;
+    plei?: number | null;
+    isSpecial?: boolean;
+  };
+  npcTraits?: {
+    general: {
+      isTroll: boolean;
+      bluffModifier: number;
+      thinkTime: number;
+      tiltLevel: number;
+    };
+    comments?: Partial<Record<CurrentSituationType, string[]>> | null;
+  };
 }

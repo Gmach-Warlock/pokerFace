@@ -1,22 +1,19 @@
 import "./MatchResultsOverlay.css";
 import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
+
 import {
   selectWinnerId,
   selectWinningHandLabel,
-  selectPot,
   selectPlayerById,
-} from "../../../../features/game/gameSelectors";
+} from "../../../../features/match/matchSelectors";
 import { useEffect, useState } from "react";
-import {
-  prepareNextHand,
-  quitPlaying,
-} from "../../../../features/game/gameSlice";
+import { quitPlaying } from "../../../../features/game/gameSlice";
+import { prepareNextHand } from "../../../../features/match/matchSlice";
 
 export default function MatchResultOverlay() {
   const dispatch = useAppDispatch();
   const winnerId = useAppSelector(selectWinnerId);
   const handLabel = useAppSelector(selectWinningHandLabel);
-  const potAmount = useAppSelector(selectPot);
   const winner = useAppSelector((state) =>
     selectPlayerById(state, winnerId ?? ""),
   );
@@ -24,11 +21,16 @@ export default function MatchResultOverlay() {
   const [displayAmount, setDisplayAmount] = useState(0);
 
   // Counter animation logic
+  const winAmount = useAppSelector(
+    (state) => state.game.currentMatch.lastWinAmount || 0,
+  );
+
   useEffect(() => {
-    if (potAmount > 0) {
+    // Only trigger if we actually have a win amount to show
+    if (winAmount > 0) {
       let start = 0;
-      const end = potAmount;
-      const duration = 1000; // 1 second animation
+      const end = winAmount; // Use the stable value here
+      const duration = 1000;
       const increment = end / (duration / 16);
 
       const timer = setInterval(() => {
@@ -42,7 +44,7 @@ export default function MatchResultOverlay() {
       }, 16);
       return () => clearInterval(timer);
     }
-  }, [potAmount]);
+  }, [winAmount]); // Only re-run if a new win amount is recorded
 
   if (!winnerId) return null;
 
