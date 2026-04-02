@@ -1,5 +1,5 @@
 .hand-container {
-  margin: 1rem;
+  margin: 0;
   height: 18rem;
   display: flex;
   justify-content: center;
@@ -9,10 +9,11 @@
 
 .hand-draw {
   display: flex;
-  margin: 1rem;
   position: relative;
-  width: 100%;
+  width: 120px; /* Set width to ONE card's width */
+  height: 180px;
   justify-content: center;
+  align-items: center;
 }
 
 [class^="hand-draw-card"] {
@@ -26,23 +27,23 @@
 
 .hand-draw-card1 {
   --offset: -10rem;
-  z-index: 1;
+  z-index: 3;
 }
 .hand-draw-card2 {
   --offset: -5rem;
-  z-index: 2;
+  z-index: 4;
 }
 .hand-draw-card3 {
   --offset: 0rem;
-  z-index: 3;
+  z-index: 5;
 }
 .hand-draw-card4 {
   --offset: 5rem;
-  z-index: 4;
+  z-index: 6;
 }
 .hand-draw-card5 {
   --offset: 10rem;
-  z-index: 5;
+  z-index: 7;
 }
 
 .card-interactive {

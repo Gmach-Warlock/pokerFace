@@ -1,38 +1,3 @@
-:root {
-  --font-hennyPenny: "Henny Penny", system-ui;
-  --font-pressStart: "Press Start 2P", system-ui;
-
-  --text-md: 1.125rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 2rem;
-  --text-4xl: 4rem;
-
-  --bw-hs: 0, 0%;
-  --red-hs: 0, 100%;
-  --green-hs: 120, 100%;
-  --blue-hs: 240, 100%;
-  --table-felt-hs: 128, 27%;
-  --table-wood-hs: 22, 46%;
-  --nt-night-hs: 259, 75%; /* Deep Midnight Purple */
-  --nt-neon-pink-hs: 331, 100%; /* Shocking Pink */
-  --nt-electric-cyan-hs: 184, 100%; /* Electric Cyan */
-  --nt-gold-hs: 45, 100%; /* Gold for wins/highlights */
-
-  --color-nt-bg: hsl(var(--nt-night-hs), 8%);
-  --color-nt-surface: hsl(var(--nt-night-hs), 15%);
-  --color-nt-accent-pink: hsl(var(--nt-neon-pink-hs), 50%);
-  --color-nt-accent-cyan: hsl(var(--nt-electric-cyan-hs), 50%);
-  --color-nt-gold: hsl(var(--nt-gold-hs), 50%);
-
-  --color-red-500: hsl(var(--red-hs), 50%);
-  --color-green-500: hsl(var(--green-hs), 25%);
-  --color-blue-500: hsl(var(--blue-hs), 50%);
-  --color-black: hsl(var(--bw-hs), 0%);
-  --color-white: hsl(var(--bw-hs), 100%);
-  --color-cyan-500: hsl(180, 100%, 50%);
-  --color-cyan-700: hsl(180, 100%, 25%);
-}
 * {
   margin: 0;
   padding: 0;
@@ -40,10 +5,10 @@
   font-size: inherit;
 }
 .text-red {
-  color: red;
+  color: var(--color-red-500);
 }
 .text-black {
-  color: black;
+  color: var(--color-black);
 }
 .rotate-180 {
   transform: rotate(180deg);
@@ -57,10 +22,10 @@
   align-items: center;
 }
 .border-red {
-  border: 1px solid red;
+  border: 1px solid var(--color-red-500);
 }
 .border-black {
-  border: 1px solid black;
+  border: 1px solid var(--color-black);
 }
 .bg-none {
   background-image: none;

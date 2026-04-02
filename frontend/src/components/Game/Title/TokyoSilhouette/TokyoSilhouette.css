@@ -1,0 +1,180 @@
+.skyline-grid {
+  display: grid;
+  /* 12 equal columns */
+  grid-template-columns: repeat(50, 1fr);
+  /* 10 rows to give us vertical "steps" */
+  grid-template-rows: repeat(10, 1fr);
+  align-items: end;
+  gap: 0.5rem;
+  width: 100%;
+  height: 60vh; /* Pushes the 'skyline' higher up the screen */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.building {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr); /* 8 windows across */
+  grid-auto-rows: min-content; /* Rows will wrap based on content */
+  align-content: start; /* Start windows at the TOP of the building */
+  gap: 4px;
+  padding: 8px;
+  background-color: #050505;
+  overflow: auto;
+
+  /* Keep your existing positioning */
+  grid-row: 10;
+  box-shadow: 0px -8px 20px rgba(0, 255, 255, 0.15);
+}
+
+.window {
+  width: 100%;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* This ensures they are square based on column width */
+  background-color: #1a1a1a;
+  border-radius: 1px;
+  z-index: 2;
+}
+
+/* LEFT SIDE */
+.b-1 {
+  grid-column: 1 / span 8;
+  height: 55vh;
+  z-index: 1;
+}
+
+.b-2 {
+  grid-column: 9 / span 5;
+  height: 34vh;
+  z-index: 1; /* Tall tower on the left of the cards */
+}
+
+/* CENTER (Gap for the cards) */
+.b-3 {
+  grid-column: 16 / span 7;
+  height: 45vh; /* Low building directly behind cards */
+  opacity: 0.8;
+  z-index: 1; /* Tall tower on the left of the cards */
+}
+
+.b-4 {
+  grid-column: 25 / span 8;
+  height: 18vh;
+  z-index: 1; /* Tall tower on the left of the cards */
+}
+
+/* RIGHT SIDE */
+.b-5 {
+  grid-column: 33 / span 9;
+  height: 31vh; /* Tallest tower on the right of the cards */
+  z-index: 1; /* Tall tower on the left of the cards */
+}
+
+.b-6 {
+  grid-column: 42 / span 9;
+  height: 48vh; /* Tallest tower on the right of the cards */
+}
+
+.building--bg {
+  background-color: #030303; /* Slightly darker than foreground */
+  z-index: 0; /* Sits behind the main buildings */
+  filter: blur(1px); /* Optional: subtle blur makes them feel further away */
+  box-shadow: none; /* No glow for distant buildings to keep focus on foreground */
+}
+
+/* Placement Examples in your 50-col grid */
+.b-bg-1 {
+  grid-column: 7 / span 4; /* Staggers the gap between b-1 and b-2 */
+  height: 50vh;
+}
+.b-bg-2 {
+  grid-column: 10 / span 8; /* Fills the gap in the center */
+  height: 22vh;
+}
+
+.b-bg-3 {
+  grid-column: 22 / span 5; /* Fills the gap in the center */
+  height: 32vh;
+}
+
+.b-bg-4 {
+  grid-column: 32 / span 6; /* Fills the gap in the center */
+  height: 52vh;
+}
+
+.b-bg-5 {
+  grid-column: 39 / span 4; /* Fills the gap in the center */
+  height: 20vh;
+}
+
+.b-bg-6 {
+  grid-column: 47 / span 4; /* Fills the gap in the center */
+  height: 52vh;
+}
+
+.window {
+  background-color: #1a1a1a; /* "Off" state */
+  height: 10px;
+  border-radius: 1px;
+}
+
+/* The "On" State with a Neon Glow */
+.window--active {
+  background-color: #0ff; /* Electric Cyan */
+  box-shadow: 0 0 10px #0ff;
+  animation: flicker 5s infinite;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  52% {
+    opacity: 1;
+  }
+  54% {
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 600px) {
+  .skyline-container {
+    grid-template-columns: repeat(6, 1fr); /* Simpler grid for mobile */
+  }
+
+  .building--three {
+    display: none; /* Hide small buildings on mobile to reduce noise */
+  }
+  .skyline-grid {
+    /* Lower the container height so buildings don't reach the title */
+    height: 35vh;
+    /* Reduce columns to 25 for easier placement math on small screens */
+    grid-template-columns: repeat(25, 1fr);
+  }
+
+  /* Scale down the height of your "Hero" buildings */
+  .b-2,
+  .b-5,
+  .b-6 {
+    height: 25vh !important;
+  }
+
+  .b-5,
+  .b-bg-5,
+  .b-6,
+  .b-bg-6 {
+    display: none;
+  }
+
+  /* Hide the background layer on mobile to keep the limited space clean */
+  .building--bg {
+    display: none;
+  }
+}

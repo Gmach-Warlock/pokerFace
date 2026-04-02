@@ -1,20 +1,47 @@
 :root {
-  /* HSL Palette */
-  /* Usage: hsl(Hue, Saturation%, Lightness%) */
+  --font-hennyPenny: "Henny Penny", system-ui;
+  --font-pressStart: "Press Start 2P", system-ui;
 
-  --bg-dark: hsl(260, 75%, 8%); /* Deep midnight purple */
-  --neon-blue: hsl(183, 100%, 50%); /* Electric Cyan */
-  --neon-pink: hsl(306, 100%, 50%); /* Hot Magenta */
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-4xl: 4rem;
 
-  --card-red: hsl(355, 78%, 56%); /* Vibrant Poker Red */
-  --card-black: hsl(0, 0%, 10%); /* Neutral Black */
-  --card-white: hsl(0, 0%, 100%); /* Pure White */
+  --color-nt-bg: hsl(259, 75%, 8%);
+  --color-nt-surface: hsl(259, 75%, 15%);
+  --color-nt-accent-pink: hsl(331, 100%, 50%);
+  --color-nt-accent-cyan: hsl(184, 100%, 50%);
+  --color-nt-gold: hsl(45, 100%, 50%);
+  --color-red-500: hsl(0, 100%, 50%);
+  --color-green-500: hsl(120, 100%, 25%);
+  --color-blue-500: hsl(240, 100%, 50%);
+  --color-cyan-500: hsl(180, 100%, 50%);
+  --color-black: hsl(0, 0%, 0%);
+  --color-white: hsl(0, 0%, 100%);
+  --color-neon-green: hsl(184, 100%, 50%);
+  --color-neon-pink: hsl(306, 100%, 50%);
 
-  /* Surface / UI Colors */
-  --ui-gold: hsl(50, 100%, 50%); /* That "Logout" button yellow */
-
+  --card-red: hsl(355, 78%, 56%);
   --card-shadow: hsla(0, 0%, 0%, 0.4);
-  --card-glow: hsla(183, 100%, 50%, 0.15); /* A faint tint of your neon blue */
+  --card-glow: hsla(183, 100%, 50%, 0.15);
+  --ui-gold: hsl(50, 100%, 50%);
+  --bg-dark: hsl(260, 75%, 8%);
+
+  --bw-hs: 0, 0%;
+  --red-hs: 0, 100%;
+  --green-hs: 120, 100%;
+  --blue-hs: 240, 100%;
+  --table-felt-hs: 128, 27%;
+  --table-wood-hs: 22, 46%;
+  --nt-night-hs: 259, 75%;
+  --nt-neon-pink-hs: 331, 100%;
+  --nt-electric-cyan-hs: 184, 100%;
+  --nt-gold-hs: 45, 100%;
+  --neon-pink-hs: 306, 100%;
+  --card-red-hs: 355, 78%;
+  --gold-hs: 50, 100%;
+  --glow-hs: 183, 100%;
 }
 
 .btn {
@@ -32,13 +59,65 @@
 }
 
 .btn-neon:hover {
-  background-color: hsl(183, 100%, 40%);
+  background-color: hsl(var(--neon-blue-hs), 40%);
 }
 
 .btn--settings {
   background-color: transparent;
   border: none;
   float: right;
+}
+
+/* High Contrast Backgrounds */
+.bg-nt-night {
+  background-color: var(--color-nt-bg);
+}
+
+.bg-nt-pink {
+  background-color: var(--color-nt-accent-pink);
+}
+
+/* Manga Text Styles */
+.text-nt-cyan {
+  color: var(--color-nt-accent-cyan);
+}
+
+/* The "Manga Stroke" - essential for the Henny Penny font */
+.manga-outline {
+  -webkit-text-stroke: 1.5px var(--color-black);
+  paint-order: stroke fill;
+}
+
+.neon-glow-cyan {
+  text-shadow:
+    0 0 5px hsl(var(--nt-electric-cyan-hs), 50%),
+    0 0 10px hsl(var(--nt-electric-cyan-hs), 30%);
+}
+
+.neon-glow-pink {
+  box-shadow: 0 0 15px hsl(var(--nt-neon-pink-hs), 40%);
+}
+
+.panel-tokyo {
+  background-color: var(--color-nt-surface);
+  border: 3px solid var(--color-black);
+  box-shadow: 6px 6px 0px var(--color-nt-accent-pink);
+}
+
+[data-design="arrowBolt"] .card-back {
+  background-image: url("/arrowBolt.png");
+}
+[data-design="explodingFace"] .card-back {
+  background-image: url("/explodingFace.png");
+}
+[data-design="inBloom"] .card-back {
+  background-image: url("/inBloom.png");
+}
+[data-design="redFire"] .card-back {
+  background-image: url("/redFire.png");
+}
+[data-design="theFlyingCow"] .card-back {
+  background-image: url("/theFlyingCow.png");
 }
 
 @keyframes simpleFade {
