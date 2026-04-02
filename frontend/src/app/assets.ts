@@ -165,6 +165,23 @@ export const fetchObject: FetchInterface = {
   message: "",
   payload: null,
 };
+
+export const gameAudio = {
+  hits: {
+    title: "/pokerFaceTitleHit.wav",
+    hit1: "/pokerFaceHit1.wav",
+    hit2: "/pokerFaceHit2.wav",
+    sprinkles: "/pokerFaceSprinkles.wav",
+  },
+  tracks: {
+    shelter: "/theShelter.wav",
+  },
+} as const;
+
+export type SoundEffectType =
+  | keyof typeof gameAudio.hits
+  | keyof typeof gameAudio.tracks;
+
 export const gamePhases = {
   holdem: {
     preFlop: "Place your bets",
@@ -268,6 +285,81 @@ export const matchMap: MatchMapInterface = {
   atrium: ["classic", "pro", "modern", "classy"],
   zenith: ["classic", "gritty", "modern", "classy", "pro"],
 };
+// Map out the grid coordinates for each card value
+export const pipPositions: Record<number, { col: number; row: number }[]> = {
+  2: [
+    { col: 2, row: 1 },
+    { col: 2, row: 5 },
+  ],
+  3: [
+    { col: 2, row: 1 },
+    { col: 2, row: 3 },
+    { col: 2, row: 5 },
+  ],
+  4: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+  ],
+  5: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 2, row: 3 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+  ],
+  6: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 3 },
+    { col: 3, row: 3 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+  ],
+  7: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 3 },
+    { col: 3, row: 3 },
+    { col: 2, row: 2 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+  ],
+  8: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 3 },
+    { col: 3, row: 3 },
+    { col: 2, row: 2 },
+    { col: 2, row: 4 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+  ],
+  9: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 3 },
+    { col: 3, row: 3 },
+    { col: 2, row: 4 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+    { col: 1, row: 7 },
+    { col: 3, row: 7 },
+  ],
+  10: [
+    { col: 1, row: 1 },
+    { col: 3, row: 1 },
+    { col: 1, row: 3 },
+    { col: 3, row: 3 },
+    { col: 2, row: 2 },
+    { col: 2, row: 6 },
+    { col: 1, row: 5 },
+    { col: 3, row: 5 },
+    { col: 1, row: 7 },
+    { col: 3, row: 7 },
+  ],
+};
 export const pokerChips = {
   black: {
     face: "/blackChipFace.png",
@@ -300,6 +392,16 @@ export const pokerChips = {
     sideDropShadow: "/whiteChipSideDropShadow.png",
   },
 };
+export const prefixes = [
+  "Slippery",
+  "Old Man",
+  "Crazy",
+  "Gentleman",
+  "Deacon",
+  "Rattlesnake",
+  "Smiling",
+];
+
 export const royalFlush: CardInterface[] = [
   {
     value: "A",
@@ -349,6 +451,14 @@ export const startingChips: ChipMapInterface = {
   green: 7,
   black: 0,
 };
+
+export const suffixes = [
+  "the Kid",
+  "the Cheat",
+  "Two-Times",
+  "of the West",
+  "Smooth",
+];
 export const suitColors = {
   club: "black",
   spade: "black",
@@ -431,28 +541,3 @@ export const villainPool = {
     "Michael",
   ],
 };
-export const prefixes = [
-  "Slippery",
-  "Old Man",
-  "Crazy",
-  "Gentleman",
-  "Deacon",
-  "Rattlesnake",
-  "Smiling",
-];
-export const suffixes = [
-  "the Kid",
-  "the Cheat",
-  "Two-Times",
-  "of the West",
-  "Smooth",
-];
-
-export const gameAudio = {
-  title: "/pokerFaceTitleHit.wav",
-  hit1: "/pokerFaceHit1.wav",
-  hit2: "/pokerFaceHit2.wav",
-  sprinkles: "/pokerFaceSprinkles.wav",
-} as const;
-
-export type SoundEffectType = keyof typeof gameAudio;

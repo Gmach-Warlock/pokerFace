@@ -3,7 +3,7 @@ import type { BettingActionType } from "../../../../app/types";
 
 import {
   selectActionButtonLabel,
-  selectCurrentMatch,
+  selectMatch,
   selectCurrentPhase,
   selectDeck,
   selectDeckStyle,
@@ -22,7 +22,7 @@ import DealButton from "./buttons/DealButton/DealButton";
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
 
-  const currentMatch = useAppSelector(selectCurrentMatch);
+  const currentMatch = useAppSelector(selectMatch);
   const deck = useAppSelector(selectDeck);
   const designKey = useAppSelector(selectDeckStyle);
   const pot = useAppSelector(selectPot);
@@ -86,6 +86,12 @@ export default function ArenaCenter() {
         <div className="arena-center__phase-display">
           <p>{phase}</p>
         </div>
+
+        {currentMatch.actionMessage && (
+          <div key={currentMatch.messageId} className="action-message-flash">
+            {currentMatch.actionMessage}
+          </div>
+        )}
 
         <div className="pot">
           <p>Pot</p>

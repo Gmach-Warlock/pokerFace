@@ -3,6 +3,7 @@ import type { AppDispatch, RootState } from "./store";
 import { useEffect, useCallback, useState } from "react";
 import { type SoundEffectType } from "./assets";
 import { gameAudio } from "./assets";
+import { Howl } from "howler";
 
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(window.matchMedia(query).matches);
@@ -21,17 +22,31 @@ export function useMediaQuery(query: string): boolean {
 
 export const useSound = () => {
   const playSound = useCallback(
-    (effect: SoundEffectType, volume: number = 0.5) => {
-      const src = gameAudio[effect];
+    (
+      effect: SoundEffectType | string,
+      volume: number = 0.5,
+      loop: boolean = false,
+    ) => {
+      // Create a flat map of all sound categories
+      const allSounds: Record<string, string> = {
+        ...gameAudio.hits,
+        ...gameAudio.tracks,
+      };
+
+      const src = allSounds[effect];
 
       if (src) {
-        const audio = new Audio(src);
-        audio.volume = volume;
+        const sound = new Howl({
+          src: [src],
+          volume: volume,
+          loop: loop,
+          html5: true,
+        });
 
-        // Play and then remove the element once the sound finishes
-        audio.play().catch((e) => console.warn("Audio playback blocked:", e));
-        audio.onended = () => audio.remove();
+        sound.play();
+        return sound;
       }
+      return null;
     },
     [],
   );

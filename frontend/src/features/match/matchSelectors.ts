@@ -10,12 +10,7 @@ import { evaluatePokerHand, getAIDiscardIndices } from "../../app/logic/logic";
  * BASE SELECTORS (The "Roots")
  * ============================================================
  */
-export const selectGame = (state: RootState) => state.game;
-
-export const selectCurrentMatch = createSelector(
-  [selectGame],
-  (game) => game.currentMatch,
-);
+export const selectMatch = (state: RootState) => state.match;
 
 /**
  * ============================================================
@@ -23,17 +18,17 @@ export const selectCurrentMatch = createSelector(
  * ============================================================
  */
 export const selectCurrentPhase = createSelector(
-  [selectCurrentMatch],
+  [selectMatch],
   (m) => m.currentPhase.phase,
 );
-export const selectPot = createSelector([selectCurrentMatch], (m) => m.pot);
+export const selectPot = createSelector([selectMatch], (m) => m.pot);
 export const selectMatchLocation = createSelector(
-  [selectCurrentMatch],
+  [selectMatch],
   (m) => m.matchLocation,
 );
 export const selectDeckStyle = createSelector(
-  [selectGame],
-  (g) => g.currentMatch.deckStyle,
+  [selectMatch],
+  (m) => m.deckStyle,
 );
 
 export const selectIsBettingPhase = createSelector(
@@ -41,20 +36,18 @@ export const selectIsBettingPhase = createSelector(
   (phase) => phase === "bettingOne" || phase === "bettingTwo",
 );
 
-export const selectCurrentMaxBet = createSelector(
-  [selectCurrentMatch],
-  (match) => {
-    const allBets = match.players.map((p) => p.currentBet ?? 0);
-    return Math.max(...allBets, 0);
-  },
-);
+export const selectCurrentMaxBet = createSelector([selectMatch], (match) => {
+  const allBets = match.players.map((p) => p.currentBet ?? 0);
+  return Math.max(...allBets, 0);
+});
 /**
  * ============================================================
  * HERO SELECTORS (Specific to the Human Player)
  * ============================================================
  */
-export const selectHero = (state: RootState) =>
-  state.game.currentMatch.players.find((p) => p.type === "human");
+export const selectHero = createSelector([selectMatch], (match) =>
+  match.players.find((p) => p.type === "human"),
+);
 export const selectHerosId = createSelector([selectHero], (h) => h?.id ?? "");
 export const selectHeroName = createSelector(
   [selectHero],
@@ -99,19 +92,14 @@ export const selectHeroAmountToCall = createSelector(
  */
 
 export const selectPlayerById = createSelector(
-  [
-    selectCurrentMatch,
-    (_state: RootState, playerId: string | null) => playerId,
-  ],
+  [selectMatch, (_state: RootState, playerId: string | null) => playerId],
   (match, playerId) => {
     if (!playerId) return null;
     return match.players.find((p) => p.id === playerId) || null;
   },
 );
-export const selectMatch = (state: RootState) => state.game.currentMatch;
 
-export const selectPlayers = (state: RootState) =>
-  state.game.currentMatch.players;
+export const selectPlayers = (state: RootState) => state.match.players;
 
 export const selectNpcDiscards = createSelector([selectMatch], (match) => {
   // Returns an array of arrays: [[indices for NPC 1], [indices for NPC 2]]
@@ -123,7 +111,7 @@ export const selectNpcDiscards = createSelector([selectMatch], (match) => {
   });
 });
 
-export const selectOpponents = createSelector([selectCurrentMatch], (match) => {
+export const selectOpponents = createSelector([selectMatch], (match) => {
   return match.players.filter((player) => player.type === "computer");
 });
 
@@ -160,12 +148,9 @@ export const selectPlayerChips = createSelector(
  * ============================================================
  */
 
-export const selectWinnerId = createSelector(
-  [selectCurrentMatch],
-  (m) => m.winnerId,
-);
+export const selectWinnerId = createSelector([selectMatch], (m) => m.winnerId);
 export const selectWinningHandLabel = createSelector(
-  [selectCurrentMatch],
+  [selectMatch],
   (m) => m.winningHand,
 );
 
@@ -198,10 +183,7 @@ export const selectActionButtonLabel = createSelector(
     }
   },
 );
-export const selectDeck = createSelector(
-  [selectCurrentMatch],
-  (match) => match.deck,
-);
+export const selectDeck = createSelector([selectMatch], (match) => match.deck);
 
 export const selectMinBetAmount = createSelector(
   [selectHeroAmountToCall],
@@ -270,7 +252,7 @@ export const selectAvailableLocations = createSelector(
 );
 export const selectPlayerHandEval = createSelector(
   [
-    (state: RootState) => state.game.currentMatch.players,
+    (state: RootState) => state.match.players,
     (_state: RootState, index: number) => index,
   ],
   (players, index) => {

@@ -126,7 +126,6 @@ export type PokerChoiceType =
   | "fold"
   | "raise"
   | null;
-
 export type VillainThemeType =
   | "classic"
   | "gritty"
@@ -134,13 +133,8 @@ export type VillainThemeType =
   | "classy"
   | "pro";
 
-export interface DialogueInterface {
-  gritty: string[];
-  classic: string[];
-  modern: string[];
-  classy: string[];
-  pro: string[];
-}
+// interfaces
+
 export interface BettingInterface {
   currentPot?: number;
   heroMoney?: number;
@@ -179,17 +173,14 @@ export interface DealCardPayload {
   side: CardSideType;
   opponentIndex?: number;
 }
-
-export interface SituationalDialogueInterface {
-  strongHand: DialogueInterface;
-  weakHand: DialogueInterface;
-  bluffing: DialogueInterface;
-  gloating: DialogueInterface;
-  sulking: DialogueInterface;
-  neutral: DialogueInterface;
-  nagging: DialogueInterface;
-  egging: DialogueInterface;
+export interface DialogueInterface {
+  gritty: string[];
+  classic: string[];
+  modern: string[];
+  classy: string[];
+  pro: string[];
 }
+
 export interface EvaluatedHandInterface {
   value: number;
   label: string;
@@ -293,9 +284,12 @@ export interface MatchInterface {
   currentBetOnTable: number;
   activePlayerIndex: number;
   lastRaiserId: string | null;
+  actionMessage: string;
+  messageId: number;
   currentPhase: GamePhaseInterface;
   winnerId?: string;
   winningHand?: string;
+  lastWinAmount?: number;
   isGameOver?: boolean;
   handHistory?: {
     playerId: string;
@@ -310,6 +304,7 @@ export interface MatchInterface {
     isFirstWin?: boolean;
     isLevelUp?: boolean;
   };
+  playingMatch: boolean;
 }
 
 export interface PhaseInstruction {
@@ -333,7 +328,6 @@ export interface PlayerInterface {
   chips: ChipMapInterface;
   currentBet: number;
   hasActed: boolean;
-  actionMessage: string;
   lastAction?: PokerChoiceType;
   isAllin: boolean;
   sessionStats: {
@@ -362,4 +356,79 @@ export interface PlayerInterface {
     };
     comments?: Partial<Record<CurrentSituationType, string[]>> | null;
   };
+}
+
+export interface SituationalDialogueInterface {
+  strongHand: DialogueInterface;
+  weakHand: DialogueInterface;
+  bluffing: DialogueInterface;
+  gloating: DialogueInterface;
+  sulking: DialogueInterface;
+  neutral: DialogueInterface;
+  nagging: DialogueInterface;
+  egging: DialogueInterface;
+}
+
+export type AchievementCategory =
+  | "WIN_STREAK"
+  | "BANKROLL"
+  | "LOCATION_MASTER"
+  | "GAME_SPECIALIST";
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: AchievementCategory;
+  isUnlocked: boolean;
+  dateUnlocked?: string; // ISO string
+  rewardPlei: number;
+}
+
+export interface LocationDetailsInterface {
+  stats: PlayerStatsInterface;
+  bossDefeated: boolean;
+  timesBossEncountered: number;
+  unlockedLocalItems: string[]; // e.g., ["neon-deck", "high-roller-avatar"]
+  rank: number; // 0 to 5 "stars" for that area
+}
+
+// Gary's "Trophy Case" Map
+export interface UserProgressRegistry {
+  achievements: Record<string, Achievement>;
+  lifetimeStats: PlayerStatsInterface;
+  locationProgress: Partial<
+    Record<MatchLocationType, LocationDetailsInterface>
+  >;
+}
+
+export interface PlayerStatsInterface {
+  totalHandsPlayed: number;
+  totalMatchesWon: number;
+  biggestPotWon: number;
+  locationsVisited: MatchLocationType[];
+  gamesMastered: MatchType[];
+}
+
+export interface MatchSummaryInterface {
+  matchId: string;
+  location: MatchLocationType;
+  gameType: MatchType;
+  difficulty: DifficultyType;
+
+  // Financials
+  finalPot: number;
+  earningsCash: number;
+  earningsPlei: number;
+
+  // Performance
+  wasVictory: boolean;
+  bestHandRank: HandType; // e.g., 'full-house'
+  opponentsKnockedOut: number;
+  bluffsSucceeded: number;
+
+  // Progression
+  xpGained: number;
+  newLevelReached: boolean;
+  unlockedItemIds: string[]; // IDs to be cross-referenced with VendingInventory
 }

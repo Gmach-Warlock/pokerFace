@@ -20,7 +20,7 @@ export default function RaiseButton({
     // If I already bet $5 and I want to "Raise to $20",
     // I need to spend $15 more.
     const additionalAmount = sliderValue - currentPlayerBet;
-
+    console.log(herosId, additionalAmount);
     dispatch(
       processBet({
         playerId: herosId,

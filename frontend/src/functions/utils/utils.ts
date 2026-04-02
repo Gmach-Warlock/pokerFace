@@ -1,3 +1,5 @@
+import type { GameInterface } from "../../app/types";
+
 export function generateRandomString(length: number) {
   let text = "";
   const possible =
@@ -8,7 +10,42 @@ export function generateRandomString(length: number) {
   }
   return text;
 }
+export const logGameStep = (
+  stage: string,
+  state: GameInterface,
+  actionType?: string,
+) => {
+  const match = state.currentMatch;
+  const activePlayer = match.players[match.activePlayerIndex];
 
+  console.group(
+    `%c[GAME STEP]: ${stage}`,
+    "color: #00ffff; font-weight: bold;",
+  );
+  console.log(
+    `%cAction Type: %c${actionType || "N/A"}`,
+    "font-weight: bold",
+    "color: #ff00ff",
+  );
+  console.log(`Current Phase: ${match.currentPhase.phase}`);
+  console.log(
+    `Active Player: ${activePlayer?.name} (Index: ${match.activePlayerIndex})`,
+  );
+  console.log(`Pot: $${match.pot} | Current Bet: $${match.currentBetOnTable}`);
+
+  // Quick view of all players to check 'isFolded' or 'hasActed'
+  console.table(
+    match.players.map((p) => ({
+      name: p.name,
+      money: p.money,
+      isFolded: p.isFolded,
+      hasActed: p.hasActed,
+      lastAction: p.lastAction,
+    })),
+  );
+
+  console.groupEnd();
+};
 /* function getSituation(player: PlayerInterface, personality: CharacterPersonality): CurrentSituationType {
   // 1. Priority Checks (Time-sensitive/Action-sensitive)
   if (isHeroTakingTooLong) return "nagging";

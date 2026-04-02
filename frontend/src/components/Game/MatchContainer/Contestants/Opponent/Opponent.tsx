@@ -39,7 +39,6 @@ export default function Opponent({ data }: OpponentPropsInterface) {
       <div className="opponent__info">
         <h3 className="opponent__name">{name}</h3>
         <p className="opponent__stats">${money}</p>
-        <p>{playerId}</p>
       </div>
 
       {/* Note: You could even move data.isFolded to a selector if you want to be 100% Redux-led! */}
@@ -49,7 +48,7 @@ export default function Opponent({ data }: OpponentPropsInterface) {
         </div>
       )}
 
-      <div className="opponent__bubble" />
+      <div className="opponent__bubble"></div>
       <button
         type="button"
         onClick={() => console.log("Debug Player ID:", playerId, data)}

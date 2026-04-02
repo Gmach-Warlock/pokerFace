@@ -50,15 +50,14 @@ export default function Title() {
           Poker Face
         </h1>
 
+        <p className="text-shadow">
+          {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
+        </p>
         <div
           className={`title__hand-container ${isExiting ? "is-scattering" : ""}`}
         >
           <TitleScreenCards />
         </div>
-
-        <p className="text-shadow">
-          {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
-        </p>
       </div>
     </div>
   );

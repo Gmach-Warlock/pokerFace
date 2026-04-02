@@ -54,7 +54,6 @@ export const createVillain = (
     chips: chipMap,
     currentBet: 0,
     hasActed: false,
-    actionMessage: "",
     isAllin: false,
     sessionStats: {
       handsWon: 0,
