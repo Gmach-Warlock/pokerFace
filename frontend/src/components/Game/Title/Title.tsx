@@ -1,31 +1,29 @@
 import { useNavigate } from "react-router";
-import { royalFlush } from "../../../app/assets";
-import { useAppDispatch } from "../../../app/hooks";
+import { useAppDispatch, useSound } from "../../../app/hooks";
 import { goToMainMenu } from "../../../features/game/gameSlice";
-import Hand from "../../Hand/Hand";
 import "./Title.css";
 import { useCallback, useEffect, useState } from "react";
+import TitleScreenCards from "./TitleScreenCards/TitleScreenCards";
 
 export default function Title() {
   const [isExiting, setIsExiting] = useState(false);
-  const winningHand = royalFlush;
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const hitAudio = "/pokerFaceTitleHit.wav";
+  const { playSound } = useSound();
 
   const navToMainMenu = useCallback(() => {
     if (isExiting) return;
 
     setIsExiting(true);
-    const titleHit = new Audio(hitAudio);
-    titleHit.play().catch((e) => console.log(e));
+    playSound("title", 0.4);
 
     setTimeout(() => {
       dispatch(goToMainMenu());
       navigate("/game/mainMenu");
     }, 1500);
-  }, [dispatch, navigate, isExiting]);
+  }, [dispatch, navigate, isExiting, playSound]);
 
   useEffect(() => {
     const handleInteraction = (e: Event) => {
@@ -45,21 +43,22 @@ export default function Title() {
   }, [navToMainMenu]);
 
   return (
-    <div className={`title ${isExiting ? "title--exit" : ""}`}>
-      <h1 className="title__title manga-outline neon-glow-cyan">Poker Face</h1>
+    /* We pass the pattern to the wrapper so CSS can see it */
+    <div className="title-screen-wrapper">
+      <div className={`title ${isExiting ? "title--exit" : ""}`}>
+        <h1 className="title__title manga-outline neon-glow-cyan">
+          Poker Face
+        </h1>
 
-      <div className="title__hand-container">
-        <Hand
-          matchType="draw"
-          cards={winningHand}
-          currentLocation="demo"
-          hand="tbd"
-        />
+        <p className="text-shadow">
+          {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
+        </p>
+        <div
+          className={`title__hand-container ${isExiting ? "is-scattering" : ""}`}
+        >
+          <TitleScreenCards />
+        </div>
       </div>
-
-      <p className="text-shadow">
-        {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
-      </p>
     </div>
   );
 }

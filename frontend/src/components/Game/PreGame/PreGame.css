@@ -69,3 +69,13 @@
   cursor: pointer;
   text-transform: uppercase;
 }
+
+.deck-preview-image {
+  width: 1.5rem;
+  height: auto;
+  float: right;
+}
+
+.setting--style {
+  align-content: center;
+}

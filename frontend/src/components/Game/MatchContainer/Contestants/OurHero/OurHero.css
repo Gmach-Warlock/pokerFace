@@ -1,5 +1,5 @@
 /* OurHero.css */
-.our-hero {
+.hero__container {
   grid-column: 1 / -1; /* Span all 12 columns */
   grid-row: 8 / 13;
 
@@ -20,7 +20,6 @@
 .our-hero__hand-container {
   grid-row: 1 / span 1;
   position: relative;
-  /* This width should be wide enough to accommodate the translateX values in Hand.css */
   width: 400px;
   min-height: 150px;
   margin: 0 auto;
@@ -33,4 +32,17 @@
 .our-hero__chips {
   grid-column: 1 / -1;
   grid-row: 1 / span 1;
+}
+
+.hero__identity {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+  align-items: center;
+  height: 2rem;
+}
+
+.hero__name {
+  padding: 0;
+  margin: 0;
 }

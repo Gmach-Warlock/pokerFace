@@ -3,12 +3,11 @@ import "./MatchContainer.css";
 import { useAppSelector } from "../../../app/hooks";
 import { useEffect } from "react";
 import PhaseAlert from "./PhaseAlert/PhaseAlert";
-import WinnerOverlay from "./WinnerOverlay/WinnerOverlay";
+import WinnerOverlay from "./WinnerOverlay/MatchResultsOverlay";
+import { selectOpponents } from "../../../features/match/matchSelectors";
 
 export default function MatchContainer() {
-  const opponents = useAppSelector(
-    (state) => state.game.currentMatch.opponents,
-  );
+  const opponents = useAppSelector(selectOpponents || []);
   const phase = useAppSelector(
     (state) => state.game.currentMatch.currentPhase.phase,
   );

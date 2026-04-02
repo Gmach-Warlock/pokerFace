@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { cardSuitIcons } from "../../app/assets";
 import type {
   CardInterface,
@@ -15,7 +16,6 @@ export default function Card({
   const isRed = suit === "heart" || suit === "diamond";
   const suitColor = isRed ? "red" : "black";
   const cardClass = `card-face ${isDiscarded ? "card-discarded" : ""}`;
-  // --- Helper Sub-renderers ---
 
   const renderSuitIcon = (size: IconSizeType) => (
     <img
@@ -24,6 +24,20 @@ export default function Card({
       className={`suit-icon--${size}`}
     />
   );
+  const containerClass = useMemo(() => {
+    // Handle Face Cards (Strings: 'A', 'J', 'Q', 'K')
+    if (typeof value === "string") {
+      return "card__centerpiece-face";
+    }
+
+    // Handle Pip Cards (Numbers)
+    switch (true) {
+      case value >= 8:
+        return "card__centerpiece-lg";
+      default:
+        return "card__centerpiece";
+    }
+  }, [value]);
 
   const renderCenterPiece = (val: CardValueType) => {
     // Face Card Logic (J, Q, K, A)
@@ -52,17 +66,21 @@ export default function Card({
 
     const count = val as number;
     const prefix = numberMap[count];
-    const containerClass =
-      count > 8 ? "card__centerpiece-lg" : "card__centerpiece";
 
     return (
       <div className={containerClass}>
         {Array(count)
           .fill(null)
           .map((_, i) => {
-            const isBottomHalf = i >= Math.ceil(count / 2);
-            const isThreeCase = count === 3 && i === 2; // Fixed index logic for 3
-            const shouldRotate = isThreeCase || (count !== 3 && isBottomHalf);
+            const shouldRotate = (() => {
+              if (count === 3) return i === 2; // Bottom pip rotates
+              if (count === 6) return i >= 4;
+
+              if (count === 7) return i >= 5; // Only rotate the bottom two
+              if (count === 8) return i >= 5; // Only rotate the bottom two
+
+              return i >= Math.ceil(count / 2);
+            })();
 
             return (
               <div

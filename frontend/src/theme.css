@@ -26,14 +26,12 @@
   font-size: var(--text-md);
 }
 
-/* Why HSL is great: Easy Hover States */
 .btn-neon {
   background-color: var(--neon-blue);
   transition: background-color 0.2s;
 }
 
 .btn-neon:hover {
-  /* We just drop the lightness from 50% to 40% to make it darker! */
   background-color: hsl(183, 100%, 40%);
 }
 
@@ -41,4 +39,13 @@
   background-color: transparent;
   border: none;
   float: right;
+}
+
+@keyframes simpleFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

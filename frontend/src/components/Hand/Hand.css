@@ -6,57 +6,102 @@
   padding-inline: 20px;
   perspective: 1000px;
 }
+
 .hand-draw {
   display: flex;
-
   margin: 1rem;
   position: relative;
   width: 100%;
+  justify-content: center;
 }
-.hand-draw-card1 {
-  z-index: 1;
+
+[class^="hand-draw-card"] {
   position: absolute;
-  transform: translateX(-3rem);
+  will-change: transform;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    filter 0.3s ease;
+  transform: translateX(var(--offset));
+}
+
+.hand-draw-card1 {
+  --offset: -10rem;
+  z-index: 1;
 }
 .hand-draw-card2 {
+  --offset: -5rem;
   z-index: 2;
-  position: absolute;
-  transform: translateX(-1.5rem);
 }
 .hand-draw-card3 {
+  --offset: 0rem;
   z-index: 3;
-  position: absolute;
 }
 .hand-draw-card4 {
+  --offset: 5rem;
   z-index: 4;
-  position: absolute;
-  transform: translateX(1.5rem);
 }
 .hand-draw-card5 {
+  --offset: 10rem;
   z-index: 5;
-  position: absolute;
-  transform: translateX(3rem);
 }
 
-.hand-draw-card1,
-.hand-draw-card2,
-.hand-draw-card3,
-.hand-draw-card4,
-.hand-draw-card5 {
-  /* Common transition for smooth movements */
-  transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
-}
-
-/* New helper class */
 .card-interactive {
   cursor: pointer;
 }
 
-/* Optional: Add a slight lift when hovering over a clickable card */
 .card-interactive:hover {
   filter: brightness(1.1);
-  /* This moves the card up slightly relative to its current stack position */
-  z-index: 10;
+  z-index: 20;
+  transform: translateX(var(--offset)) translateY(-1.5rem) scale(1.05);
+}
+
+.hand-draw--animated [class^="hand-draw-card"] {
+  animation: cardIntroLoop 6s ease-in-out infinite;
+}
+
+.hand-container.is-exiting [class^="hand-draw-card"] {
+  animation: cardExitExplode 0.8s forwards ease-in;
+}
+
+.is-scattering [class^="hand-draw-card"] {
+  animation: cardScatter 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+  pointer-events: none;
+}
+
+.is-scattering .hand-draw-card1 {
+  animation-delay: 0s;
+}
+.is-scattering .hand-draw-card2 {
+  animation-delay: 0.05s;
+}
+.is-scattering .hand-draw-card3 {
+  animation-delay: 0.1s;
+}
+.is-scattering .hand-draw-card4 {
+  animation-delay: 0.15s;
+}
+.is-scattering .hand-draw-card5 {
+  animation-delay: 0.2s;
+}
+
+@media (max-width: 430px) {
+  .hand-draw-card1 {
+    --offset: -4rem;
+  }
+  .hand-draw-card2 {
+    --offset: -2rem;
+  }
+  .hand-draw-card3 {
+    --offset: 0rem;
+  }
+  .hand-draw-card4 {
+    --offset: 2rem;
+  }
+  .hand-draw-card5 {
+    --offset: 4rem;
+  }
+  .hand-container {
+    height: 14rem;
+    padding-inline: 10px;
+  }
 }

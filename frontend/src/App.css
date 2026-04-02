@@ -51,6 +51,7 @@
 .place-center {
   display: flex;
   place-content: center;
+  place-items: center;
 }
 .items-center {
   align-items: center;

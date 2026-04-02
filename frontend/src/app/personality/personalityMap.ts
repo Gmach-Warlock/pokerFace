@@ -1,4 +1,31 @@
-export const personalityMap = {
+import type { VillainThemeType } from "../types";
+
+export type PersonalityMapInterface = Record<
+  VillainThemeType,
+  Record<string, CharacterPersonality>
+>;
+
+export interface CharacterPersonality {
+  situations: Record<string, number>;
+  tells: {
+    physical: string;
+    frequency?: number; // I noticed some use 'frequency' and
+  };
+  unique: {
+    comment: string;
+    frequency: number;
+  };
+  tilt: {
+    limit: number;
+    comment: string;
+    multiplier: number;
+  };
+  pressure: {
+    comment: string;
+  };
+}
+
+export const personalityMap: PersonalityMapInterface = {
   classic: {
     Arthur: {
       situations: {
@@ -13,6 +40,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Arthur sits up firmly in his chair.",
+        frequency: 0.05,
       },
       unique: {
         comment: "Cheers everyone",
@@ -39,6 +67,7 @@ export const personalityMap = {
         baiting: 0.9,
       },
       tells: {
+        frequency: 0.05,
         physical: "Eleanor seems pretty comfortable right now.",
       },
       unique: {
@@ -67,6 +96,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Raymond sratches the table.",
+        frequency: 0.1,
       },
       unique: {
         comment: "Fun times.",
@@ -94,6 +124,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Martha takes a deep breath.",
+        frequency: 0.09,
       },
       unique: {
         comment: "Maybe I need a break.",
@@ -121,6 +152,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Harvey bites his lip.",
+        frequency: 0.05,
       },
       unique: {
         comment: "You are all ok in my book.",
@@ -148,6 +180,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Janet grunts to herself.",
+        frequency: 0.04,
       },
       unique: {
         comment: "Okie dokie.",
@@ -175,6 +208,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Greg is suddenly quiet.",
+        frequency: 0.04,
       },
       unique: {
         comment: "I'll be coming back.",
@@ -202,6 +236,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Bonnie's eyes get large for a split second.",
+        frequency: 0.04,
       },
       unique: {
         comment: "I am holding out til the end of the night.",
@@ -229,6 +264,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Kyle is uneasy.",
+        frequency: 0.04,
       },
       unique: {
         comment: "This has been good so far.",
@@ -256,6 +292,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Mary sighs.",
+        frequency: 0.04,
       },
       unique: {
         comment: "Gotta admit, I'm enjoying myself.",
@@ -283,6 +320,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Clark quickly gives the dealer with a look of dismay",
+        frequency: 0.04,
       },
       unique: {
         comment: "Chillin like a villain.",
@@ -310,6 +348,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Donna starts to hum to herself.",
+        frequency: 0.06,
       },
       unique: {
         comment: "Kicking it with my peeps.",
@@ -339,6 +378,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Rocco's eyes dart to your chip stack for a split second.",
+        frequency: 0.1,
       },
       unique: {
         comment: "You're in my hood now.",
@@ -347,7 +387,7 @@ export const personalityMap = {
       tilt: {
         limit: 6,
         comment: "This is about to get ugly.",
-        multiplier: 1.8,
+        multiplier: 18,
       },
       pressure: {
         comment: "These big pots just belong with me.",
@@ -366,6 +406,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Mickey twitches.",
+        frequency: 0.1,
       },
       unique: {
         comment: "I feel a beating coming on.",
@@ -394,6 +435,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Sloan slumps a little in her chair.",
+        frequency: 0.2,
       },
       unique: {
         comment: "You look like you've never held a winning hand in your life.",
@@ -421,6 +463,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Rocco's eyes dart to your chip stack for a split second.",
+        frequency: 0.12,
       },
       unique: {
         comment: "You're playing with fire, kid. Don't get burned.",
@@ -448,6 +491,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Vinnie starts tapping his foot.",
+        frequency: 0.22,
       },
       unique: {
         comment: "I’ve seen guys like you disappear for less.",
@@ -475,6 +519,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Ripley's eyes scan the room frantically, avoiding yours.",
+        frequency: 0.2,
       },
       unique: {
         comment: "Lady luck's a fickle mistress, ain't she?",
@@ -502,6 +547,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Moxie shifts her body in a wierd way",
+        frequency: 0.17,
       },
       unique: {
         comment: "Cute play. Try it again and see what happens.",
@@ -530,6 +576,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Gunnar's grip on his cards tightens until his knuckles turn white.",
+        frequency: 0.1,
       },
       unique: {
         comment: "My patience is as thin as your bankroll.",
@@ -559,6 +606,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Jinx adjusts her rings, a rhythmic tapping sound filling the silence.",
+        frequency: 0.14,
       },
       unique: {
         comment: "Is it hot in here, or is it just your stack burning up?",
@@ -586,6 +634,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Aria giggles to herself.",
+        frequency: 0.02,
       },
       unique: {
         comment: "There's gonna be some violence if this doesn't change.",
@@ -614,6 +663,7 @@ export const personalityMap = {
       tells: {
         physical:
           "A faint smirk plays on Sledge's lips as he checks his cards.",
+        frequency: 0.1,
       },
       unique: {
         comment: "We roll fat, that's how we roll.",
@@ -642,6 +692,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Vanna exhales a cloud of smoke, with a bored look on her face",
+        frequency: 0.14,
       },
       unique: {
         comment: "This is a solid group of thugs here.",
@@ -669,6 +720,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Steel slowly leans forward, casting a shadow over the pot.",
+        frequency: 0.31,
       },
       unique: {
         comment: "Let's bash it up.",
@@ -696,6 +748,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Gutter gulps.",
+        frequency: 0.21,
       },
       unique: {
         comment: "This makes me want to butt heads with someone. Good times.",
@@ -724,6 +777,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Tank's heavy breathing becomes noticeably rhythmic and deep.",
+        frequency: 0.14,
       },
       unique: {
         comment: "I like you, I don't care what they say about you.",
@@ -751,6 +805,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Li starts to shake a little.",
+        frequency: 0.31,
       },
       unique: {
         comment: "I'm about to start crackin skulls.",
@@ -781,6 +836,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Leo stomps his foot quietly",
+        frequency: 0.14,
       },
       unique: {
         comment: "I'm clip-hunting right now and you're making it too easy.",
@@ -808,6 +864,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Sienna looks at her wrist.",
+        frequency: 0.21,
       },
       unique: {
         comment: "Is it my turn? I was busy checking my portfolio.",
@@ -835,6 +892,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Kai taps a rapid, restless beat on the edge of the table.",
+        frequency: 0.16,
       },
       unique: {
         comment: "That play was mid at best, but okay.",
@@ -862,6 +920,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Ezra taps his thumbs.",
+        frequency: 0.3,
       },
       unique: {
         comment: "I've seen better AI than your strategy.",
@@ -890,6 +949,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Luna's gaze lingers on the community cards a fraction too long.",
+        frequency: 0.2,
       },
       unique: {
         comment: "The vibes are shiftin'... and not in your favor.",
@@ -917,6 +977,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Ryker looks intently at his hand.",
+        frequency: 0.05,
       },
       unique: {
         comment: "You need some inline style.",
@@ -944,6 +1005,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Nova nods her head.",
+        frequency: 0.22,
       },
       unique: {
         comment: "Are we playing poker or are you just donating?",
@@ -971,6 +1033,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Xiomara snaps the dealer a quick glaring look.",
+        frequency: 0.21,
       },
       unique: {
         comment:
@@ -1000,6 +1063,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Rhodes looks at his chips.",
+        frequency: 0.13,
       },
       unique: {
         comment: "My node is functioning. How about yours?",
@@ -1027,6 +1091,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Zadie plays with her hair.",
+        frequency: 0.1,
       },
       unique: {
         comment: "I'm about to add you to my clean out list.",
@@ -1054,6 +1119,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Merrick glances away.",
+        frequency: 0.23,
       },
       unique: {
         comment: "I like you guys.",
@@ -1081,6 +1147,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Lana looks up at the ceiling.",
+        frequency: 0.21,
       },
       unique: {
         comment: "Are you syncing up with your cards? Doesn't seem like it.",
@@ -1108,6 +1175,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Vaughn scratches her chin.",
+        frequency: 0.13,
       },
       unique: {
         comment:
@@ -1139,6 +1207,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Julian eyes flutter for a brief moment.",
+        frequency: 0.21,
       },
       unique: {
         comment: "A fascinating choice. Wrong, but fascinating.",
@@ -1166,6 +1235,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Beatrice smiles.",
+        frequency: 0.21,
       },
       unique: {
         comment: "One must learn when to fold with grace, darling.",
@@ -1194,6 +1264,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Bob takes quick sip of his drink.",
+        frequency: 0.31,
       },
       unique: {
         comment: "All this winning is making me thirsty.",
@@ -1221,6 +1292,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Madelaine has a look of confusion for a second.",
+        frequency: 0.27,
       },
       unique: {
         comment: "Quality over quantity, dear. Remember that.",
@@ -1248,6 +1320,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Gemma scratches her nose.",
+        frequency: 0.01,
       },
       unique: {
         comment:
@@ -1276,6 +1349,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Hubert twiddles his thumbs.",
+        frequency: 0.1,
       },
       unique: {
         comment: "I remember when this game required a certain... stature.",
@@ -1303,6 +1377,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Lindsay shifts uneasily.",
+        frequency: 0.24,
       },
       unique: {
         comment: "Lovely to meet all of your aquaintances.",
@@ -1330,6 +1405,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Veronica cracks her knuckles.",
+        frequency: 0.02,
       },
       unique: {
         comment: "I'm about to start crackin skulls.",
@@ -1358,6 +1434,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Winthrop spins a chip in his hand.",
+        frequency: 0.14,
       },
       unique: {
         comment: "I need my stock updates please.",
@@ -1385,6 +1462,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Joseph pulls his hair back.",
+        frequency: 0.14,
       },
       unique: {
         comment: "I'm liking these odds today.",
@@ -1412,6 +1490,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Gerald snarls at the dealer really quickly.",
+        frequency: 0.19,
       },
       unique: {
         comment: "I suppose even a broken clock is right twice a day.",
@@ -1439,6 +1518,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Kathleen looks to her right really quickly.",
+        frequency: 0.11,
       },
       unique: {
         comment: "You have the luck of a man with nothing to lose.",
@@ -1466,6 +1546,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Derek rubs his belly.",
+        frequency: 0.04,
       },
       unique: {
         comment: "I'm feeling it today.",
@@ -1495,6 +1576,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Doyle's expression is as still as carved stone.",
+        frequency: 0.04,
       },
       unique: {
         comment: "You're playing the player, kid. Not the cards.",
@@ -1523,6 +1605,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Stu's breathing hitches, a microscopic shift in his posture.",
+        frequency: 0.03,
       },
       unique: {
         comment: "I can see your cards in your eyes. Try harder.",
@@ -1550,6 +1633,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Phil's jaw tightens for a nearly imperceptible second.",
+        frequency: 0.02,
       },
       unique: {
         comment:
@@ -1578,6 +1662,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Johnny adjusts his cards slightly.",
+        frequency: 0.02,
       },
       unique: {
         comment: "I've won rings with worse hands than this.",
@@ -1605,6 +1690,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Annette slightly shifts her posture.",
+        frequency: 0.02,
       },
       unique: {
         comment: "I'm not worried about my execution. You should be.",
@@ -1633,6 +1719,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Barbara briefly adjusts her glasses, the light reflecting off the lenses.",
+        frequency: 0.02,
       },
       unique: {
         comment: "Silly mistake there.",
@@ -1661,6 +1748,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Barbara briefly adjusts her glasses, the light reflecting off the lenses.",
+        frequency: 0.02,
       },
       unique: {
         comment: "I feel bad for you.",
@@ -1688,6 +1776,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Carlos' breathing is extremely calm and relaxed.",
+        frequency: 0.02,
       },
       unique: {
         comment: "It's interesting that you would make that move.",
@@ -1715,6 +1804,7 @@ export const personalityMap = {
       },
       tells: {
         physical: "Jennifer has a little uneasiness in her eyes.",
+        frequency: 0.02,
       },
       unique: {
         comment: "You're over-representing your hand. It's a classic mistake.",
@@ -1743,6 +1833,7 @@ export const personalityMap = {
       tells: {
         physical:
           "Michael sternly stares at everyone waiting to see what they do.",
+        frequency: 0.02,
       },
       unique: {
         comment: "I'm about to start crackin skulls.",

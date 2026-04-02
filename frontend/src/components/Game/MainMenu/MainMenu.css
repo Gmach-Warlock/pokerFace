@@ -25,3 +25,45 @@
 .btn--previous {
   float: right;
 }
+
+.btn--menu {
+  /* Existing styles (background: #FFD700, etc.) */
+  transition:
+    transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover: Pop out and glow */
+.btn--menu:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  filter: brightness(1.1);
+}
+
+/* Click: Recess into the screen */
+.btn--menu:active {
+  transform: scale(0.95) translateY(1px);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  filter: brightness(0.9);
+}
+
+/* Optional: Add a "shimmer" stripe that passes over on hover */
+.btn--menu::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(30deg);
+  transition: none;
+}
+
+.btn--menu:hover::after {
+  left: 120%;
+  transition: all 0.5s scale-in;
+}

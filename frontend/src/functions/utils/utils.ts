@@ -1,6 +1,4 @@
-import type { CardInterface, MatchLocationType } from "../../app/types";
-import { AnteMap, handRanks } from "../../app/assets";
-import { type GameInterface } from "../../features/game/gameSlice";
+import type { GameInterface } from "../../app/types";
 
 export function generateRandomString(length: number) {
   let text = "";
@@ -12,77 +10,63 @@ export function generateRandomString(length: number) {
   }
   return text;
 }
-
-export const evaluatePokerHand = (hand: CardInterface[]) => {
-  if (hand.length < 5) return handRanks.highCard;
-
-  // 1. Normalize values (J=11, Q=12, K=13, A=14)
-  const getVal = (v: string | number): number => {
-    if (typeof v === "number") return v;
-    const map: Record<string, number> = { J: 11, Q: 12, K: 13, A: 14 };
-    return map[v] || 0;
-  };
-
-  const values = hand.map((c) => getVal(c.value)).sort((a, b) => a - b);
-  const suits = hand.map((c) => c.suit);
-
-  // 2. Checks
-  const isFlush = new Set(suits).size === 1;
-  const isStraight = values.every((v, i) => i === 0 || v === values[i - 1] + 1);
-
-  const counts: Record<number, number> = {};
-  values.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
-  const valCounts = Object.values(counts).sort((a, b) => b - a);
-
-  // 3. Return the handRanks object
-  if (isStraight && isFlush) {
-    return values[4] === 14 ? handRanks.royalFlush : handRanks.straightFlush;
-  }
-  if (valCounts[0] === 4) return handRanks.fourOfAKind;
-  if (valCounts[0] === 3 && valCounts[1] === 2) return handRanks.fullHouse;
-  if (isFlush) return handRanks.flush;
-  if (isStraight) return handRanks.straight;
-  if (valCounts[0] === 3) return handRanks.threeOfAKind;
-  if (valCounts[0] === 2 && valCounts[1] === 2) return handRanks.twoPair;
-  if (valCounts[0] === 2) return handRanks.onePair;
-
-  return handRanks.highCard;
-};
-
-export const handleFoldLogic = (state: GameInterface, playerId: string) => {
+export const logGameStep = (
+  stage: string,
+  state: GameInterface,
+  actionType?: string,
+) => {
   const match = state.currentMatch;
+  const activePlayer = match.players[match.activePlayerIndex];
 
-  // 1. Mark the player as folded
-  if (playerId === match.hero.id) {
-    // We can't really "fold" the hero and keep playing,
-    // so we usually jump to post-game or show a "You Folded" state.
-    state.currentlyDisplayed = "postGame";
-    return;
-  } else {
-    const opponent = match.opponents.find((o) => o.id === playerId);
-    if (opponent) opponent.isFolded = true;
-  }
+  console.group(
+    `%c[GAME STEP]: ${stage}`,
+    "color: #00ffff; font-weight: bold;",
+  );
+  console.log(
+    `%cAction Type: %c${actionType || "N/A"}`,
+    "font-weight: bold",
+    "color: #ff00ff",
+  );
+  console.log(`Current Phase: ${match.currentPhase.phase}`);
+  console.log(
+    `Active Player: ${activePlayer?.name} (Index: ${match.activePlayerIndex})`,
+  );
+  console.log(`Pot: $${match.pot} | Current Bet: $${match.currentBetOnTable}`);
 
-  // 2. CHECK FOR WINNER (Is only 1 player left who hasn't folded?)
-  const activeOpponents = match.opponents.filter((opp) => !opp.isFolded);
-  const heroFolded = state.currentlyDisplayed === "postGame"; // or your hero-specific flag
+  // Quick view of all players to check 'isFolded' or 'hasActed'
+  console.table(
+    match.players.map((p) => ({
+      name: p.name,
+      money: p.money,
+      isFolded: p.isFolded,
+      hasActed: p.hasActed,
+      lastAction: p.lastAction,
+    })),
+  );
 
-  if (activeOpponents.length === 0 && !heroFolded) {
-    // HERO WINS BY DEFAULT
-    match.hero.money += match.pot;
-    match.pot = 0;
-    state.currentlyDisplayed = "postGame";
-    // You could also set a "winner" state here to show a toast/message
-  } else if (activeOpponents.length === 1 && heroFolded) {
-    // LAST REMAINING OPPONENT WINS
-    activeOpponents[0].money += match.pot;
-    match.pot = 0;
-    state.currentlyDisplayed = "postGame";
-  }
+  console.groupEnd();
 };
+/* function getSituation(player: PlayerInterface, personality: CharacterPersonality): CurrentSituationType {
+  // 1. Priority Checks (Time-sensitive/Action-sensitive)
+  if (isHeroTakingTooLong) return "nagging";
+  
+  // 2. Performance Checks
+  if (player.sessionStats.currentWinStreak >= 2) return "gloating";
+  if (player.sessionStats.currentLossStreak >= 2) return "sulking";
 
-export const pickAnteAmount = (location: MatchLocationType) => {
-  const amount = AnteMap[location as keyof typeof AnteMap];
+  // 3. Hand Strength (Your existing logic)
+  const strength = calculateHandStrength(player.currentHand);
+  if (strength > 0.8) return "strongHand";
+  if (strength < 0.2) return "weakHand";
 
-  return amount;
-};
+  return "neutral";
+} */
+
+/*   const shouldSpeak = Math.random() < personality.unique.frequency;
+
+if (shouldSpeak) {
+  const situation = getSituation(player, personality);
+  const dialogueOptions = dialogueMap[theme][situation]; // Pulled from your DialogueInterface
+  const randomLine = dialogueOptions[Math.floor(Math.random() * dialogueOptions.length)];
+  displayDialogue(player.id, randomLine);
+} */

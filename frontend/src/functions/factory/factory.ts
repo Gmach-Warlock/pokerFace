@@ -1,11 +1,11 @@
 import type {
-  PlayerType,
   ChipMapInterface,
   PlayerInterface,
   VillainThemeType,
   CardInterface,
   CardValueType,
   CurrentLocationType,
+  DeckStyleType,
 } from "../../app/types";
 import { villainPool, cardSuitIcons, cardRankValues } from "../../app/assets";
 import { generateRandomString } from "../utils/utils";
@@ -31,33 +31,9 @@ export const createChips = (pot: number): ChipMapInterface => {
 
 export const createComment = () => {};
 
-export const createPlayer = (
-  name: string,
-  type: PlayerType,
-  startingPot: number,
-): PlayerInterface => {
-  const newChipMap = createChips(startingPot);
-
-  return {
-    id: generateRandomString(8),
-    name,
-    type,
-    currentHand: [],
-    isFolded: false,
-    money: startingPot,
-    chips: newChipMap,
-    level: 1,
-    xp: 0,
-    nextLevel: 5,
-    availableDecks: ["arrowBolt"],
-    currentDeckChoice: "arrowBolt",
-    plei: 0,
-  };
-};
-
 export const createVillain = (
   theme: VillainThemeType,
-  nameOverride?: string, // Add this optional parameter
+  nameOverride?: string,
 ): PlayerInterface => {
   const getRandomVillainName = (theme: VillainThemeType) => {
     const pool = villainPool[theme];
@@ -68,7 +44,7 @@ export const createVillain = (
   const chipMap = createChips(500);
 
   const newVillain: PlayerInterface = {
-    id: `${newVillainName}-${generateRandomString(4)}`,
+    id: generateRandomString(8),
     name: newVillainName,
     type: "computer",
     difficulty: "normal",
@@ -76,12 +52,26 @@ export const createVillain = (
     isFolded: false,
     money: 500,
     chips: chipMap,
-    comments: null,
+    currentBet: 0,
+    hasActed: false,
+    isAllin: false,
+    sessionStats: {
+      handsWon: 0,
+      handsLost: 0,
+      currentWinStreak: 0,
+      currentLossStreak: 0,
+      totalSessionProfit: 0,
+      lastHandResult: null,
+    },
+    profile: {},
   };
 
   return newVillain;
 };
-export const generateDeck = (count: number = 1): CardInterface[] => {
+export const generateDeck = (
+  count: number = 1,
+  design: DeckStyleType,
+): CardInterface[] => {
   const deck: CardInterface[] = [];
   const suits = Object.keys(cardSuitIcons) as (keyof typeof cardSuitIcons)[];
   const ranks = Object.keys(cardRankValues);
@@ -97,6 +87,7 @@ export const generateDeck = (count: number = 1): CardInterface[] => {
           side: "face-down",
           currentLocation: "deck" as CurrentLocationType,
           isDiscarded: false,
+          deckDesign: design,
         });
       });
     });
@@ -106,14 +97,10 @@ export const generateDeck = (count: number = 1): CardInterface[] => {
 };
 
 export const pickWeightedIndex = (arrayLength: number): number => {
-  // Squaring a number between 0 and 1 skews it toward 0.
-  // Example: 0.9 * 0.9 = 0.81 | 0.2 * 0.2 = 0.04
   const skewedRandom = Math.pow(Math.random(), 2);
   return Math.floor(skewedRandom * arrayLength);
 };
-/**
- * Shuffles an array of cards using the Fisher-Yates algorithm.
- */
+
 export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
   const shuffled = [...deck];
   for (let i = shuffled.length - 1; i > 0; i--) {
