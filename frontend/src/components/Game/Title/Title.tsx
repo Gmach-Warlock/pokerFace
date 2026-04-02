@@ -4,6 +4,7 @@ import { goToMainMenu } from "../../../features/game/gameSlice";
 import "./Title.css";
 import { useCallback, useEffect, useState } from "react";
 import TitleScreenCards from "./TitleScreenCards/TitleScreenCards";
+import TokyoSilhouette from "./TokyoSilhouette/TokyoSilhouette";
 
 export default function Title() {
   const [isExiting, setIsExiting] = useState(false);
@@ -50,13 +51,16 @@ export default function Title() {
           Poker Face
         </h1>
 
-        <p className="text-shadow">
+        <p className="title__message text-shadow">
           {isExiting ? "GOOD LUCK" : "Hit any key to continue"}
         </p>
         <div
           className={`title__hand-container ${isExiting ? "is-scattering" : ""}`}
         >
           <TitleScreenCards />
+        </div>
+        <div className="title__tokyo">
+          <TokyoSilhouette />
         </div>
       </div>
     </div>
