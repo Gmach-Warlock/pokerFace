@@ -1,4 +1,4 @@
-import type { ButtonPropsInterface } from "../../../../../../app/types";
+import type { ButtonPropsInterface } from "../../../../../../app/interfaces";
 
 export default function PlaceBetButton({
   label,

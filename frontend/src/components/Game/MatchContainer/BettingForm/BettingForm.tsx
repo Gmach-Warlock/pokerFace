@@ -1,4 +1,4 @@
-import { type BettingInterface } from "../../../../app/types";
+import type { BettingInterface } from "../../../../app/interfaces";
 import "./BettingForm.css";
 import { useState, useEffect } from "react";
 import CallButton from "./CallButton/CallButton";

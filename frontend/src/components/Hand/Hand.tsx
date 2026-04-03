@@ -1,5 +1,5 @@
 // Hand.tsx
-import type { HandInterface } from "../../app/types";
+import type { HandInterface } from "../../app/interfaces";
 import Card from "../Card/Card";
 import "./Hand.css";
 import { toggleDiscard } from "../../features/match/matchSlice";

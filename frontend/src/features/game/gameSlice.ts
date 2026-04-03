@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { GameInterface } from "../../app/types";
+import type { GameInterface } from "../../app/interfaces";
 
 const initialGameState: GameInterface = {
   isPlaying: false,

@@ -1,15 +1,17 @@
 import type {
   BettingActionType,
-  CardInterface,
   DifficultyType,
-  GameInterface,
   NextLevelXpType,
+  MatchLocationType,
+} from "../types";
+import type {
+  CardInterface,
+  GameInterface,
   PlayerInterface,
   MatchInterface,
-  MatchLocationType,
   EvaluatedHandInterface,
-} from "../types";
-import { anteMap, handRanks } from "../assets";
+} from "../interfaces";
+import { anteMap, handRanks, LEVEL_UP_REWARDS } from "../assets";
 
 export const calculateShowdown = (
   match: MatchInterface,
@@ -37,15 +39,32 @@ export const calculateShowdown = (
   const hero = match.players.find((p) => p.type === "human");
 
   // Check if the winner we just found is the Hero
-  if (match.winnerId === hero?.id && hero) {
+  if (match.winnerId === hero?.id && hero?.profile) {
     const xpGained = Math.floor(match.pot * 0.1) + 50;
-    const currentLevel = hero.profile.level ?? 1;
-    const currentXp = hero.profile.xp ?? 0;
+    const currentLevel = hero.profile.level;
+    const currentXp = hero.profile.xp;
 
     const thresholds = [5, 20, 45, 80, 125, 180, 245, 320, 405, 500];
     const nextThreshold = thresholds[currentLevel - 1] ?? 999;
 
     const didLevelUp = currentXp + xpGained >= nextThreshold;
+
+    if (didLevelUp) {
+      const nextLevel = (hero.profile?.level ?? 1) + 1;
+      const rewardData = LEVEL_UP_REWARDS[nextLevel];
+
+      // We explicitly provide the required fields to ensure they are never undefined
+      match.rewards = {
+        xp: xpGained, // Required
+        plei: match.pot, // Required
+        bonuses: [], // Required
+        isLevelUp: true,
+        isFirstMatch,
+        isFirstWin,
+        message: rewardData?.message ?? "You've reached a new plateau.",
+        perk: rewardData?.perk ?? "Increased Reputation",
+      };
+    }
 
     match.rewards = {
       xp: xpGained,

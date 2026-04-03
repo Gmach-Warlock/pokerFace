@@ -1,15 +1,17 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type {
   MatchLocationType,
-  PlayerInterface,
   CurrentLocationType,
-  MatchInterface,
-  GamePayloadInterface,
   CardSideType,
   GamePhaseType,
   GamePhaseConfigType,
   BettingActionType,
 } from "../../app/types";
+import type {
+  GamePayloadInterface,
+  MatchInterface,
+  PlayerInterface,
+} from "../../app/interfaces";
 import { generateDeck, shuffleDeck } from "../../functions/factory/factory";
 import { createVillain } from "../../functions/factory/factory";
 import { matchMap, gamePhases, GamePhaseMap } from "../../app/assets";
@@ -203,7 +205,7 @@ const matchSlice = createSlice({
       const { playerId, method } = action.payload;
       const player = state.players.find((p) => p.id === playerId);
 
-      if (!player) return;
+      if (!player || !player.profile) return;
 
       if (method === "plei" && (player.profile.plei ?? 0) >= 10) {
         player.profile.plei! -= 10;
@@ -418,7 +420,13 @@ const matchSlice = createSlice({
 
       const count =
         numberOfOpponents === "tbd" ? 1 : (numberOfOpponents as number);
-      const availableThemes = matchMap[matchLocation] || ["classic"];
+
+      // FIX: Use 'as keyof typeof matchMap' to force TS to allow the indexing
+      // Also added a fallback to ensure availableThemes is never undefined
+      const availableThemes = matchMap[
+        matchLocation as keyof typeof matchMap
+      ] || ["classic"];
+
       const selectedTheme =
         availableThemes[Math.floor(Math.random() * availableThemes.length)];
 
@@ -428,18 +436,28 @@ const matchSlice = createSlice({
       while (newOpponents.length < count) {
         const candidate = createVillain(selectedTheme);
         if (!usedNames.has(candidate.name)) {
+          // Ensure we spread the candidate and initialize match-specific fields
           newOpponents.push({
             ...candidate,
             currentHand: [],
             currentBet: 0,
             hasActed: false,
+            isFolded: false, // Adding safety initializers
+            isAllin: false,
           });
           usedNames.add(candidate.name);
         }
       }
 
       state.players = [
-        { ...hero, currentHand: [], currentBet: 0, hasActed: false },
+        {
+          ...hero,
+          currentHand: [],
+          currentBet: 0,
+          hasActed: false,
+          isFolded: false,
+          isAllin: false,
+        },
         ...newOpponents,
       ];
 

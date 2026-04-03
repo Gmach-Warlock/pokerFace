@@ -1,14 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type {
-  CardInterface,
-  ChipMapInterface,
   DeckStyleType,
   MatchLocationType,
   NextLevelXpType,
 } from "../../app/types";
+import type {
+  AchievementInterface,
+  CardInterface,
+  ChipMapInterface,
+  SessionStatsInterface,
+} from "../../app/interfaces";
 import { startingChips } from "../../app/assets";
-import { type PayloadAction } from "@reduxjs/toolkit";
-import { createChips } from "../../functions/factory/factory";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileInterface {
   meta: {
@@ -34,6 +37,7 @@ interface ProfileInterface {
     currentDeckChoice: DeckStyleType;
     availableLocations: MatchLocationType[];
     plei: number;
+    achievements: AchievementInterface[];
   };
 }
 
@@ -61,6 +65,7 @@ const initialAuthorizeState: ProfileInterface = {
     currentDeckChoice: "arrowBolt",
     availableLocations: ["shelter", "halls"],
     plei: 0,
+    achievements: [],
   },
 };
 
@@ -68,19 +73,48 @@ const profileSlice = createSlice({
   name: "authorize",
   initialState: initialAuthorizeState,
   reducers: {
+    addExperience: () => {},
     createUser: (state, action) => {
       state.meta.username = action.payload.username;
       state.meta.email = action.payload.email;
       state.meta.password = action.payload.password;
       state.meta.authorized = true;
     },
-    subtractHeroMoney: (state, action: PayloadAction<{ amount: number }>) => {
-      state.playerData.money -= action.payload.amount;
-      // Here you would also call your chip calculator logic to update state.playerData.chips
-      state.playerData.chips = createChips(state.playerData.money);
+    unlockLocation: () => {},
+    updateAchievements: (
+      state,
+      action: PayloadAction<SessionStatsInterface>,
+    ) => {
+      const stats = action.payload;
+
+      state.playerData.achievements.forEach((ach) => {
+        if (ach.isUnlocked) return; // Skip already finished ones
+
+        // Logic for specific IDs
+        if (ach.id === "high_roller_1") {
+          ach.currentProgress = state.playerData.plei;
+        }
+
+        if (ach.id === "bluff_master") {
+          ach.currentProgress = stats.bluffsSucceeded;
+        }
+
+        // Check for Unlock
+        if (ach.currentProgress >= ach.targetValue) {
+          ach.isUnlocked = true;
+          state.playerData.plei += ach.rewardPlei;
+          // You could also trigger a "Pop-up" message here!
+        }
+      });
     },
+    updateLocationStats: () => {},
   },
 });
 
-export const { createUser, subtractHeroMoney } = profileSlice.actions;
+export const {
+  addExperience,
+  createUser,
+  unlockLocation,
+  updateLocationStats,
+} = profileSlice.actions;
 export default profileSlice.reducer;

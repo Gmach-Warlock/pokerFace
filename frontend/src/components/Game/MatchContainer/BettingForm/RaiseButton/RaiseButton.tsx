@@ -1,9 +1,10 @@
-import type { BettingInterface } from "../../../../../app/types";
+import type { BettingInterface } from "../../../../../app/interfaces";
 import { useAppDispatch, useAppSelector } from "../../../../../app/hooks";
 import { selectHerosId } from "../../../../../features/match/matchSelectors";
 import { processBet } from "../../../../../features/match/matchSlice";
 
 interface RaiseButtonProps extends BettingInterface {
+  currentPlayerBet: number;
   sliderValue: number; // The total amount shown on the slider
 }
 

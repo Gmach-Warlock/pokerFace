@@ -1,5 +1,5 @@
 import { useAppDispatch } from "../../../../../../app/hooks";
-import { type ButtonPropsInterface } from "../../../../../../app/types";
+import type { ButtonPropsInterface } from "../../../../../../app/interfaces";
 
 import { processArenaAction } from "../../../../../../features/match/matchThunks";
 

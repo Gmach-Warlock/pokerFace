@@ -1,4 +1,4 @@
-import type { GameInterface } from "../../app/types";
+import type { GameInterface } from "../../app/interfaces";
 
 export function generateRandomString(length: number) {
   let text = "";

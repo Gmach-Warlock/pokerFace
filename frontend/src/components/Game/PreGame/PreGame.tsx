@@ -173,7 +173,7 @@ export default function PreGame() {
           <div className="setting">
             <label>Location</label>
             <select name="match-area-select" title="match area select">
-              {locations.map((area) => (
+              {locations.map((area: MatchLocationType) => (
                 <option key={area} value={area}>
                   {`The ${formatLocation(area)}`}
                 </option>

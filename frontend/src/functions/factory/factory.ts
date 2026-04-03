@@ -1,13 +1,21 @@
 import type {
-  ChipMapInterface,
-  PlayerInterface,
   VillainThemeType,
-  CardInterface,
   CardValueType,
   CurrentLocationType,
   DeckStyleType,
+  MatchLocationType,
 } from "../../app/types";
-import { villainPool, cardSuitIcons, cardRankValues } from "../../app/assets";
+import type {
+  CardInterface,
+  ChipMapInterface,
+  PlayerInterface,
+} from "../../app/interfaces";
+import {
+  villainPool,
+  cardSuitIcons,
+  cardRankValues,
+  INITIAL_SESSION_STATS,
+} from "../../app/assets";
 import { generateRandomString } from "../utils/utils";
 
 export const createChips = (pot: number): ChipMapInterface => {
@@ -55,15 +63,7 @@ export const createVillain = (
     currentBet: 0,
     hasActed: false,
     isAllin: false,
-    sessionStats: {
-      handsWon: 0,
-      handsLost: 0,
-      currentWinStreak: 0,
-      currentLossStreak: 0,
-      totalSessionProfit: 0,
-      lastHandResult: null,
-    },
-    profile: {},
+    sessionStats: INITIAL_SESSION_STATS,
   };
 
   return newVillain;
@@ -109,3 +109,9 @@ export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
   }
   return shuffled;
 };
+export const spawnLocation = (id: MatchLocationType) => ({
+  id,
+  stats: { ...INITIAL_SESSION_STATS }, // Fresh stats from your assets!
+  bossDefeated: false,
+  rank: 0,
+});

@@ -1,4 +1,4 @@
-import { type PlayerInterface } from "../../../../../app/types";
+import type { PlayerInterface } from "../../../../../app/interfaces";
 import "./Opponent.css";
 import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";

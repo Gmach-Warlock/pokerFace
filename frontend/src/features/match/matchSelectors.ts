@@ -1,8 +1,16 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
 import { createChips } from "../../functions/factory/factory";
-import { handRanks, cardSuitIcons } from "../../app/assets";
-import { type CardSuitType, type DeckStyleType } from "../../app/types";
+import {
+  handRanks,
+  cardSuitIcons,
+  INITIAL_SESSION_STATS,
+} from "../../app/assets";
+import {
+  type CardSuitType,
+  type DeckStyleType,
+  type MatchLocationType,
+} from "../../app/types";
 import { evaluatePokerHand, getAIDiscardIndices } from "../../app/logic/logic";
 
 /**
@@ -222,22 +230,21 @@ export const selectInitialHeroState = createSelector(
     hasActed: false,
     actionMessage: "",
     isAllin: false,
-    sessionStats: {
-      handsWon: 0,
-      handsLost: 0,
-      currentWinStreak: 0,
-      currentLossStreak: 0,
-      totalSessionProfit: 0,
-      lastHandResult: null,
-    },
+    sessionStats: INITIAL_SESSION_STATS,
     profile: {
       level: 1,
       xp: 0,
-      nextLevel: 5, // or whatever your NextLevelXpType starts at
+      nextLevel: 5,
+      availableLocations: ["shelter"] as MatchLocationType[],
       availableDecks: ["arrowBolt"] as DeckStyleType[],
+      locationsVisited: ["none"] as MatchLocationType[],
+      locationsMastered: ["none"] as MatchLocationType[],
       currentDeckChoice: "arrowBolt" as DeckStyleType,
       plei: 0,
       isSpecial: false,
+      stats: {
+        lifetime: INITIAL_SESSION_STATS,
+      },
     },
   }),
 );
