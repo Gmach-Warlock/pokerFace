@@ -1,21 +1,18 @@
+import type { VillainThemeType } from "../../app/types/villainsTypes";
 import type {
-  VillainThemeType,
   CardValueType,
   CurrentLocationType,
   DeckStyleType,
   MatchLocationType,
-} from "../../app/types";
+} from "../../app/types/matchTypes";
 import type {
   CardInterface,
   ChipMapInterface,
   PlayerInterface,
-} from "../../app/interfaces";
-import {
-  villainPool,
-  cardSuitIcons,
-  cardRankValues,
-  INITIAL_SESSION_STATS,
-} from "../../app/assets";
+} from "../../app/interfaces/matchInterfaces";
+import { villainPool } from "../../app/assets/villainsAssets";
+import { INITIAL_SESSION_STATS } from "../../app/assets/profileAssets";
+import { cardSuitIcons, cardRankValues } from "../../app/assets/matchAssets";
 import { generateRandomString } from "../utils/utils";
 
 export const createChips = (pot: number): ChipMapInterface => {
@@ -56,14 +53,17 @@ export const createVillain = (
     name: newVillainName,
     type: "computer",
     difficulty: "normal",
-    currentHand: [],
-    isFolded: false,
     money: 500,
-    chips: chipMap,
-    currentBet: 0,
-    hasActed: false,
-    isAllin: false,
-    sessionStats: INITIAL_SESSION_STATS,
+
+    currentMatch: {
+      isFolded: false,
+      chips: chipMap,
+      currentBet: 0,
+      hasActed: false,
+      isAllin: false,
+      currentHand: [],
+      sessionStats: INITIAL_SESSION_STATS,
+    },
   };
 
   return newVillain;

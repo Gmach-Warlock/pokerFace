@@ -7,7 +7,7 @@ import {
   finishMatch,
   markNpcDiscard,
 } from "./matchSlice";
-import type { RootState } from "../../app/store";
+import type { RootState } from "../../app/store/store";
 
 import { selectNpcDiscards } from "./matchSelectors";
 import { logGameStep } from "../../functions/utils/utils";

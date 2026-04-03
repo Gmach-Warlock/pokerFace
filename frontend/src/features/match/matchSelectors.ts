@@ -1,17 +1,14 @@
 import { createSelector } from "@reduxjs/toolkit";
-import type { RootState } from "../../app/store";
+import type { RootState } from "../../app/store/store";
 import { createChips } from "../../functions/factory/factory";
+import { INITIAL_SESSION_STATS } from "../../app/assets/profileAssets";
+import type { MatchLocationType } from "../../app/types/matchTypes";
+import type { CardSuitType, DeckStyleType } from "../../app/types/matchTypes";
 import {
-  handRanks,
-  cardSuitIcons,
-  INITIAL_SESSION_STATS,
-} from "../../app/assets";
-import {
-  type CardSuitType,
-  type DeckStyleType,
-  type MatchLocationType,
-} from "../../app/types";
-import { evaluatePokerHand, getAIDiscardIndices } from "../../app/logic/logic";
+  evaluatePokerHand,
+  getAIDiscardIndices,
+} from "../../app/logic/gameLogic";
+import { cardSuitIcons, handRanks } from "../../app/assets/matchAssets";
 
 /**
  * ============================================================
@@ -45,7 +42,7 @@ export const selectIsBettingPhase = createSelector(
 );
 
 export const selectCurrentMaxBet = createSelector([selectMatch], (match) => {
-  const allBets = match.players.map((p) => p.currentBet ?? 0);
+  const allBets = match.players.map((p) => p.currentMatch.currentBet ?? 0);
   return Math.max(...allBets, 0);
 });
 /**
@@ -67,15 +64,15 @@ export const selectHeroMoney = createSelector(
 );
 export const selectHeroIsFolded = createSelector(
   [selectHero],
-  (h) => h?.isFolded ?? false,
+  (h) => h?.currentMatch.isFolded ?? false,
 );
 export const selectHeroHand = createSelector(
   [selectHero],
-  (h) => h?.currentHand ?? [],
+  (h) => h?.currentMatch.currentHand ?? [],
 );
 export const selectHeroCurrentBet = createSelector(
   [selectHero],
-  (h) => h?.currentBet ?? 0,
+  (h) => h?.currentMatch.currentBet ?? 0,
 );
 
 export const selectHeroChips = createSelector([selectHeroMoney], (money) =>
@@ -112,8 +109,8 @@ export const selectPlayers = (state: RootState) => state.match.players;
 export const selectNpcDiscards = createSelector([selectMatch], (match) => {
   // Returns an array of arrays: [[indices for NPC 1], [indices for NPC 2]]
   return match.players.map((player) => {
-    if (player.type === "computer" && !player.isFolded) {
-      return getAIDiscardIndices(player.currentHand);
+    if (player.type === "computer" && !player.currentMatch.isFolded) {
+      return getAIDiscardIndices(player.currentMatch.currentHand);
     }
     return [];
   });
@@ -127,8 +124,8 @@ export const selectOpponentStatusClass = createSelector(
   [selectPlayerById],
   (player) => {
     if (!player) return "";
-    if (player.isFolded) return "opponent__card--folded";
-    if (player.isAllin) return "opponent__card--all-in";
+    if (player.currentMatch.isFolded) return "opponent__card--folded";
+    if (player.currentMatch.isAllin) return "opponent__card--all-in";
     return "opponent__card--active";
   },
 );
@@ -143,11 +140,12 @@ export const selectPlayerMoney = createSelector(
 );
 export const selectIsPlayerFolded = createSelector(
   [selectPlayerById],
-  (p) => p?.isFolded ?? false,
+  (p) => p?.currentMatch.isFolded ?? false,
 );
 export const selectPlayerChips = createSelector(
   [selectPlayerById],
-  (p) => p?.chips ?? { white: 0, red: 0, blue: 0, green: 0, black: 0 },
+  (p) =>
+    p?.currentMatch.chips ?? { white: 0, red: 0, blue: 0, green: 0, black: 0 },
 );
 
 /**
@@ -248,22 +246,20 @@ export const selectInitialHeroState = createSelector(
     },
   }),
 );
-export const selectAvailableDecks = createSelector(
-  [selectPlayerData],
-  (player) => player.availableDecks,
-);
 
-export const selectAvailableLocations = createSelector(
-  [selectPlayerData],
-  (player) => player.availableLocations,
-);
+export const selectAvailableDecks = (state: RootState) =>
+  state.profile.playerData.profile?.availableDecks ?? ["arrowBolt"];
+
+export const selectAvailableLocations = (state: RootState) =>
+  state.profile.playerData.profile?.availableLocations ?? ["shelter"];
+
 export const selectPlayerHandEval = createSelector(
   [
     (state: RootState) => state.match.players,
     (_state: RootState, index: number) => index,
   ],
   (players, index) => {
-    const hand = players[index]?.currentHand || [];
+    const hand = players[index]?.currentMatch.currentHand || [];
     return evaluatePokerHand(hand);
   },
 );

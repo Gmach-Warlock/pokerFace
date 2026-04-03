@@ -1,6 +1,6 @@
-import type { PhaseInstruction } from "./interfaces";
+import type { VillainThemeType } from "./villainsTypes";
+import type { PhaseInstruction } from "../interfaces/matchInterfaces";
 
-export type AchievementCategory = "COMBAT" | "WEALTH" | "EXPLORATION" | "STYLE";
 export type AttributeValueType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type BettingActionType = "call" | "raise" | "fold" | "check";
 export type CardValueType =
@@ -53,7 +53,6 @@ export type DeckStyleType =
   | "redFire"
   | "theFlyingCow";
 export type DifficultyType = "easy" | "normal" | "hard";
-export type FetchStatusType = "idle" | "pending" | "failed" | "succeeded";
 export type GameDisplayType =
   | "title"
   | "match"
@@ -95,7 +94,7 @@ export type HandType =
   | "royal-flush"
   | "tbd";
 export type IconSizeType = "small" | "medium" | "large";
-export type LastResultType = "win" | "loss" | "fold " | null;
+export type LastResultType = "win" | "loss" | "fold " | "tie" | null;
 export type MatchType = "draw" | "holdem" | "stud";
 export type MatchLocationType =
   | "none"
@@ -109,23 +108,11 @@ export type MatchLocationType =
   | "stud-stay"
   | "atrium"
   | "zenith";
-export type MatchMapInterface = Partial<
+export type MatchMapType = Partial<
   Record<MatchLocationType, VillainThemeType[]>
 >;
-export type NextLevelXpType =
-  | 5
-  | 20
-  | 45
-  | 80
-  | 125
-  | 180
-  | 245
-  | 320
-  | 405
-  | 500;
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
 export type PlayerType = "human" | "computer";
-export type PlayStyleType = "passive" | "loose" | "tight" | "aggressive";
 export type PokerChoiceType =
   | "ante"
   | "call"
@@ -133,9 +120,3 @@ export type PokerChoiceType =
   | "fold"
   | "raise"
   | null;
-export type VillainThemeType =
-  | "classic"
-  | "gritty"
-  | "modern"
-  | "classy"
-  | "pro";

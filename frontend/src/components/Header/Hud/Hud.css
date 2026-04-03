@@ -78,3 +78,43 @@
   text-shadow: 0 0 2px black; /* Outline for readability */
   pointer-events: none; /* Text won't interfere with interaction */
 }
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f2ff, #0062ff);
+  box-shadow: 0 0 10px #00f2ff;
+  transition: width 0.4s ease-out;
+  width: 0%; /* Default */
+}
+
+/* Match the data-progress attribute to a width */
+.xp-bar-fill[data-progress^="1"] {
+  width: 10%;
+}
+.xp-bar-fill[data-progress^="2"] {
+  width: 20%;
+}
+.xp-bar-fill[data-progress^="3"] {
+  width: 30%;
+}
+.xp-bar-fill[data-progress^="4"] {
+  width: 40%;
+}
+.xp-bar-fill[data-progress^="5"] {
+  width: 50%;
+}
+.xp-bar-fill[data-progress^="6"] {
+  width: 60%;
+}
+.xp-bar-fill[data-progress^="7"] {
+  width: 70%;
+}
+.xp-bar-fill[data-progress^="8"] {
+  width: 80%;
+}
+.xp-bar-fill[data-progress^="9"] {
+  width: 90%;
+}
+.xp-bar-fill[data-progress="100"] {
+  width: 100%;
+}

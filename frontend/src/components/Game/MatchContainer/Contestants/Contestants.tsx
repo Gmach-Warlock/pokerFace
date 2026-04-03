@@ -1,4 +1,4 @@
-import { useAppSelector } from "../../../../app/hooks";
+import { useAppSelector } from "../../../../app/hooks/gameHooks";
 import { selectOpponents } from "../../../../features/match/matchSelectors";
 import ArenaCenter from "../ArenaCenter/ArenaCenter";
 import "./Contestants.css";

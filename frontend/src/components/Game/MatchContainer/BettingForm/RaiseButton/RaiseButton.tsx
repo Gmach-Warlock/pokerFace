@@ -1,5 +1,8 @@
-import type { BettingInterface } from "../../../../../app/interfaces";
-import { useAppDispatch, useAppSelector } from "../../../../../app/hooks";
+import type { BettingInterface } from "../../../../../app/interfaces/matchInterfaces";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../app/hooks/gameHooks";
 import { selectHerosId } from "../../../../../features/match/matchSelectors";
 import { processBet } from "../../../../../features/match/matchSlice";
 

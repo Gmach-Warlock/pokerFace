@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "react-router";
 import "./MatchContainer.css";
-import { useAppSelector } from "../../../app/hooks";
+import { useAppSelector } from "../../../app/hooks/gameHooks";
 import { useEffect } from "react";
 import PhaseAlert from "./PhaseAlert/PhaseAlert";
 import WinnerOverlay from "./WinnerOverlay/MatchResultsOverlay";

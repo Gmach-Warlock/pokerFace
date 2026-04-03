@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { useAppDispatch, useAppSelector, useSound } from "../../../app/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useSound,
+} from "../../../app/hooks/gameHooks";
 import { startMatch } from "../../../features/match/matchSlice";
 import {
   selectAvailableDecks,
@@ -15,7 +19,7 @@ import type {
   MatchLocationType,
   MatchType,
   NumberOfOpponentsType,
-} from "../../../app/types";
+} from "../../../app/types/matchTypes";
 import MatchTransition from "../MatchContainer/overlays/MatchTransition/MatchTransition";
 
 interface PendingMatchData {
@@ -39,7 +43,7 @@ export default function PreGame() {
   const [pendingMatchData, setPendingMatchData] =
     useState<PendingMatchData | null>(null);
   const [previewDeck, setPreviewDeck] = useState<string>(
-    availableDecks[0] || "arrowBolt",
+    availableDecks?.[0] ?? "arrowBolt",
   );
 
   const formatLocation = (text: string) =>
@@ -67,6 +71,7 @@ export default function PreGame() {
         matchType: matchType,
         numberOfDecks: numDecks as DeckNumberType,
         deckStyle: fullData.get("deck-style") as DeckStyleType,
+        // We pass the hero exactly as the interface expects now
         hero: initialHero,
       }),
     );
@@ -173,7 +178,7 @@ export default function PreGame() {
           <div className="setting">
             <label>Location</label>
             <select name="match-area-select" title="match area select">
-              {locations.map((area: MatchLocationType) => (
+              {((locations as MatchLocationType[]) ?? []).map((area) => (
                 <option key={area} value={area}>
                   {`The ${formatLocation(area)}`}
                 </option>

@@ -1,5 +1,5 @@
-import type { ChipColorType, ChipIconType } from "../../app/types";
-import { pokerChips, chipValues } from "../../app/assets";
+import type { ChipColorType, ChipIconType } from "../../app/types/matchTypes";
+import { chipValues, pokerChips } from "../../app/assets/matchAssets";
 import "./Chip.css";
 
 interface ChipProps {

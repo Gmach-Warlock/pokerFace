@@ -63,3 +63,8 @@
 .btn-bet:hover {
   filter: brightness(1.2);
 }
+
+.bet__quick {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}

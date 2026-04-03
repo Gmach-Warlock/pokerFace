@@ -1,11 +1,11 @@
-import { useAppDispatch } from "../../../../../../app/hooks";
-import type { ButtonPropsInterface } from "../../../../../../app/interfaces";
+import { useAppDispatch } from "../../../../../../app/hooks/gameHooks";
+import type { BettingButtonPropsInterface } from "../../../../../../app/interfaces/matchInterfaces";
 import { processArenaAction } from "../../../../../../features/match/matchThunks";
 
 export default function DealButton({
   label,
   isConfirming,
-}: ButtonPropsInterface) {
+}: BettingButtonPropsInterface) {
   const dispatch = useAppDispatch();
   const handleDeal = () => {
     dispatch(processArenaAction());
@@ -16,7 +16,7 @@ export default function DealButton({
       <button
         type="button"
         onClick={handleDeal}
-        className={isConfirming ? "btn-confirm-draw" : "btn-draw-standard"}
+        className={isConfirming ? "btn-confirm-draw" : "btn btn-draw-standard"}
       >
         {label}
       </button>

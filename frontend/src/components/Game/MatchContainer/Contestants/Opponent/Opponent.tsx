@@ -1,6 +1,9 @@
-import type { PlayerInterface } from "../../../../../app/interfaces";
 import "./Opponent.css";
-import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
+import type { PlayerInterface } from "../../../../../app/interfaces/matchInterfaces";
+import {
+  useAppSelector,
+  useMediaQuery,
+} from "../../../../../app/hooks/gameHooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
 import {
   selectDeckStyle,
@@ -42,7 +45,7 @@ export default function Opponent({ data }: OpponentPropsInterface) {
       </div>
 
       {/* Note: You could even move data.isFolded to a selector if you want to be 100% Redux-led! */}
-      {data.isFolded && (
+      {data.currentMatch.isFolded && (
         <div className="opponent__fold-overlay">
           <span>FOLDED</span>
         </div>

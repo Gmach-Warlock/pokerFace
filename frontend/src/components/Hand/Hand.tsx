@@ -1,9 +1,9 @@
 // Hand.tsx
-import type { HandInterface } from "../../app/interfaces";
+import type { HandInterface } from "../../app/interfaces/gameInterfaces";
 import Card from "../Card/Card";
 import "./Hand.css";
 import { toggleDiscard } from "../../features/match/matchSlice";
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { useAppSelector, useAppDispatch } from "../../app/hooks/gameHooks";
 import { selectDeckStyle } from "../../features/match/matchSelectors";
 
 export default function Hand(props: HandInterface) {

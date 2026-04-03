@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useAppDispatch, useSound } from "../../../app/hooks";
+import { useAppDispatch, useSound } from "../../../app/hooks/gameHooks";
 import { goToPreGame, quitPlaying } from "../../../features/game/gameSlice";
 import "./MainMenu.css";
 

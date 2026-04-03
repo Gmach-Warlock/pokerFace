@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./TitleScreenCards.css";
 import "./TitleScreenAnimations.css";
 import Hand from "../../../Hand/Hand";
-import { royalFlush } from "../../../../app/assets";
+import { royalFlush } from "../../../../app/assets/matchAssets";
 
 const PATTERNS = [
   "standard",

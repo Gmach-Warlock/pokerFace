@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "./store";
+import type { AppDispatch, RootState } from "../store/store";
 import { useEffect, useCallback, useState } from "react";
-import { type SoundEffectType } from "./assets";
-import { gameAudio } from "./assets";
+import type { SoundEffectType } from "../assets/gameAssets";
+import { gameAudio } from "../assets/gameAssets";
 import { Howl } from "howler";
 
 export function useMediaQuery(query: string): boolean {

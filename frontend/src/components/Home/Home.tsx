@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router";
-import { useAppSelector } from "../../app/hooks";
+import { useAppSelector } from "../../app/hooks/gameHooks";
 import { useEffect } from "react";
 import "./Home.css";
-import { API_URL } from "../../app/global";
+import { API_URL } from "../../app/global/global";
 
 export default function Home() {
   const authorized = useAppSelector((state) => state.profile.meta.authorized);

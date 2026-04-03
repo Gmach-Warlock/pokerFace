@@ -1,4 +1,4 @@
-import type { GamePhaseType } from "../../../../app/types";
+import type { GamePhaseType } from "../../../../app/types/matchTypes";
 import "./PhaseAlert.css";
 
 interface PhaseAlertProps {

@@ -1,25 +1,34 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+
 import type {
   MatchLocationType,
-  CurrentLocationType,
-  CardSideType,
   GamePhaseType,
   GamePhaseConfigType,
-  BettingActionType,
-} from "../../app/types";
+} from "../../app/types/matchTypes";
 import type {
-  GamePayloadInterface,
+  CurrentLocationType,
+  CardSideType,
+  BettingActionType,
+} from "../../app/types/matchTypes";
+import type { GamePayloadInterface } from "../../app/interfaces/gameInterfaces";
+import type {
   MatchInterface,
   PlayerInterface,
-} from "../../app/interfaces";
+  SessionStatsInterface,
+} from "../../app/interfaces/matchInterfaces";
 import { generateDeck, shuffleDeck } from "../../functions/factory/factory";
 import { createVillain } from "../../functions/factory/factory";
-import { matchMap, gamePhases, GamePhaseMap } from "../../app/assets";
+import {
+  matchMap,
+  matchPhases,
+  matchPhaseMap,
+  startingChips,
+} from "../../app/assets/matchAssets";
 import {
   pickAnteAmount,
   getNextActivePlayerIndex,
   evaluatePokerHand,
-} from "../../app/logic/logic";
+} from "../../app/logic/gameLogic";
 
 const initialGameState: MatchInterface = {
   numberOfOpponents: "tbd",
@@ -69,13 +78,13 @@ const matchSlice = createSlice({
         match.lastRaiserId = null;
 
         match.players.forEach((player) => {
-          player.hasActed = false;
-          player.currentBet = 0;
+          player.currentMatch.hasActed = false;
+          player.currentMatch.currentBet = 0;
         });
 
         match.activePlayerIndex = 0;
 
-        if (match.players[0].isFolded) {
+        if (match.players[0].currentMatch.isFolded) {
           match.activePlayerIndex = getNextActivePlayerIndex(match);
         }
 
@@ -98,11 +107,11 @@ const matchSlice = createSlice({
       match.currentBetOnTable = 0;
       match.lastRaiserId = null;
       match.players.forEach((p) => {
-        p.hasActed = false;
-        p.currentBet = 0;
+        p.currentMatch.hasActed = false;
+        p.currentMatch.currentBet = 0;
       });
 
-      match.activePlayerIndex = match.players[0].isFolded
+      match.activePlayerIndex = match.players[0].currentMatch.isFolded
         ? getNextActivePlayerIndex(match)
         : 0;
 
@@ -123,32 +132,33 @@ const matchSlice = createSlice({
       const dealtCard = { ...card, side };
       if (target === "hero") {
         dealtCard.currentLocation = "p1";
-        state.players[0].currentHand.push(dealtCard);
+        state.players[0].currentMatch.currentHand.push(dealtCard);
       } else if (target === "dealer") {
         dealtCard.currentLocation = "dealer";
         state.dealersHand.push(dealtCard);
       } else if (target === "opponent" && typeof index === "number") {
         const opponent = state.players[index];
         if (opponent) {
-          if (!opponent.currentHand) opponent.currentHand = [];
+          if (!opponent.currentMatch.currentHand)
+            opponent.currentMatch.currentHand = [];
           dealtCard.currentLocation = `p${index + 1}` as CurrentLocationType;
-          opponent.currentHand.push(dealtCard);
+          opponent.currentMatch.currentHand.push(dealtCard);
         }
       }
     },
     dealRound: (state) => {
       const match = state;
       const { type, phase } = match.currentPhase;
-      const typedMap = GamePhaseMap as GamePhaseConfigType;
+      const typedMap = matchPhaseMap as GamePhaseConfigType;
       const config = typedMap[type]?.[phase];
 
       if (!config || config.cards === 0) return;
 
       match.players.forEach((player, idx) => {
-        if (player.isFolded) return;
+        if (player.currentMatch.isFolded) return;
 
         if (phase === "draw") {
-          const discardCount = player.currentHand.filter(
+          const discardCount = player.currentMatch.currentHand.filter(
             (card) => card.isDiscarded,
           ).length;
 
@@ -157,14 +167,13 @@ const matchSlice = createSlice({
               ? `${player.name} stands pat.`
               : `${player.name} drew ${discardCount} cards.`;
 
-          player.currentHand = player.currentHand.filter(
-            (card) => !card.isDiscarded,
-          );
+          player.currentMatch.currentHand =
+            player.currentMatch.currentHand.filter((card) => !card.isDiscarded);
         }
 
         const cardsNeeded =
           config.cards === "variable" || phase === "draw"
-            ? 5 - player.currentHand.length
+            ? 5 - player.currentMatch.currentHand.length
             : (config.cards as number);
 
         const side = player.type === "human" ? config.hero : config.opp;
@@ -173,7 +182,7 @@ const matchSlice = createSlice({
         for (let i = 0; i < cardsNeeded; i++) {
           const card = match.deck.pop();
           if (card) {
-            player.currentHand.push({
+            player.currentMatch.currentHand.push({
               ...card,
               side: side,
               currentLocation: `p${idx + 1}` as CurrentLocationType,
@@ -192,8 +201,8 @@ const matchSlice = createSlice({
       const player = match.players.find((p) => p.id === playerId);
 
       if (player) {
-        player.isFolded = true;
-        player.hasActed = true;
+        player.currentMatch.isFolded = true;
+        player.currentMatch.hasActed = true;
         match.activePlayerIndex = getNextActivePlayerIndex(match);
       }
     },
@@ -223,10 +232,10 @@ const matchSlice = createSlice({
       const { playerIndex, cardIndices } = action.payload;
       const player = state.players[playerIndex];
 
-      if (player && player.currentHand) {
+      if (player && player.currentMatch.currentHand) {
         cardIndices.forEach((index) => {
-          if (player.currentHand[index]) {
-            player.currentHand[index].isDiscarded = true;
+          if (player.currentMatch.currentHand[index]) {
+            player.currentMatch.currentHand[index].isDiscarded = true;
           }
         });
       }
@@ -253,17 +262,21 @@ const matchSlice = createSlice({
       const player = match.players.find((p) => p.id === playerId);
 
       if (player && player.money >= amount) {
-        player.currentBet += amount;
+        player.currentMatch.currentBet += amount;
         player.money -= amount;
-        player.hasActed = true;
-        player.lastAction = "raise";
-        if (player.money === 0) player.isAllin = true;
+        player.currentMatch.hasActed = true;
+        player.currentMatch.lastAction = "raise";
+        if (player.money === 0) player.currentMatch.isAllin = true;
         match.pot += amount;
 
         // Reset hasActed for everyone ELSE
         match.players.forEach((p) => {
-          if (p.id !== playerId && !p.isFolded && !p.isAllin) {
-            p.hasActed = false;
+          if (
+            p.id !== playerId &&
+            !p.currentMatch.isFolded &&
+            !p.currentMatch.isAllin
+          ) {
+            p.currentMatch.hasActed = false;
           }
         });
       }
@@ -275,20 +288,21 @@ const matchSlice = createSlice({
       match.currentBetOnTable = 0;
       match.lastRaiserId = null;
       match.activePlayerIndex = 0;
+
       delete match.winnerId;
       delete match.winningHand;
 
       match.players.forEach((player) => {
-        player.currentHand = [];
-        player.isFolded = false;
-        player.isAllin = false;
-        player.currentBet = 0;
-        player.hasActed = false;
+        player.currentMatch.currentHand = [];
+        player.currentMatch.isFolded = false;
+        player.currentMatch.isAllin = false;
+        player.currentMatch.currentBet = 0;
+        player.currentMatch.hasActed = false;
       });
 
       const gameType = match.currentPhase.type;
       const phaseSequence = Object.keys(
-        gamePhases[gameType],
+        matchPhases[gameType],
       ) as GamePhaseType[];
       match.currentPhase.phase = phaseSequence[0];
       match.actionMessage = "";
@@ -309,43 +323,49 @@ const matchSlice = createSlice({
       if (!player) return;
 
       // 1. Mark player as having acted
-      player.hasActed = true;
-      player.lastAction = type; // Keep track of what they did for the UI
+      player.currentMatch.hasActed = true;
+      player.currentMatch.lastAction = type; // Keep track of what they did for the UI
 
       if (type === "fold") {
         match.actionMessage = `${player.name} folds!`;
-        player.isFolded = true;
+        player.currentMatch.isFolded = true;
       } else {
         // 2. Safety check: ensure they don't go negative
         const actualAmount = Math.min(player.money, amount);
 
         player.money -= actualAmount;
-        player.currentBet += actualAmount;
+        player.currentMatch.currentBet += actualAmount;
         match.pot += actualAmount;
 
         // 3. Handle All-In status
         if (player.money === 0 && actualAmount > 0) {
           match.actionMessage = `${player.name} is all in!`;
-          player.isAllin = true;
+          player.currentMatch.isAllin = true;
         }
 
         // 4. Update Table State for Raises
         if (type === "raise") {
           match.actionMessage = `${player.name} raise to ${match.currentBetOnTable}`;
-          match.currentBetOnTable = player.currentBet;
+          match.currentBetOnTable = player.currentMatch.currentBet;
           match.lastRaiserId = playerId;
 
           // IMPORTANT: Reset everyone else so they have to respond to the raise
           match.players.forEach((p) => {
-            if (p.id !== playerId && !p.isFolded && !p.isAllin) {
-              p.hasActed = false;
+            if (
+              p.id !== playerId &&
+              !p.currentMatch.isFolded &&
+              !p.currentMatch.isAllin
+            ) {
+              p.currentMatch.hasActed = false;
             }
           });
         }
       }
 
       // 5. Check for "Last Man Standing" (Everyone else folded)
-      const activePlayers = match.players.filter((p) => !p.isFolded);
+      const activePlayers = match.players.filter(
+        (p) => !p.currentMatch.isFolded,
+      );
       if (
         activePlayers.length === 1 &&
         match.currentPhase.phase !== "showdown"
@@ -373,12 +393,14 @@ const matchSlice = createSlice({
     resolveShowdown: (state) => {
       const match = state;
 
-      const activePlayers = match.players.filter((p) => !p.isFolded);
+      const activePlayers = match.players.filter(
+        (p) => !p.currentMatch.isFolded,
+      );
 
       if (activePlayers.length === 0) return; // Edge case: everyone folded?
 
       const results = activePlayers.map((player) => {
-        const evaluation = evaluatePokerHand(player.currentHand);
+        const evaluation = evaluatePokerHand(player.currentMatch.currentHand);
         return {
           id: player.id,
           name: player.name,
@@ -420,13 +442,9 @@ const matchSlice = createSlice({
 
       const count =
         numberOfOpponents === "tbd" ? 1 : (numberOfOpponents as number);
-
-      // FIX: Use 'as keyof typeof matchMap' to force TS to allow the indexing
-      // Also added a fallback to ensure availableThemes is never undefined
       const availableThemes = matchMap[
         matchLocation as keyof typeof matchMap
       ] || ["classic"];
-
       const selectedTheme =
         availableThemes[Math.floor(Math.random() * availableThemes.length)];
 
@@ -436,14 +454,18 @@ const matchSlice = createSlice({
       while (newOpponents.length < count) {
         const candidate = createVillain(selectedTheme);
         if (!usedNames.has(candidate.name)) {
-          // Ensure we spread the candidate and initialize match-specific fields
           newOpponents.push({
             ...candidate,
-            currentHand: [],
-            currentBet: 0,
-            hasActed: false,
-            isFolded: false, // Adding safety initializers
-            isAllin: false,
+            // Ensure villain also has the nested match object initialized
+            currentMatch: {
+              currentHand: [],
+              isFolded: false,
+              isAllin: false,
+              currentBet: 0,
+              hasActed: false,
+              chips: startingChips, // Assuming villains need chips too
+              sessionStats: {} as SessionStatsInterface,
+            },
           });
           usedNames.add(candidate.name);
         }
@@ -452,11 +474,16 @@ const matchSlice = createSlice({
       state.players = [
         {
           ...hero,
-          currentHand: [],
-          currentBet: 0,
-          hasActed: false,
-          isFolded: false,
-          isAllin: false,
+          // FIX: Move flat properties into the currentMatch nest
+          currentMatch: {
+            currentHand: [],
+            currentBet: 0,
+            hasActed: false,
+            isFolded: false,
+            isAllin: false,
+            chips: startingChips,
+            sessionStats: {} as SessionStatsInterface,
+          },
         },
         ...newOpponents,
       ];
@@ -468,7 +495,7 @@ const matchSlice = createSlice({
 
       const gameType = state.currentPhase.type;
       state.currentPhase.phase = (
-        Object.keys(gamePhases[gameType]) as GamePhaseType[]
+        Object.keys(matchPhases[gameType]) as GamePhaseType[]
       )[0];
     },
 
@@ -486,9 +513,9 @@ const matchSlice = createSlice({
 
       const hero = state.players.find((p) => p.type === "human");
 
-      if (hero && hero.currentHand[cardIndex]) {
-        hero.currentHand[cardIndex].isDiscarded =
-          !hero.currentHand[cardIndex].isDiscarded;
+      if (hero && hero.currentMatch.currentHand[cardIndex]) {
+        hero.currentMatch.currentHand[cardIndex].isDiscarded =
+          !hero.currentMatch.currentHand[cardIndex].isDiscarded;
       }
     },
   },

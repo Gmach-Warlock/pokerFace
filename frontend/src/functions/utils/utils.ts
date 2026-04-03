@@ -1,4 +1,4 @@
-import type { GameInterface } from "../../app/interfaces";
+import type { GameInterface } from "../../app/interfaces/gameInterfaces";
 
 export function generateRandomString(length: number) {
   let text = "";
@@ -38,14 +38,15 @@ export const logGameStep = (
     match.players.map((p) => ({
       name: p.name,
       money: p.money,
-      isFolded: p.isFolded,
-      hasActed: p.hasActed,
-      lastAction: p.lastAction,
+      isFolded: p.currentMatch.isFolded,
+      hasActed: p.currentMatch.hasActed,
+      lastAction: p.currentMatch.lastAction,
     })),
   );
 
   console.groupEnd();
 };
+
 /* function getSituation(player: PlayerInterface, personality: CharacterPersonality): CurrentSituationType {
   // 1. Priority Checks (Time-sensitive/Action-sensitive)
   if (isHeroTakingTooLong) return "nagging";

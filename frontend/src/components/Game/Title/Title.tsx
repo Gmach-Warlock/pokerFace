@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useAppDispatch, useSound } from "../../../app/hooks";
+import { useAppDispatch, useSound } from "../../../app/hooks/gameHooks";
 import { goToMainMenu } from "../../../features/game/gameSlice";
 import "./Title.css";
 import { useCallback, useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export default function Title() {
 
     setTimeout(() => {
       dispatch(goToMainMenu());
-      navigate("/game/mainMenu");
+      navigate("/game/world");
     }, 1500);
   }, [dispatch, navigate, isExiting, playSound]);
 

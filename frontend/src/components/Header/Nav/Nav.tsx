@@ -1,6 +1,6 @@
 import LoginButton from "./LoginButton/LoginButton";
 import LogoutButton from "./LogoutButton/LogoutButton";
-import { useAppSelector } from "../../../app/hooks";
+import { useAppSelector } from "../../../app/hooks/gameHooks";
 import "./Nav.css";
 
 export default function Nav() {

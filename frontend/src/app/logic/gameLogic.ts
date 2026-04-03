@@ -1,30 +1,30 @@
 import type {
   BettingActionType,
   DifficultyType,
-  NextLevelXpType,
   MatchLocationType,
-} from "../types";
+} from "../types/matchTypes";
 import type {
   CardInterface,
-  GameInterface,
   PlayerInterface,
   MatchInterface,
   EvaluatedHandInterface,
-} from "../interfaces";
-import { anteMap, handRanks, LEVEL_UP_REWARDS } from "../assets";
+} from "../interfaces/matchInterfaces";
+import type { GameInterface } from "../interfaces/gameInterfaces";
+import { LEVEL_UP_REWARDS } from "../assets/profileAssets";
+import { anteMap, handRanks } from "../assets/matchAssets";
 
 export const calculateShowdown = (
   match: MatchInterface,
   isFirstMatch: boolean,
   isFirstWin: boolean,
 ) => {
-  const activePlayers = match.players.filter((p) => !p.isFolded);
+  const activePlayers = match.players.filter((p) => !p.currentMatch.isFolded);
   if (activePlayers.length === 0) return;
 
   // 1. Evaluate all hands
   const evaluations = activePlayers.map((p) => ({
     id: p.id,
-    ...evaluatePokerHand(p.currentHand),
+    ...evaluatePokerHand(p.currentMatch.currentHand),
   }));
 
   // 2. Determine Winner and assign to match object
@@ -134,10 +134,13 @@ export const executeTurn = (
   // 2. Calculate the chip amount based on the decision
   let amount = 0;
   if (decision === "call") {
-    amount = Math.max(0, currentBetOnTable - (npc.currentBet || 0));
+    amount = Math.max(
+      0,
+      currentBetOnTable - (npc.currentMatch.currentBet || 0),
+    );
   } else if (decision === "raise") {
     // Standard raise: match the bet + a fixed increment (e.g., 50)
-    amount = currentBetOnTable + 50 - (npc.currentBet || 0);
+    amount = currentBetOnTable + 50 - (npc.currentMatch.currentBet || 0);
   }
   // "fold" or "check" result in 0 amount
 
@@ -163,7 +166,7 @@ export const getNPCAction = (
   const normalizedStrength = (value / 900) * 100;
 
   // 2. Logic: Determine if we are checking vs calling
-  const amountToCall = currentBet - (npc.currentBet || 0);
+  const amountToCall = currentBet - (npc.currentMatch.currentBet || 0);
   const canCheck = amountToCall <= 0;
 
   const defaultPassAction: BettingActionType = canCheck ? "check" : "call";
@@ -256,10 +259,12 @@ export const handleFoldLogic = (state: GameInterface, playerId: string) => {
     return;
   } else {
     const opponent = match.players.find((o) => o.id === playerId);
-    if (opponent) opponent.isFolded = true;
+    if (opponent) opponent.currentMatch.isFolded = true;
   }
 
-  const activeOpponents = match.players.filter((opp) => !opp.isFolded);
+  const activeOpponents = match.players.filter(
+    (opp) => !opp.currentMatch.isFolded,
+  );
   const heroFolded = state.currentlyDisplayed === "postGame";
 
   if (activeOpponents.length === 0 && !heroFolded) {
@@ -304,7 +309,7 @@ export const getNextActivePlayerIndex = (match: MatchInterface) => {
   for (let i = 0; i < totalPlayers; i++) {
     const player = match.players[nextIndex];
 
-    if (!player.isFolded && !player.isAllin) {
+    if (!player.currentMatch.isFolded && !player.currentMatch.isAllin) {
       return nextIndex;
     }
     // If this player can't act, try the next one
@@ -312,26 +317,4 @@ export const getNextActivePlayerIndex = (match: MatchInterface) => {
   }
 
   return match.activePlayerIndex; // Fallback
-};
-
-const LEVEL_THRESHOLDS: NextLevelXpType[] = [
-  5, 20, 45, 80, 125, 180, 245, 320, 405, 500,
-];
-
-export const checkLevelUp = (currentLevel: number, currentXp: number) => {
-  const requiredXp = LEVEL_THRESHOLDS[currentLevel - 1] ?? 999999;
-
-  if (currentXp >= requiredXp) {
-    return {
-      didLevelUp: true,
-      newLevel: currentLevel + 1,
-      nextThreshold: LEVEL_THRESHOLDS[currentLevel] ?? null,
-    };
-  }
-
-  return {
-    didLevelUp: false,
-    newLevel: currentLevel,
-    nextThreshold: requiredXp,
-  };
 };

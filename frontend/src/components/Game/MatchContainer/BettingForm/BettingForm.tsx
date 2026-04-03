@@ -1,9 +1,16 @@
-import type { BettingInterface } from "../../../../app/interfaces";
+import type { BettingInterface } from "../../../../app/interfaces/matchInterfaces";
 import "./BettingForm.css";
 import { useState, useEffect } from "react";
 import CallButton from "./CallButton/CallButton";
 import FoldButton from "./FoldButton/FoldButton";
 import RaiseButton from "./RaiseButton/RaiseButton";
+import QuarterInButton from "./QuarterInButton/QuarterInButton";
+import HalfInButton from "./HalfButton/HalfInButton";
+import ThreeQuartersInButton from "./ThreeQuartersInButton/ThreeQuartersInButton";
+import AllInButton from "./AllInButton/AllInButton";
+import { selectPot } from "../../../../features/match/matchSelectors";
+import { useAppSelector } from "../../../../app/hooks/gameHooks";
+import MatchPotButton from "./MatchPotButton/MatchPotButton";
 
 export default function BettingForm({
   heroMoney,
@@ -15,16 +22,57 @@ export default function BettingForm({
 
   const callAmount = Math.max(0, currentTableBet - playerBet);
   const [betAmount, setBetAmount] = useState(callAmount);
+  const currentPot = useAppSelector(selectPot);
 
   useEffect(() => {
     setBetAmount(callAmount);
   }, [callAmount]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setBetAmount(val);
+  };
+
+  const handleQuickBet = (percentage: number) => {
+    // Calculate the fraction of heroMoney
+    const amount = Math.floor((heroMoney ?? 0) * percentage);
+
+    // Optional: Ensure it's at least the minimum call/raise amount
+    const clampedAmount = Math.max(amount, currentTableBet + 5);
+
+    setBetAmount(clampedAmount);
+  };
+
+  const handlePotBet = (multiplier: number) => {
+    // Assuming 'currentPot' is passed in as a prop
+    const potSize = currentPot + callAmount;
+    const amount = Math.floor(potSize * multiplier);
+
+    // Keep using your clamped logic!
+    setBetAmount(Math.min(amount, heroMoney ?? 0));
+  };
+
   return (
     <div className="betting-form-container">
-      <div className="bet__input"></div>
+      <div className="bet__input">
+        <label htmlFor="bet__manual-entry">Enter Bet Amount</label>
+        <input
+          type="number"
+          name="bet__manual-entry"
+          id="bet__manual-entry"
+          className="bet__manual-entry"
+          value={betAmount}
+          onChange={handleInputChange}
+        />
+      </div>
 
-      <div className="bet__quick"></div>
+      <div className="bet__quick">
+        <QuarterInButton onClick={() => handleQuickBet(0.25)} />
+        <HalfInButton onClick={() => handleQuickBet(0.5)} />
+        <ThreeQuartersInButton onClick={() => handleQuickBet(0.75)} />
+        <AllInButton onClick={() => handleQuickBet(1.0)} />
+        <MatchPotButton onClick={() => handlePotBet(1.0)} />
+      </div>
 
       <div>
         <input
@@ -33,7 +81,7 @@ export default function BettingForm({
           min={currentTableBet + 5} // Min raise is usually 1 increment above table bet
           max={heroMoney}
           value={betAmount}
-          onChange={(e) => setBetAmount(Number(e.target.value))}
+          onChange={handleInputChange}
         />
       </div>
 

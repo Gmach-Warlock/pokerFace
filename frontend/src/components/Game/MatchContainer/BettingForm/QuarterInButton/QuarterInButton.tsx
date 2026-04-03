@@ -1,12 +1,13 @@
-export default function QuarterInButton() {
-  const handleQuarterIn = () => {};
+import type { BettingButtonProps } from "../../../../../app/interfaces/matchInterfaces";
+
+export default function QuarterInButton({ onClick }: BettingButtonProps) {
   return (
     <div>
       <button
         type="button"
         title="quarter in button"
         className="btn btn--quarter-in"
-        onClick={handleQuarterIn}
+        onClick={onClick}
       >
         25%
       </button>

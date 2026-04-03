@@ -1,5 +1,8 @@
 import "./MatchResultsOverlay.css";
-import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../app/hooks/gameHooks";
 
 import {
   selectWinnerId,

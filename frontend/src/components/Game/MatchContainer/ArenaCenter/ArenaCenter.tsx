@@ -1,5 +1,9 @@
-import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
-import type { BettingActionType } from "../../../../app/types";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../app/hooks/gameHooks";
+
+import type { BettingActionType } from "../../../../app/types/matchTypes";
 
 import {
   selectActionButtonLabel,

@@ -1,4 +1,7 @@
-import { useAppSelector, useMediaQuery } from "../../../../../app/hooks";
+import {
+  useAppSelector,
+  useMediaQuery,
+} from "../../../../../app/hooks/gameHooks";
 import ChipStacks from "../../../../ChipStacks/ChipStacks";
 import "./OurHero.css";
 

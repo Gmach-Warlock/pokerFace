@@ -1,4 +1,7 @@
-import { useAppDispatch, useAppSelector } from "../../../../../app/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../app/hooks/gameHooks";
 import { selectHerosId } from "../../../../../features/match/matchSelectors";
 import { foldHand } from "../../../../../features/match/matchSlice";
 

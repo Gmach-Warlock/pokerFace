@@ -1,0 +1,61 @@
+/* WorldMap.css */
+
+.map-canvas {
+  display: grid;
+  /* Creates a 12x12 grid where every cell is equal size */
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+
+  width: 100%;
+  height: 600px;
+  background: #020508;
+  border: 1px solid #00f3ff;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Perfectly centers the icon and text inside the grid square */
+  place-self: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.map__the-shelter {
+  grid-column: 6; /* Centered horizontally */
+  grid-row: 11; /* Near the bottom */
+}
+
+/* Mid-Point */
+.map__neon-alley {
+  grid-column: 4;
+  grid-row: 7;
+}
+
+/* Higher Up */
+.map__the-halls {
+  grid-column: 8;
+  grid-row: 3;
+}
+
+/* Visuals */
+.node-label {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.75rem;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.map-node.active .node-label {
+  color: #00f3ff;
+  text-shadow: 0 0 8px #00f3ff;
+}
+
+.map-node.locked {
+  filter: grayscale(100%) opacity(0.5);
+}

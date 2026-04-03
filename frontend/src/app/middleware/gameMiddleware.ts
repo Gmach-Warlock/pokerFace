@@ -8,11 +8,11 @@ import {
   dealRound,
   processBet,
   resolveShowdown,
-} from "../features/match/matchSlice";
-import type { RootState } from "./store";
-import { getNPCAction } from "./logic/logic";
+} from "../../features/match/matchSlice";
+import type { RootState } from "../store/store";
+import { getNPCAction } from "../logic/gameLogic";
 
-import { selectPlayerHandEval } from "../features/match/matchSelectors";
+import { selectPlayerHandEval } from "../../features/match/matchSelectors";
 
 const deckListener = createListenerMiddleware();
 
@@ -52,14 +52,16 @@ deckListener.startListening({
     }
 
     // --- PHASE ADVANCEMENT LOGIC ---
-    const activePlayers = players.filter((p) => !p.isFolded && !p.isAllin);
+    const activePlayers = players.filter(
+      (p) => !p.currentMatch.isFolded && !p.currentMatch.isAllin,
+    );
 
     // Safety check: if everyone folded, processBet handles it, so we exit here
     if (activePlayers.length <= 1) return;
 
-    const everyoneActed = activePlayers.every((p) => p.hasActed);
+    const everyoneActed = activePlayers.every((p) => p.currentMatch.hasActed);
     const betsEqual = activePlayers.every(
-      (p) => p.currentBet === currentBetOnTable,
+      (p) => p.currentMatch.currentBet === currentBetOnTable,
     );
 
     if (everyoneActed && betsEqual) {
@@ -84,7 +86,10 @@ deckListener.startListening({
 
     const currentWaitPlayer = players[activePlayerIndex];
 
-    if (currentWaitPlayer?.type === "computer" && !currentWaitPlayer.hasActed) {
+    if (
+      currentWaitPlayer?.type === "computer" &&
+      !currentWaitPlayer.currentMatch.hasActed
+    ) {
       await listenerApi.delay(
         currentWaitPlayer.npcTraits?.general.thinkTime || 1000,
       );
@@ -105,7 +110,7 @@ deckListener.startListening({
 
       const amountToCall = Math.max(
         0,
-        currentBetOnTable - (currentWaitPlayer.currentBet || 0),
+        currentBetOnTable - (currentWaitPlayer.currentMatch.currentBet || 0),
       );
 
       let amountToSend = 0;

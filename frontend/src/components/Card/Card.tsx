@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { cardSuitIcons } from "../../app/assets";
-import type { CardValueType, IconSizeType } from "../../app/types";
-import type { CardInterface } from "../../app/interfaces";
+import { cardSuitIcons } from "../../app/assets/matchAssets";
+import type { CardValueType, IconSizeType } from "../../app/types/matchTypes";
+import type { CardInterface } from "../../app/interfaces/matchInterfaces";
 import "./Card.css";
 
 export default function Card({

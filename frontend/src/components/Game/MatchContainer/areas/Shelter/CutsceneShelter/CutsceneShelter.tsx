@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSound } from "../../../../../../app/hooks";
+import { useSound } from "../../../../../../app/hooks/gameHooks";
 
 export interface SoundTrackInterface {
   play: (sprite?: string | number) => number;

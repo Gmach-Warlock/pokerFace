@@ -1,9 +1,9 @@
-import type { ButtonPropsInterface } from "../../../../../../app/interfaces";
+import type { BettingButtonPropsInterface } from "../../../../../../app/interfaces/matchInterfaces";
 
 export default function PlaceBetButton({
   label,
   isConfirming,
-}: ButtonPropsInterface) {
+}: BettingButtonPropsInterface) {
   const handlePlaceBet = () => {};
 
   return (

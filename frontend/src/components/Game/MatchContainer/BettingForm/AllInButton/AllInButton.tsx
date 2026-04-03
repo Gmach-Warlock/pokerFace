@@ -1,12 +1,13 @@
-export default function AllInButton() {
-  const handleAllIn = () => {};
+import type { BettingButtonProps } from "../../../../../app/interfaces/matchInterfaces";
+
+export default function AllInButton({ onClick }: BettingButtonProps) {
   return (
     <div>
       <button
         type="button"
         title="all in button"
         className="btn btn--all-in"
-        onClick={handleAllIn}
+        onClick={onClick}
       >
         All In
       </button>
