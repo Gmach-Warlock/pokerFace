@@ -130,15 +130,42 @@ export const xpMap = {
   four: 45,
   five: 80,
   six: 125,
+  seven: 180,
+  eight: 245,
+  nine: 320,
+  ten: 405,
+  eleven: 500,
 };
 
-export const locationRewardsMap = {
+export const locationRewardsMap: Record<
+  string,
+  { xpBase: number; pleiBase: number }
+> = {
   shelter: {
-    xpPerMatch: 1,
-    pleiPerMatch: 5,
+    xpBase: 20,
+    pleiBase: 5,
   },
-  "low-vault-lounge": {
-    xpPerMatch: 5,
-    pleiPerMatch: 10,
+  halls: {
+    xpBase: 50,
+    pleiBase: 15,
   },
+  neonAlley: {
+    xpBase: 120,
+    pleiBase: 40,
+  },
+};
+
+export const MAX_LEVEL = 50;
+export const BASE_XP = 100; // XP needed for Level 1 -> 2
+export const EXPONENT = 1.5; // Controls how steep the curve is (1.5 is classic MMO)
+
+/**
+ * Calculates total XP required to reach a specific level.
+ * Formula: BaseXP * (Level ^ Exponent)
+ */
+export const getXpRequiredForLevel = (level: number): number => {
+  if (level >= MAX_LEVEL) return 999_999_999; // The "Endless" cap
+
+  // This creates a curve: Level 2 ≈ 282, Level 10 ≈ 3,162, Level 49 ≈ 34,300
+  return Math.floor(BASE_XP * Math.pow(level, EXPONENT));
 };

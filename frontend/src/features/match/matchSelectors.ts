@@ -171,13 +171,18 @@ export const selectDiscardCount = createSelector(
   (hand) => hand.filter((card) => card.isDiscarded).length,
 );
 export const selectActionButtonLabel = createSelector(
-  [selectCurrentPhase, selectDiscardCount],
-  (phase, discardCount) => {
-    switch (phase) {
+  [selectCurrentPhase, selectDiscardCount, selectHeroAmountToCall],
+  (phase, discardCount, amountToCall) => {
+    const p = phase.toLowerCase(); // Safety first
+    switch (p) {
       case "ante":
         return "Ante Up & Deal";
       case "draw":
         return discardCount > 0 ? `Swap ${discardCount} Cards` : "Stand Pat";
+      case "bettingone":
+      case "bettingtwo":
+        // This is the core fix for the "Check" vs "Call" label
+        return amountToCall > 0 ? `Call $${amountToCall}` : "Check";
       case "showdown":
         return "See Results";
       default:

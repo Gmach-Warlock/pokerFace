@@ -10,3 +10,8 @@ export default function Header() {
     </header>
   );
 }
+
+/* const nextLevelXp = getXpRequiredForLevel(hero.profile.level);
+const progressPercent = (hero.profile.xp / nextLevelXp) * 100;
+
+// Render your Styled Progress Bar with width: `${progressPercent}%` */

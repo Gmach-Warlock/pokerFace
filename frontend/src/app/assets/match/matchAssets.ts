@@ -126,7 +126,8 @@ export const handRanks = {
     label: "Royal Flush",
   },
 };
-export const matchPhases = {
+
+export const matchPhaseMessages = {
   holdem: {
     preFlop: "Place your bets",
     flop: "The Flop",
@@ -152,6 +153,7 @@ export const matchPhases = {
     showdown: "Showdown",
   },
 };
+
 export const matchPhaseMap: GamePhaseConfigType = {
   draw: {
     notInGameYet: { cards: 0, target: "players", side: "face-down" },
@@ -276,6 +278,40 @@ export const pipPositions: Record<number, { col: number; row: number }[]> = {
     { col: 3, row: 7 },
   ],
 };
+
+export const phaseSequences = {
+  draw: ["ante", "deal", "bettingOne", "draw", "bettingTwo", "showdown"],
+  holdem: [
+    "ante", // Optional small/big blind phase
+    "deal", // Pre-flop (2 cards to players)
+    "bettingOne", // Pre-flop betting
+    "flop", // 3 community cards
+    "bettingTwo",
+    "turn", // 4th community card
+    "bettingThree",
+    "river", // 5th community card
+    "bettingFour",
+    "showdown",
+  ],
+  stud: [
+    "ante",
+    "thirdStreet", // Deal 2 down, 1 up
+    "bettingOne",
+    "fourthStreet", // 1 card up
+    "bettingTwo",
+    "fifthStreet", // 1 card up
+    "bettingThree",
+    "sixthStreet", // 1 card up
+    "bettingFour",
+    "seventhStreet", // 1 card down
+    "bettingFive",
+    "showdown",
+  ],
+} as const;
+
+// Helper to get the actual phase strings for type safety
+export type MatchVariant = keyof typeof phaseSequences;
+
 export const pokerChips = {
   black: {
     face: "/blackChipFace.png",

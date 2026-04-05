@@ -27,7 +27,10 @@ import {
   gamePhaseSequences,
 } from "../../app/assets/match/matchAssets";
 import {
+  checkLastManStanding,
+  getActivePlayers,
   getNextActivePlayerIndex,
+  prepareNewPhase,
   shuffleDeck,
 } from "../../app/logic/match/utils/utils";
 import { pickAnteAmount } from "../../app/logic/match/utils/utils";
@@ -36,6 +39,7 @@ import {
   evaluatePokerHand,
 } from "../../app/logic/match/evaluators/evaluators";
 import { generateRandomString } from "../../app/logic/general/generalUtils";
+import { generateBettingMessage } from "../../app/logic/match/utils/messageUtils";
 
 const initialMatchState: MatchInterface = {
   id: generateRandomString(10),
@@ -84,21 +88,7 @@ const matchSlice = createSlice({
 
       if (currentIdx < sequence.length - 1) {
         const nextPhase = sequence[currentIdx + 1];
-        state.currentPhase.phase = nextPhase;
-
-        state.currentBetOnTable = 0;
-        state.lastRaiserId = null;
-        state.players.forEach((p) => {
-          p.currentMatch.hasActed = false;
-          p.currentMatch.currentBet = 0;
-        });
-
-        state.activePlayerIndex = state.players[0].currentMatch.isFolded
-          ? getNextActivePlayerIndex(state)
-          : 0;
-
-        state.actionMessage = `Phase: ${nextPhase.toUpperCase()}`;
-        state.messageId += 1;
+        prepareNewPhase(state, nextPhase);
       }
     },
     checkAndRefillDeck: (state) => {
@@ -154,7 +144,6 @@ const matchSlice = createSlice({
       }
     },
     dealRound: (state) => {
-      // 1. Cast to the Union type to unlock all variant 'pipes'
       const match = state as MatchInterface;
       const { currentPhase } = match;
       const { type, phase } = currentPhase;
@@ -169,7 +158,6 @@ const matchSlice = createSlice({
 
       // --- 1. BOARD / COMMUNITY DEALING (Hold'em & Stud) ---
       if (config.target === "board") {
-        // Because we're in the 'holdem' pipe, communityCards is now visible
         if (match.matchType === "holdem") {
           const cardsToDeal = config.cards as number;
           for (let i = 0; i < cardsToDeal; i++) {
@@ -231,65 +219,33 @@ const matchSlice = createSlice({
     },
     foldHand: (state, action: PayloadAction<{ playerId: string }>) => {
       const { playerId } = action.payload;
-      const match = state;
-      const player = match.players.find((p) => p.id === playerId);
+      const player = state.players.find((p) => p.id === playerId);
 
-      if (player) {
-        player.currentMatch.isFolded = true;
-        player.currentMatch.hasActed = true;
-        player.currentMatch.lastAction = "fold";
+      if (!player) return;
 
-        match.actionMessage = `${player.name} folds`;
-        match.messageId += 1;
+      player.currentMatch.isFolded = true;
+      player.currentMatch.hasActed = true;
+      player.currentMatch.lastAction = "fold";
+      state.actionMessage = `${player.name} folds`;
+      state.messageId += 1;
 
-        // 1. Check for "Last Man Standing"
-        const activePlayers = match.players.filter(
-          (p) => !p.currentMatch.isFolded,
-        );
+      if (checkLastManStanding(state)) return;
 
-        if (activePlayers.length === 1) {
-          const winner = activePlayers[0];
-          winner.money += match.pot;
-          match.winnerId = winner.id ?? "";
-          match.pot = 0;
-          match.currentPhase.phase = "showdown";
-          return;
+      const activePlayers = getActivePlayers(state.players);
+      const roundOver = activePlayers.every((p) => p.currentMatch.hasActed);
+
+      if (roundOver) {
+        const { type, phase } = state.currentPhase;
+        const sequence = gamePhaseSequences[type];
+        const currentIdx = sequence.indexOf(phase);
+
+        if (currentIdx < sequence.length - 1) {
+          prepareNewPhase(state, sequence[currentIdx + 1]);
         }
-
-        // 2. Check if the betting round is actually over
-        // If everyone left has acted and bets are even (which they are on a fold)
-        const roundOver = activePlayers.every((p) => p.currentMatch.hasActed);
-
-        if (roundOver) {
-          // Use your existing advancePhase logic internally or call a helper
-          // This forces the game to move to 'draw' or 'bettingTwo'
-          const { type, phase } = match.currentPhase;
-          const sequence = gamePhaseSequences[type];
-          const currentIdx = sequence.indexOf(phase);
-
-          if (currentIdx < sequence.length - 1) {
-            const nextPhase = sequence[currentIdx + 1];
-            match.currentPhase.phase = nextPhase;
-
-            // Reset for the new phase
-            match.currentBetOnTable = 0;
-            match.lastRaiserId = null;
-            match.players.forEach((p) => {
-              p.currentMatch.hasActed = false;
-              p.currentMatch.currentBet = 0;
-            });
-
-            // Start the turn on the first non-folded player
-            match.activePlayerIndex = getNextActivePlayerIndex(match);
-            match.actionMessage = `Phase: ${nextPhase.toUpperCase()}`;
-          }
-        } else {
-          // If round isn't over, just move to the next NPC
-          match.activePlayerIndex = getNextActivePlayerIndex(match);
-        }
+      } else {
+        state.activePlayerIndex = getNextActivePlayerIndex(state);
       }
     },
-
     handlePlayerBroke: (
       state,
       action: PayloadAction<{ playerId: string; method: "plei" | "daily" }>,
@@ -352,7 +308,6 @@ const matchSlice = createSlice({
         if (player.money === 0) player.currentMatch.isAllin = true;
         match.pot += amount;
 
-        // Reset hasActed for everyone ELSE
         match.players.forEach((p) => {
           if (
             p.id !== playerId &&
@@ -405,14 +360,12 @@ const matchSlice = createSlice({
 
       if (!player) return;
 
-      // 1. Update Player State
       player.currentMatch.hasActed = true;
       player.currentMatch.lastAction = type;
 
       if (type === "fold") {
         player.currentMatch.isFolded = true;
       } else {
-        // Handle Money Movement
         const actualAmount = Math.min(player.money, amount);
         player.money -= actualAmount;
         player.currentMatch.currentBet += actualAmount;
@@ -422,12 +375,10 @@ const matchSlice = createSlice({
           player.currentMatch.isAllin = true;
         }
 
-        // 2. LOGIC FIX: Update Table Bet on Raise
         if (type === "raise") {
           match.currentBetOnTable = player.currentMatch.currentBet;
           match.lastRaiserId = playerId;
 
-          // Reset everyone else so they have to respond to the new price
           match.players.forEach((p) => {
             if (
               p.id !== playerId &&
@@ -439,7 +390,6 @@ const matchSlice = createSlice({
           });
         }
 
-        // 3. LOGIC FIX: If calling a bet that was already on the table
         if (
           type === "call" &&
           player.currentMatch.currentBet > match.currentBetOnTable
@@ -448,42 +398,23 @@ const matchSlice = createSlice({
         }
       }
 
-      // 4. Construct Message
-      let finalMessage = "";
-      if (player.currentMatch.isFolded) {
-        finalMessage = `${player.name} folds`;
-      } else if (player.currentMatch.isAllin) {
-        finalMessage = `${player.name} is ALL IN!`;
-      } else if (type === "raise") {
-        finalMessage = `${player.name} raises to $${match.currentBetOnTable}`;
-      } else if (type === "call") {
-        finalMessage = `${player.name} calls $${amount}`;
-      } else {
-        finalMessage = `${player.name} checks`;
+      if (type === "call" || type === "check") {
+        // Calculate exactly what they owe to match the table
+        const amountNeeded =
+          match.currentBetOnTable - player.currentMatch.currentBet;
+        const actualDeduction = Math.min(player.money, amountNeeded);
+
+        player.money -= actualDeduction;
+        player.currentMatch.currentBet += actualDeduction;
+        match.pot += actualDeduction;
+        player.currentMatch.hasActed = true;
       }
 
-      state.actionMessage = finalMessage;
+      state.actionMessage = generateBettingMessage(player, match, type, amount);
       state.messageId += 1;
 
-      // 5. Check for "Last Man Standing"
-      const activePlayers = match.players.filter(
-        (p) => !p.currentMatch.isFolded,
-      );
-      if (
-        activePlayers.length === 1 &&
-        match.currentPhase.phase !== "showdown"
-      ) {
-        const winner = activePlayers[0];
-        winner.money += match.pot;
-        match.winnerId = winner.id ?? "";
-        match.pot = 0;
-        match.currentPhase.phase = "showdown";
-        return;
-      }
+      if (checkLastManStanding(state)) return;
 
-      // 6. Advance the turn pointer
-      // If everyone has acted and bets are equal, the Thunk will see this
-      // state change and trigger advancePhase automatically.
       match.activePlayerIndex = getNextActivePlayerIndex(match);
     },
     quitMatch: (state) => {
@@ -502,8 +433,6 @@ const matchSlice = createSlice({
         (p) => !p.currentMatch.isFolded,
       );
 
-      // Edge case: if somehow everyone folded, the last person to fold should have
-      // been caught by your 'Last Man Standing' logic in the foldHand reducer.
       if (activePlayers.length === 0) return;
 
       const results = activePlayers.map((player) => {
@@ -511,13 +440,11 @@ const matchSlice = createSlice({
         return {
           id: player.id,
           name: player.name,
-          // 1. Updated from .value to .rankValue
           rankValue: evaluation.rankValue,
           handName: evaluation.label,
         };
       });
 
-      // 2. The comparison now works perfectly with the 0-900 scale
       const winnerResult = results.reduce((prev, current) =>
         prev.rankValue > current.rankValue ? prev : current,
       );
@@ -531,13 +458,10 @@ const matchSlice = createSlice({
         match.winningHand = winnerResult.handName;
         match.lastWinAmount = match.pot;
 
-        // Feedback for the dev console
         console.log(
           `${winningPlayer.name} wins $${match.pot} with ${winnerResult.handName}!`,
         );
       }
-
-      // Reset the pot for the next hand
       match.pot = 0;
     },
     startMatch: (state, action: PayloadAction<GamePayloadInterface>) => {

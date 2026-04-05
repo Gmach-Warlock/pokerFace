@@ -16,6 +16,19 @@ import type {
 import { anteMap, matchPhaseMap } from "../../../assets/match/matchAssets";
 import { INITIAL_SESSION_STATS } from "../../../assets/profile/profileAssets";
 
+export const checkLastManStanding = (state: MatchInterface) => {
+  const activePlayers = getActivePlayers(state.players);
+
+  if (activePlayers.length === 1 && state.currentPhase.phase !== "showdown") {
+    const winner = activePlayers[0];
+    winner.money += state.pot;
+    state.winnerId = winner.id ?? "";
+    state.pot = 0;
+    state.currentPhase.phase = "showdown";
+    return true;
+  }
+  return false;
+};
 export const executeTurn = (
   npc: PlayerInterface,
   evaluation: EvaluatedHandInterface,
@@ -47,7 +60,9 @@ export const executeTurn = (
     amount: amount,
   };
 };
-
+export const getActivePlayers = (players: PlayerInterface[]) => {
+  return players.filter((p) => !p.currentMatch.isFolded);
+};
 export const getCardDestination = (
   matchType: MatchType,
   phase: GamePhaseType,
@@ -107,7 +122,7 @@ export const handleFoldLogic = (state: GameInterface, playerId: string) => {
 
 export const logGameStep = (
   stage: string,
-  match: MatchInterface, // Changed from GameInterface to MatchInterface
+  match: MatchInterface,
   actionType?: string,
 ) => {
   const activePlayer = match.players[match.activePlayerIndex];
@@ -129,7 +144,6 @@ export const logGameStep = (
     `Pot: $${match.pot} | Table Bet: $${match.currentBetOnTable} | Deck: ${match.deck.length}`,
   );
 
-  // Monitor player status - critical for debugging "stuck" turns
   console.table(
     match.players.map((p) => ({
       name: p.name,
@@ -154,6 +168,22 @@ export const pickWeightedIndex = (arrayLength: number): number => {
   return Math.floor(skewedRandom * arrayLength);
 };
 
+export const prepareNewPhase = (
+  state: MatchInterface,
+  nextPhase: GamePhaseType,
+) => {
+  state.currentPhase.phase = nextPhase;
+  state.currentBetOnTable = 0;
+  state.lastRaiserId = null;
+  state.players.forEach((p) => {
+    p.currentMatch.hasActed = false;
+    p.currentMatch.currentBet = 0;
+  });
+  state.activePlayerIndex = getNextActivePlayerIndex(state);
+  state.actionMessage = `Phase: ${nextPhase.toUpperCase()}`;
+  state.messageId += 1;
+};
+
 export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
   const shuffled = [...deck];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -164,7 +194,7 @@ export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {
 };
 export const spawnLocation = (id: MatchLocationType) => ({
   id,
-  stats: { ...INITIAL_SESSION_STATS }, // Fresh stats from your assets!
+  stats: { ...INITIAL_SESSION_STATS },
   bossDefeated: false,
   rank: 0,
 });

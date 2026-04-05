@@ -1,5 +1,20 @@
 import type { NextLevelXpType } from "../../types/profileTypes";
-import { xpMap } from "../../assets/profile/profileAssets";
+import { xpMap, locationRewardsMap } from "../../assets/profile/profileAssets";
+
+export const calculateRewards = (location: string, playerLevel: number) => {
+  const config = locationRewardsMap[location] || locationRewardsMap.shelter;
+
+  // Example Scaling Logic:
+  // If the player is much higher level than the zone, they get less XP.
+  // If they are in a high-level zone, the reward is fat.
+  const levelDiff = Math.max(1, playerLevel);
+  const scaledXp = Math.floor(config.xpBase / (levelDiff * 0.5));
+
+  return {
+    xp: scaledXp,
+    plei: config.pleiBase,
+  };
+};
 
 export const calculateXpProgress = (currentTotalXp: number) => {
   // 1. Find the next goal (Total XP needed for next level)

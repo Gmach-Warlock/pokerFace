@@ -6,20 +6,24 @@ import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
 import { executeTurn, logGameStep } from "../../app/logic/match/utils/utils";
 import { selectNpcDiscards } from "./matchSelectors";
 import { processBet, resolveShowdown } from "./matchSlice";
-import type { MatchInterface } from "../../app/interfaces/matchInterfaces";
+import { logBettingState } from "../../app/logic/match/debuggers/matchDebuggers";
 
 export const processArenaAction = createAsyncThunk(
   "match/processArenaAction",
   async (_, { getState, dispatch }) => {
-    const state = getState() as RootState;
-    const match = state.match as MatchInterface;
-    const { currentPhase, players, activePlayerIndex } = match;
-    const matchType = match.matchType as string;
-    const phase = currentPhase.phase.toLowerCase();
+    // 1. Get initial snapshot
+    const initialState = getState() as RootState;
+    const matchType = initialState.match.matchType as string;
+    const phase = initialState.match.currentPhase.phase.toLowerCase();
+    const activePlayerIndex = initialState.match.activePlayerIndex;
+    const players = initialState.match.players;
 
-    logGameStep(`Processing ${matchType} - Phase: ${phase}`, state.match);
+    logGameStep(
+      `Processing ${matchType} - Phase: ${phase}`,
+      initialState.match,
+    );
+    console.log("DEBUG: Thunk is running for phase:", phase); // <--- ADD THIS
 
-    // --- 5-CARD DRAW LOGIC ---
     if (matchType === "draw") {
       switch (phase) {
         case "notingameyet":
@@ -34,7 +38,7 @@ export const processArenaAction = createAsyncThunk(
           break;
 
         case "draw": {
-          const npcDiscards = selectNpcDiscards(state);
+          const npcDiscards = selectNpcDiscards(initialState);
           npcDiscards.forEach((indices, idx) => {
             if (idx > 0)
               dispatch(
@@ -46,9 +50,12 @@ export const processArenaAction = createAsyncThunk(
           break;
         }
 
-        case "bettingone":
-        case "bettingtwo": {
+        case "bettingOne":
+        case "bettingTwo": {
+          const latestState = getState() as RootState;
           const currentPlayer = players[activePlayerIndex];
+          logBettingState("Before Advance Check", latestState.match);
+          console.log("testing one two three");
 
           // 1. NPC Turn Logic
           if (currentPlayer && currentPlayer.type === "computer") {
@@ -59,7 +66,7 @@ export const processArenaAction = createAsyncThunk(
             const npcDecision = executeTurn(
               currentPlayer,
               evaluation,
-              state.match,
+              initialState.match,
             );
 
             dispatch(
@@ -72,11 +79,13 @@ export const processArenaAction = createAsyncThunk(
             return;
           }
 
-          // 2. Universal Advance Check (Fixed the "Check/Call" hang)
           const activePlayers = players.filter((p) => !p.currentMatch.isFolded);
           const allActed = activePlayers.every((p) => p.currentMatch.hasActed);
+          const currentBetOnTable = initialState.match.currentBetOnTable;
+
+          // Use the currentBetOnTable from the LATEST state
           const betsEqual = activePlayers.every(
-            (p) => p.currentMatch.currentBet === state.match.currentBetOnTable,
+            (p) => p.currentMatch.currentBet === currentBetOnTable,
           );
 
           if (allActed && betsEqual) {
@@ -94,15 +103,6 @@ export const processArenaAction = createAsyncThunk(
         default:
           break;
       }
-    }
-
-    // --- TEXAS HOLD'EM LOGIC (Future Gary) ---
-    if (matchType === "holdem") {
-      console.log("let's play some holdem");
-    }
-
-    if (matchType === "stud") {
-      console.log("let's play 7 card stud");
     }
   },
 );

@@ -32,7 +32,7 @@ export default function Card({
 
     // Handle Pip Cards (Numbers)
     switch (true) {
-      case value >= 8:
+      case value >= 9:
         return "card__centerpiece-lg";
       default:
         return "card__centerpiece";

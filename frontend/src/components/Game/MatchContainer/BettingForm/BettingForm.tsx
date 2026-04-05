@@ -54,6 +54,19 @@ export default function BettingForm({
 
   return (
     <div className="betting-form-container">
+      <div className="bet__table-status">
+        <p>
+          Current Table Bet: <strong>${currentTableBet}</strong>
+        </p>
+        {callAmount > 0 ? (
+          <p className="call-warning">
+            To Stay: <strong>${callAmount}</strong>
+          </p>
+        ) : (
+          <p className="check-msg">Pot is checked to you.</p>
+        )}
+      </div>
+
       <div className="bet__input">
         <label htmlFor="bet__manual-entry">Enter Bet Amount</label>
         <input

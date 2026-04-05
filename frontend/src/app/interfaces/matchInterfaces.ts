@@ -222,3 +222,16 @@ export interface SessionStatsInterface {
   endTime: string | null;
   lastHandResult: LastResultType;
 }
+
+/* export interface GamePhaseInterface {
+  phase: GamePhaseType;
+  step: number;
+}
+
+export interface MatchInterface {
+  // ... other properties
+  currentPhase: GamePhaseInterface;
+  // Ensure matchType matches your map keys
+  matchType: keyof typeof phaseSequences; 
+  // ...
+} */
