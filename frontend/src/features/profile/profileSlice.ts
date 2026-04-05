@@ -17,7 +17,6 @@ const initialProfileState: ProfileInterface = {
     name: "GMach",
     type: "human",
     money: 500,
-    // --- NESTED MATCH DATA ---
     currentMatch: {
       chips: startingChips,
       currentBet: 0,
@@ -27,7 +26,6 @@ const initialProfileState: ProfileInterface = {
       currentHand: [],
       sessionStats: {} as SessionStatsInterface,
     },
-    // --- NESTED PERMANENT DATA ---
     profile: {
       level: 1,
       xp: 0,
@@ -41,7 +39,6 @@ const initialProfileState: ProfileInterface = {
       stats: {
         lifetime: {} as SessionStatsInterface,
       },
-      // Ensure achievements are initialized here if they aren't coming from a DB
       achievements: [],
       isSpecial: false,
     },

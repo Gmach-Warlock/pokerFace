@@ -3,21 +3,25 @@ import "./MatchContainer.css";
 import { useAppSelector } from "../../../app/hooks/gameHooks";
 import { useEffect } from "react";
 import PhaseAlert from "./PhaseAlert/PhaseAlert";
-import WinnerOverlay from "./WinnerOverlay/MatchResultsOverlay";
-import { selectOpponents } from "../../../features/match/matchSelectors";
+import WinnerOverlay from "./MatchResultsOverlay/MatchResultsOverlay";
+import {
+  selectOpponents,
+  selectCurrentPhase,
+} from "../../../features/match/matchSelectors";
 
 export default function MatchContainer() {
   const opponents = useAppSelector(selectOpponents || []);
-  const phase = useAppSelector(
-    (state) => state.game.currentMatch.currentPhase.phase,
-  );
+  const phase = useAppSelector(selectCurrentPhase);
   const winnerId = useAppSelector((state) => state.game.currentMatch.winnerId);
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If we are in the MatchContainer but have no opponents,
+    // the state likely wiped. Send them back to the Map.
     if (opponents.length === 0) {
-      navigate("/game/preGame", { replace: true });
+      console.warn("No opponents found in state. Redirecting to World Map.");
+      navigate("/game/world");
     }
   }, [opponents, navigate]);
 

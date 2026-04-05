@@ -1,40 +1,74 @@
 .phase-overlay {
   position: absolute;
-  top: 20%;
-  left: 0;
-  width: 100%;
-  white-space: nowrap;
+  top: 15%; /* Sits slightly above center to not block the cards */
+  left: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
-  z-index: 9999;
-  overflow: hidden;
+  z-index: 200;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  perspective: 1000px;
 }
 
 .phase-text {
-  display: inline-block;
-  font-size: 5rem;
-  font-weight: 900;
-  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: 3rem;
+  color: #f1c40f;
+  text-transform: uppercase;
+  letter-spacing: 8px;
   text-shadow:
-    0 0 15px rgba(0, 0, 0, 0.8),
-    2px 2px 0px #000;
-
-  /* Slower duration (4s) and a smoother timing function */
-  animation: phase-slide-slow 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    0 0 10px rgba(241, 196, 15, 0.8),
+    0 0 30px rgba(241, 196, 15, 0.4);
 }
 
-@keyframes phase-slide-slow {
+/* ANIMATION: ZOOM FROM DEPTH */
+[data-animation="zoom-depth"] .phase-text {
+  animation: fly-from-far 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+[data-animation="cyber-glitch"] .phase-text {
+  animation: glitch-in 1s steps(2) forwards;
+}
+
+@keyframes glitch-in {
   0% {
-    transform: translateX(110%);
+    transform: skew(20deg) translateX(-100vw);
     opacity: 0;
   }
-  15% {
+  10% {
+    transform: skew(-20deg) translateX(10vw);
     opacity: 1;
   }
-  85% {
+  20% {
+    transform: skew(0deg) translateX(0);
+  }
+  /* Add more jittery frames here... */
+  90% {
     opacity: 1;
   }
   100% {
-    transform: translateX(-110%);
     opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes fly-from-far {
+  0% {
+    opacity: 0;
+    transform: scale(0.1) translateZ(-500px);
+    filter: blur(10px);
+  }
+  20% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.1) translateZ(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5) translateZ(100px);
   }
 }

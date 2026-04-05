@@ -2,12 +2,12 @@ import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store/store";
 import { createChips } from "../../functions/factory/factory";
 import { INITIAL_SESSION_STATS } from "../../app/assets/profileAssets";
-import type { MatchLocationType } from "../../app/types/matchTypes";
+import type { MatchLocationType } from "../../app/types/worldMapTypes";
 import type { CardSuitType, DeckStyleType } from "../../app/types/matchTypes";
 import {
   evaluatePokerHand,
   getAIDiscardIndices,
-} from "../../app/logic/gameLogic";
+} from "../../app/logic/matchLogic";
 import { cardSuitIcons, handRanks } from "../../app/assets/matchAssets";
 
 /**
@@ -179,9 +179,7 @@ export const selectActionButtonLabel = createSelector(
       case "ante":
         return "Ante Up & Deal";
       case "draw":
-        return discardCount > 0
-          ? `Swap ${discardCount} Cards`
-          : "Stand Pat (Keep All)";
+        return discardCount > 0 ? `Swap ${discardCount} Cards` : "Stand Pat";
       case "showdown":
         return "See Results";
       default:

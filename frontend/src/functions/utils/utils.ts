@@ -1,4 +1,4 @@
-import type { GameInterface } from "../../app/interfaces/gameInterfaces";
+import type { MatchInterface } from "../../app/interfaces/matchInterfaces";
 
 export function generateRandomString(length: number) {
   let text = "";
@@ -12,35 +12,36 @@ export function generateRandomString(length: number) {
 }
 export const logGameStep = (
   stage: string,
-  state: GameInterface,
+  match: MatchInterface, // Changed from GameInterface to MatchInterface
   actionType?: string,
 ) => {
-  const match = state.currentMatch;
   const activePlayer = match.players[match.activePlayerIndex];
 
   console.group(
-    `%c[GAME STEP]: ${stage}`,
-    "color: #00ffff; font-weight: bold;",
+    `%c[MATCH STEP]: ${stage}`,
+    "color: #00f3ff; font-weight: bold; text-shadow: 0 0 5px #00f3ff;",
   );
   console.log(
-    `%cAction Type: %c${actionType || "N/A"}`,
+    `%cType: %c${match.matchType.toUpperCase()} | Phase: %c${match.currentPhase.phase}`,
     "font-weight: bold",
     "color: #ff00ff",
+    "color: #00ff00",
   );
-  console.log(`Current Phase: ${match.currentPhase.phase}`);
   console.log(
-    `Active Player: ${activePlayer?.name} (Index: ${match.activePlayerIndex})`,
+    `Active: ${activePlayer?.name || "None"} (Index: ${match.activePlayerIndex}) action type: ${actionType}`,
   );
-  console.log(`Pot: $${match.pot} | Current Bet: $${match.currentBetOnTable}`);
+  console.log(
+    `Pot: $${match.pot} | Table Bet: $${match.currentBetOnTable} | Deck: ${match.deck.length}`,
+  );
 
-  // Quick view of all players to check 'isFolded' or 'hasActed'
+  // Monitor player status - critical for debugging "stuck" turns
   console.table(
     match.players.map((p) => ({
       name: p.name,
-      money: p.money,
-      isFolded: p.currentMatch.isFolded,
-      hasActed: p.currentMatch.hasActed,
-      lastAction: p.currentMatch.lastAction,
+      chips: p.money,
+      folded: p.currentMatch.isFolded,
+      acted: p.currentMatch.hasActed,
+      last: p.currentMatch.lastAction,
     })),
   );
 

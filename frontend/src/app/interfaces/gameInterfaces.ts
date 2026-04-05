@@ -6,10 +6,10 @@ import type {
   GameDisplayType,
   GamePhaseType,
   HandType,
-  MatchLocationType,
   MatchType,
   NumberOfOpponentsType,
 } from "../types/matchTypes";
+import type { MatchLocationType } from "../types/worldMapTypes";
 import type { CardInterface, PlayerInterface } from "./matchInterfaces";
 
 export interface GameInterface {
@@ -52,7 +52,7 @@ export interface GameInterface {
 }
 export interface GamePayloadInterface {
   numberOfOpponents: NumberOfOpponentsType;
-  levelOfDifficulty: DifficultyType;
+  difficultyLevel: DifficultyType;
   matchLocation: MatchLocationType;
   matchType: MatchType;
   numberOfDecks: DeckNumberType;

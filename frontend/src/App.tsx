@@ -10,12 +10,12 @@ import Game from "./components/Game/Game";
 import Home from "./components/Home/Home";
 import Protected from "./components/Protected/Protected";
 import Title from "./components/Game/Title/Title";
-import PreGame from "./components/Game/PreGame/PreGame";
 import MatchContainer from "./components/Game/MatchContainer/MatchContainer";
 import Shelter from "./components/Game/MatchContainer/areas/Shelter/Shelter";
 import MainMenu from "./components/Game/MainMenu/MainMenu";
 import Halls from "./components/Game/MatchContainer/areas/Halls/Halls";
 import { WorldMap } from "./components/Game/WorldMap/WorldMap";
+import Lobby from "./components/Game/Lobby/Lobby";
 
 function App() {
   const router = createBrowserRouter(
@@ -28,7 +28,7 @@ function App() {
           <Route path="game" element={<Game />}>
             <Route index element={<Title />} />
             <Route path="title" element={<Title />} />
-            <Route path="preGame" element={<PreGame />} />
+            <Route path="lobby" element={<Lobby />} />
             <Route path="mainMenu" element={<MainMenu />} />
             <Route path="match" element={<MatchContainer />}>
               <Route path="shelter" element={<Shelter />} />

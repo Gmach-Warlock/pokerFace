@@ -2,7 +2,7 @@ import type {
   PlayerInterface,
   SessionStatsInterface,
 } from "../interfaces/matchInterfaces";
-import type { MatchLocationType } from "../types/matchTypes";
+import type { MatchLocationType } from "../types/worldMapTypes";
 
 export const calculateHandResults = (
   player: PlayerInterface,

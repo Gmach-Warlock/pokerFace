@@ -3,13 +3,13 @@ import type {
   CardValueType,
   CurrentLocationType,
   DeckStyleType,
-  MatchLocationType,
 } from "../../app/types/matchTypes";
 import type {
   CardInterface,
   ChipMapInterface,
   PlayerInterface,
 } from "../../app/interfaces/matchInterfaces";
+import type { MatchLocationType } from "../../app/types/worldMapTypes";
 import { villainPool } from "../../app/assets/villainsAssets";
 import { INITIAL_SESSION_STATS } from "../../app/assets/profileAssets";
 import { cardSuitIcons, cardRankValues } from "../../app/assets/matchAssets";

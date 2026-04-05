@@ -1,6 +1,6 @@
 import { INITIAL_SESSION_STATS } from "./profileAssets";
 import type { LocationDetailsInterface } from "../interfaces/worldMapInterfaces";
-import type { MatchLocationType } from "../types/matchTypes";
+import type { MatchLocationType } from "../types/worldMapTypes";
 
 export interface MapNodeInterface extends LocationDetailsInterface {
   id: MatchLocationType;

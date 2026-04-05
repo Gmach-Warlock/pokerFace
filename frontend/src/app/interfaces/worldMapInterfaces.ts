@@ -1,4 +1,5 @@
 import type { SessionStatsInterface } from "./matchInterfaces";
+import type { MatchLocationType } from "../types/worldMapTypes";
 
 export interface LevelTier {
   level: number;
@@ -36,4 +37,14 @@ export interface MatchMapInterface {
   "stud-stay": ["pro", "classic", "classy"];
   atrium: ["classic", "pro", "modern", "classy"];
   zenith: ["classic", "gritty", "modern", "classy", "pro"];
+}
+
+export interface WorldNodeInterface {
+  id: MatchLocationType;
+  displayName: string;
+  requirements: {
+    minLevel: number;
+    completedLocation?: MatchLocationType; // Traceable progression!
+  };
+  flavorText: string;
 }

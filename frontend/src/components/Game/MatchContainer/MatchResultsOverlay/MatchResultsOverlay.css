@@ -1,0 +1,26 @@
+.match-overlay {
+  /* 1. Lift it out of the flow */
+  position: absolute;
+
+  /* 2. Center it perfectly */
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  /* 3. Style it as a Card */
+  width: 90%;
+  max-width: 400px;
+  background: rgba(10, 10, 10, 0.95);
+  border: 2px solid #f1c40f; /* Gold border to match the win state */
+  border-radius: 15px;
+  padding: 2rem;
+  z-index: 100; /* Ensure it's above cards and table */
+
+  /* 4. Visual Punch */
+  box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
+  text-align: center;
+
+  /* 5. Glassmorphism (Optional but cool) */
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}

@@ -14,6 +14,8 @@
   --color-nt-accent-cyan: hsl(184, 100%, 50%);
   --color-nt-gold: hsl(45, 100%, 50%);
   --color-red-500: hsl(0, 100%, 50%);
+  --color-ember-500: hsl(15, 76%, 36%);
+  --color-fire-500: hsl(31, 62%, 54%);
   --color-green-500: hsl(120, 100%, 25%);
   --color-blue-500: hsl(240, 100%, 50%);
   --color-cyan-500: hsl(180, 100%, 50%);
@@ -28,10 +30,15 @@
   --ui-gold: hsl(50, 100%, 50%);
   --bg-dark: hsl(260, 75%, 8%);
 
-  --bw-hs: 0, 0%;
-  --red-hs: 0, 100%;
-  --green-hs: 120, 100%;
   --blue-hs: 240, 100%;
+  --bw-hs: 0, 0%;
+  --card-red-hs: 355, 78%;
+  --red-hs: 0, 100%;
+  --ember-hs: 15, 76%;
+  --fire-hs: 31, 62%;
+  --gold-hs: 50, 100%;
+  --glow-hs: 183, 100%;
+  --green-hs: 120, 100%;
   --table-felt-hs: 128, 27%;
   --table-wood-hs: 22, 46%;
   --nt-night-hs: 259, 75%;
@@ -39,9 +46,6 @@
   --nt-electric-cyan-hs: 184, 100%;
   --nt-gold-hs: 45, 100%;
   --neon-pink-hs: 306, 100%;
-  --card-red-hs: 355, 78%;
-  --gold-hs: 50, 100%;
-  --glow-hs: 183, 100%;
 }
 
 .btn {

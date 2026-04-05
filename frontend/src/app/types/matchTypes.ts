@@ -1,5 +1,6 @@
 import type { VillainThemeType } from "./villainsTypes";
 import type { PhaseInstruction } from "../interfaces/matchInterfaces";
+import type { MatchLocationType } from "./worldMapTypes";
 
 export type AttributeValueType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type BettingActionType = "call" | "raise" | "fold" | "check";
@@ -34,7 +35,7 @@ export type CurrentLocationType =
   | "p3"
   | "p4"
   | "p5"
-  | "dealer"
+  | "board"
   | "demo";
 export type CurrentSituationType =
   | "strongHand"
@@ -53,6 +54,13 @@ export type DeckStyleType =
   | "redFire"
   | "theFlyingCow";
 export type DifficultyType = "easy" | "normal" | "hard";
+export type DrawPhaseType =
+  | "ante"
+  | "deal"
+  | "bettingOne"
+  | "draw"
+  | "bettingTwo"
+  | "showdown";
 export type GameDisplayType =
   | "title"
   | "match"
@@ -61,21 +69,9 @@ export type GameDisplayType =
   | "settings"
   | "preGame";
 export type GamePhaseType =
-  | "preFlop"
-  | "flop"
-  | "turn"
-  | "river"
-  | "showdown"
-  | "ante"
-  | "deal"
-  | "bettingOne"
-  | "draw"
-  | "bettingTwo"
-  | "thirdStreet"
-  | "fourthStreet"
-  | "fifthStreet"
-  | "sixthStreet"
-  | "seventhStreet"
+  | DrawPhaseType
+  | HoldemPhaseType
+  | StudPhaseType
   | "notInGameYet";
 export type GamePhaseConfigType = Record<
   string,
@@ -93,25 +89,21 @@ export type HandType =
   | "straight-flush"
   | "royal-flush"
   | "tbd";
+export type HoldemPhaseType =
+  | "ante"
+  | "deal"
+  | "flop"
+  | "turn"
+  | "river"
+  | "showdown";
 export type IconSizeType = "small" | "medium" | "large";
-export type LastResultType = "win" | "loss" | "fold " | "tie" | null;
+export type LastResultType = "win" | "loss" | "fold" | "tie" | null;
 export type MatchType = "draw" | "holdem" | "stud";
-export type MatchLocationType =
-  | "none"
-  | "shelter"
-  | "low-vault-lounge"
-  | "neon-alley-club"
-  | "halls"
-  | "compound"
-  | "holdem-hotel"
-  | "draw-den"
-  | "stud-stay"
-  | "atrium"
-  | "zenith";
+
 export type MatchMapType = Partial<
   Record<MatchLocationType, VillainThemeType[]>
 >;
-export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | "tbd";
+export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | null;
 export type PlayerType = "human" | "computer";
 export type PokerChoiceType =
   | "ante"
@@ -120,3 +112,11 @@ export type PokerChoiceType =
   | "fold"
   | "raise"
   | null;
+export type StudPhaseType =
+  | "ante"
+  | "thirdStreet"
+  | "fourthStreet"
+  | "fifthStreet"
+  | "sixthStreet"
+  | "seventhStreet"
+  | "showdown";

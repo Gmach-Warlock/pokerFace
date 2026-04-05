@@ -1,4 +1,8 @@
-import type { CardSuitType } from "../types/matchTypes";
+import type {
+  CardSuitType,
+  GamePhaseType,
+  GamePhaseConfigType,
+} from "../types/matchTypes";
 import type {
   CardInterface,
   ChipMapInterface,
@@ -57,45 +61,68 @@ export const deckDesigns = {
   redFire: "/redFire.png",
   theFlyingCow: "/theFlyingCow.png",
 };
+export const gamePhaseSequences: Record<string, GamePhaseType[]> = {
+  draw: ["ante", "deal", "bettingOne", "draw", "bettingTwo", "showdown"],
+  holdem: ["ante", "deal", "flop", "turn", "river", "showdown"],
+  stud: [
+    "ante",
+    "thirdStreet",
+    "fourthStreet",
+    "fifthStreet",
+    "sixthStreet",
+    "seventhStreet",
+    "showdown",
+  ],
+};
 export const handRanks = {
   highCard: {
-    value: 0,
+    rankValue: 0,
+    strength: 0,
     label: "High Card",
   },
   onePair: {
-    value: 1,
+    rankValue: 100,
+    strength: 1,
     label: "One Pair",
   },
   twoPair: {
-    value: 2,
+    rankValue: 200,
+    strength: 2,
     label: "Two Pair",
   },
   threeOfAKind: {
-    value: 3,
+    rankValue: 300,
+    strength: 3,
     label: "Three of a Kind",
   },
   straight: {
-    value: 4,
+    rankValue: 400,
+    strength: 4,
     label: "Straight",
   },
   flush: {
-    value: 5,
+    rankValue: 500,
+    strength: 5,
     label: "Flush",
   },
   fullHouse: {
-    value: 6,
+    rankValue: 600,
+    strength: 6,
     label: "Full House",
   },
   fourOfAKind: {
-    value: 7,
+    rankValue: 700,
+    strength: 7,
     label: "Four of a Kind",
   },
   straightFlush: {
-    value: 8,
+    rankValue: 800,
+    strength: 8,
     label: "Straight Flush",
   },
   royalFlush: {
-    value: 9,
+    rankValue: 900,
+    strength: 9,
     label: "Royal Flush",
   },
 };
@@ -125,27 +152,41 @@ export const matchPhases = {
     showdown: "Showdown",
   },
 };
-export const matchPhaseMap = {
+export const matchPhaseMap: GamePhaseConfigType = {
   draw: {
-    notInGameYet: { cards: 5, hero: "front", opp: "back" }, // Add this!
-    ante: { cards: 5, hero: "front", opp: "back" }, // And this!    deal: { cards: 5, hero: "face-up", opp: "face-down" },
-    discard: { cards: 0, hero: "face-up", opp: "face-down" },
-    draw: { cards: "variable", hero: "face-up", opp: "face-down" },
+    notInGameYet: { cards: 0, target: "players", side: "face-down" },
+    ante: { cards: 0, target: "players", side: "face-down" },
+    deal: {
+      cards: 5,
+      target: "players",
+      side: "face-down",
+      hero: "face-up",
+      opp: "face-down",
+    },
+    discard: { cards: 0, target: "players", side: "face-up" },
+    draw: { cards: "variable", target: "players", side: "face-up" },
   },
   holdem: {
-    ante: { cards: 0, hero: "face-up", opp: "face-down" },
-    hole: { cards: 2, hero: "face-up", opp: "face-down" },
-    flop: { cards: 3, community: "face-up" },
-    turn: { cards: 1, community: "face-up" },
-    river: { cards: 1, community: "face-up" },
+    ante: { cards: 0, target: "players", side: "face-down" },
+    deal: { cards: 2, target: "players", side: "face-down" },
+    preflop: { cards: 0, target: "players", side: "face-down" }, // Betting only
+    flop: { cards: 3, target: "board", side: "face-up" },
+    bettingOne: { cards: 0, target: "players", side: "face-up" },
+    turn: { cards: 1, target: "board", side: "face-up" },
+    bettingTwo: { cards: 0, target: "players", side: "face-up" },
+    river: { cards: 1, target: "board", side: "face-up" },
+    bettingThree: { cards: 0, target: "players", side: "face-up" },
+    showdown: { cards: 0, target: "players", side: "face-up" },
   },
   stud: {
-    street2: { cards: 2, hero: "face-down", opp: "face-down" },
-    street3: { cards: 1, hero: "face-up", opp: "face-up" },
-    street4: { cards: 1, hero: "face-up", opp: "face-up" },
-    street5: { cards: 1, hero: "face-up", opp: "face-up" },
-    street6: { cards: 1, hero: "face-up", opp: "face-up" },
-    river: { cards: 1, hero: "face-down", opp: "face-down" },
+    ante: { cards: 0, target: "players", side: "face-down" },
+    street2: { cards: 2, target: "players", side: "face-down" },
+    street3: { cards: 1, target: "players", side: "face-up" }, // First "Upcard"
+    street4: { cards: 1, target: "players", side: "face-up" },
+    street5: { cards: 1, target: "players", side: "face-up" },
+    street6: { cards: 1, target: "players", side: "face-up" },
+    river: { cards: 1, target: "players", side: "face-down" }, // Final "Downcard"
+    showdown: { cards: 0, target: "players", side: "face-up" },
   },
 };
 export const matchMap: MatchMapInterface = {

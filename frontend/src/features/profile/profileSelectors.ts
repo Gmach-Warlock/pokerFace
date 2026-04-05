@@ -4,7 +4,6 @@ import { calculateXpProgress } from "../../functions/utils/profile";
 
 const selectProfileState = (state: RootState) => state.authorize;
 
-// 2. Focused Selectors (Tracing into the nests)
 export const selectPlayerData = createSelector(
   [selectProfileState],
   (profile) => profile.playerData,
@@ -15,21 +14,16 @@ export const selectProfileMeta = createSelector(
   (profile) => profile.meta,
 );
 
-// 3. Derived Selector (The "Smart" one)
-// This automatically calculates your HUD data whenever XP changes
 export const selectXpStats = createSelector(
   [selectPlayerData],
   (playerData) => {
     // Narrowing the type here:
     if (!playerData.profile) return { xpRemaining: 0, progressPercentage: 0 };
 
-    // Now TypeScript knows playerData.profile exists!
-    // No more red squiggly lines on 'xp'.
     return calculateXpProgress(playerData.profile.xp);
   },
 );
 
-// 4. Convenience Selectors
 export const selectUsername = createSelector(
   [selectProfileMeta],
   (meta) => meta.username,
@@ -41,7 +35,7 @@ export const selectCurrentPlei = createSelector(
 );
 
 export const selectProfileData = createSelector(
-  [selectPlayerData],
+  [(state: RootState) => state.profile.playerData],
   (playerData) => {
     return (
       playerData.profile ?? {
@@ -53,7 +47,7 @@ export const selectProfileData = createSelector(
         availableDecks: [],
         locationsVisited: [],
         locationsMastered: [],
-        stats: { lifetime: {} as string[] },
+        stats: { lifetime: {} },
         achievements: [],
       }
     );

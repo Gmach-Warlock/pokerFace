@@ -7,10 +7,20 @@
 }
 
 .match__arena {
+  flex: 1; /* This forces the arena to take up every available pixel */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 90vh;
-  padding: 8px;
+  margin-top: 0; /* Remove any lingering margins */
+}
+
+.match {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  justify-content: center;
+  align-items: center;
+  /* This creates the exact distance from the edge of the screen to your border */
+  padding: 12px;
   box-sizing: border-box;
+  background-color: #0d0d15; /* Or your theme background */
 }

@@ -45,3 +45,21 @@
   font-size: 1.5rem;
   animation: float 3s ease-in-out infinite;
 }
+
+@media (max-width: 768px) {
+  .shelter {
+    /* Keep the border and radius */
+    border: 2px solid hsla(0, 0%, 100%, 0.1);
+    border-radius: 20px;
+
+    /* Fill the container provided by MatchContainer's padding */
+    width: 100%;
+    flex: 1;
+
+    /* Remove any auto-margins that might be fighting the alignment */
+    margin: 0;
+
+    /* Ensure internal content doesn't bleed over the radius */
+    overflow: hidden;
+  }
+}

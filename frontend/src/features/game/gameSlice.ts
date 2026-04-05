@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { GameInterface } from "../../app/interfaces/gameInterfaces";
+import { startMatch } from "../match/matchSlice";
 
 const initialGameState: GameInterface = {
   isPlaying: false,
   currentlyDisplayed: "title",
   currentMatch: {
-    numberOfOpponents: "tbd",
+    numberOfOpponents: null,
     deckStyle: "arrowBolt",
     difficultyLevel: "normal",
     matchLocation: "shelter",
@@ -48,6 +49,12 @@ const gameSlice = createSlice({
     startPlaying: (state) => {
       state.isPlaying = true;
     },
+  },
+  extraReducers: (builder) => {
+    // Listen specifically for the startMatch action from the OTHER slice
+    builder.addCase(startMatch, (state) => {
+      state.isPlaying = true;
+    });
   },
 });
 

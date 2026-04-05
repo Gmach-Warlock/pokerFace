@@ -1,7 +1,10 @@
 import type {
   BettingActionType,
+  CurrentLocationType,
   DifficultyType,
-  MatchLocationType,
+  GamePhaseConfigType,
+  GamePhaseType,
+  MatchType,
 } from "../types/matchTypes";
 import type {
   CardInterface,
@@ -9,9 +12,51 @@ import type {
   MatchInterface,
   EvaluatedHandInterface,
 } from "../interfaces/matchInterfaces";
+import type { MatchLocationType } from "../types/worldMapTypes";
 import type { GameInterface } from "../interfaces/gameInterfaces";
 import { LEVEL_UP_REWARDS } from "../assets/profileAssets";
-import { anteMap, handRanks } from "../assets/matchAssets";
+import { anteMap, handRanks, matchPhaseMap } from "../assets/matchAssets";
+
+export const calculateBetResults = (
+  player: PlayerInterface,
+  amount: number,
+  currentPot: number,
+) => {
+  if (amount > player.money) {
+    throw new Error("Insufficient chips");
+  }
+
+  return {
+    newPlayerChips: player.money - amount,
+    newPot: currentPot + amount,
+    betConfirmed: true,
+  };
+};
+export const calculateCardsNeeded = (
+  type: string,
+  phase: string,
+  currentHandLength: number,
+): number => {
+  const config = matchPhaseMap[type]?.[phase];
+
+  if (!config) return 0;
+
+  if (config.cards === "variable") {
+    return 5 - currentHandLength;
+  }
+
+  if (config.target === "board") {
+    return 0;
+  }
+
+  if (typeof config.cards === "number") {
+    if (currentHandLength < config.cards) {
+      return config.cards - currentHandLength;
+    }
+  }
+
+  return 0;
+};
 
 export const calculateShowdown = (
   match: MatchInterface,
@@ -21,24 +66,20 @@ export const calculateShowdown = (
   const activePlayers = match.players.filter((p) => !p.currentMatch.isFolded);
   if (activePlayers.length === 0) return;
 
-  // 1. Evaluate all hands
   const evaluations = activePlayers.map((p) => ({
     id: p.id,
     ...evaluatePokerHand(p.currentMatch.currentHand),
   }));
 
-  // 2. Determine Winner and assign to match object
   const winner = evaluations.reduce((prev, curr) =>
-    curr.value > prev.value ? curr : prev,
+    curr.rankValue > prev.rankValue ? curr : prev,
   );
 
-  match.winnerId = winner.id ?? ""; // Assign to the match object
+  match.winnerId = winner.id ?? "";
   match.winningHand = winner.label;
 
-  // 3. Reward Logic for the Hero
   const hero = match.players.find((p) => p.type === "human");
 
-  // Check if the winner we just found is the Hero
   if (match.winnerId === hero?.id && hero?.profile) {
     const xpGained = Math.floor(match.pot * 0.1) + 50;
     const currentLevel = hero.profile.level;
@@ -49,24 +90,7 @@ export const calculateShowdown = (
 
     const didLevelUp = currentXp + xpGained >= nextThreshold;
 
-    if (didLevelUp) {
-      const nextLevel = (hero.profile?.level ?? 1) + 1;
-      const rewardData = LEVEL_UP_REWARDS[nextLevel];
-
-      // We explicitly provide the required fields to ensure they are never undefined
-      match.rewards = {
-        xp: xpGained, // Required
-        plei: match.pot, // Required
-        bonuses: [], // Required
-        isLevelUp: true,
-        isFirstMatch,
-        isFirstWin,
-        message: rewardData?.message ?? "You've reached a new plateau.",
-        perk: rewardData?.perk ?? "Increased Reputation",
-      };
-    }
-
-    match.rewards = {
+    const baseRewards = {
       xp: xpGained,
       plei: match.pot,
       bonuses: [],
@@ -74,6 +98,19 @@ export const calculateShowdown = (
       isFirstWin,
       isLevelUp: didLevelUp,
     };
+
+    if (didLevelUp) {
+      const nextLevel = (hero.profile?.level ?? 1) + 1;
+      const rewardData = LEVEL_UP_REWARDS[nextLevel];
+
+      match.rewards = {
+        ...baseRewards,
+        message: rewardData?.message ?? "You've reached a new plateau.",
+        perk: rewardData?.perk ?? "Increased Reputation",
+      };
+    } else {
+      match.rewards = baseRewards;
+    }
   }
 };
 
@@ -100,7 +137,6 @@ export const evaluatePokerHand = (hand: CardInterface[]) => {
   values.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
   const valCounts = Object.values(counts).sort((a, b) => b - a);
 
-  // 3. Return the handRanks object
   if (isStraight && isFlush) {
     return values[4] === 14 ? handRanks.royalFlush : handRanks.straightFlush;
   }
@@ -122,7 +158,6 @@ export const executeTurn = (
 ) => {
   const { difficultyLevel, pot, currentBetOnTable } = match;
 
-  // 1. Get the decision from our unified logic
   const decision = getNPCAction(
     npc,
     evaluation,
@@ -131,7 +166,6 @@ export const executeTurn = (
     currentBetOnTable,
   );
 
-  // 2. Calculate the chip amount based on the decision
   let amount = 0;
   if (decision === "call") {
     amount = Math.max(
@@ -139,12 +173,9 @@ export const executeTurn = (
       currentBetOnTable - (npc.currentMatch.currentBet || 0),
     );
   } else if (decision === "raise") {
-    // Standard raise: match the bet + a fixed increment (e.g., 50)
     amount = currentBetOnTable + 50 - (npc.currentMatch.currentBet || 0);
   }
-  // "fold" or "check" result in 0 amount
 
-  // 3. Return the payload so the listener/component can dispatch it
   return {
     playerId: npc.id,
     type: decision,
@@ -152,20 +183,31 @@ export const executeTurn = (
   };
 };
 
+export const getCardDestination = (
+  matchType: MatchType,
+  phase: GamePhaseType,
+  playerIndex: number,
+): CurrentLocationType => {
+  const config = (matchPhaseMap as GamePhaseConfigType)[matchType]?.[phase];
+
+  if (config?.target === "board") {
+    return "board";
+  }
+
+  return `p${playerIndex + 1}` as CurrentLocationType;
+};
+
 export const getNPCAction = (
   npc: PlayerInterface,
-  evaluation: { value: number; label: string }, // Matches evaluatePokerHand
+  evaluation: { rankValue: number; label: string }, // Matches evaluatePokerHand
   currentDifficulty: DifficultyType,
   currentPot: number,
   currentBet: number,
 ): BettingActionType => {
-  const { value } = evaluation;
+  const { rankValue } = evaluation;
 
-  // 1. Calculate relative strength (0-100) based on max possible hand value (~900)
-  // This replaces the old 'strength' property
-  const normalizedStrength = (value / 900) * 100;
+  const normalizedStrength = (rankValue / 900) * 100;
 
-  // 2. Logic: Determine if we are checking vs calling
   const amountToCall = currentBet - (npc.currentMatch.currentBet || 0);
   const canCheck = amountToCall <= 0;
 
@@ -174,17 +216,15 @@ export const getNPCAction = (
   console.log(amountToCall, normalizedStrength);
   switch (currentDifficulty) {
     case "easy":
-      if (value >= 200) return "raise";
-      if (value >= 100) return "call";
+      if (rankValue >= 200) return "raise";
+      if (rankValue >= 100) return "call";
 
-      // NEW: On Easy, only fold if they have literally nothing AND there's a bet.
-      // If they have a pair (value >= 100), they should never hit this.
-      if (value < 100 && amountToCall > 60) return "fold";
+      if (rankValue < 300 && amountToCall > 60) return "fold";
       return defaultPassAction;
 
     case "normal":
       // Raise on Pair or better
-      if (value >= 100) {
+      if (rankValue >= 100) {
         console.log(`${currentBet} ${evaluation}, ${normalizedStrength} raise`);
         return "raise";
       }
@@ -202,7 +242,7 @@ export const getNPCAction = (
 
       const potCommitment = currentPot > 500 ? 10 : 0;
 
-      if (value >= 300 || normalizedStrength + potCommitment > 85)
+      if (rankValue >= 300 || normalizedStrength + potCommitment > 85)
         return "raise";
       if (normalizedStrength + potCommitment > 50) return "call";
       return defaultFailAction;
@@ -215,7 +255,7 @@ export const getNPCAction = (
 export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
   const evaluation = evaluatePokerHand(hand);
 
-  if (evaluation.value >= 400) return [];
+  if (evaluation.rankValue >= 400) return [];
 
   const numericValues = hand.map((c) => {
     const map: Record<string, number> = { J: 11, Q: 12, K: 13, A: 14 };
@@ -225,7 +265,6 @@ export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
   const counts: Record<number, number> = {};
   numericValues.forEach((val) => (counts[val] = (counts[val] || 0) + 1));
 
-  // 2. Keep pairs, trips, or quads
   const keeperValues = Object.entries(counts)
     .filter(([, count]) => count > 1)
     .map(([val]) => Number(val));
@@ -250,7 +289,6 @@ export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
 
   return indicesToDiscard.slice(0, 4);
 };
-
 export const handleFoldLogic = (state: GameInterface, playerId: string) => {
   const match = state.currentMatch;
 
@@ -284,35 +322,16 @@ export const pickAnteAmount = (location: MatchLocationType) => {
   return amount;
 };
 
-export const calculateBetResults = (
-  player: PlayerInterface,
-  amount: number,
-  currentPot: number,
-) => {
-  // 1. Validation Logic
-  if (amount > player.money) {
-    throw new Error("Insufficient chips");
-  }
-
-  return {
-    newPlayerChips: player.money - amount,
-    newPot: currentPot + amount,
-    betConfirmed: true,
-  };
-};
-
 export const getNextActivePlayerIndex = (match: MatchInterface) => {
   const totalPlayers = match.players.length;
   let nextIndex = (match.activePlayerIndex + 1) % totalPlayers;
 
-  // Loop through players to find the next one capable of acting
   for (let i = 0; i < totalPlayers; i++) {
     const player = match.players[nextIndex];
 
     if (!player.currentMatch.isFolded && !player.currentMatch.isAllin) {
       return nextIndex;
     }
-    // If this player can't act, try the next one
     nextIndex = (nextIndex + 1) % totalPlayers;
   }
 

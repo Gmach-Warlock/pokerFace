@@ -2,6 +2,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../app/hooks/gameHooks";
+import { useEffect } from "react";
 
 import type { BettingActionType } from "../../../../app/types/matchTypes";
 
@@ -22,6 +23,9 @@ import BettingForm from "../BettingForm/BettingForm";
 import "./ArenaCenter.css";
 import DrawButton from "./buttons/DrawButton/DrawButton";
 import DealButton from "./buttons/DealButton/DealButton";
+import { processArenaAction } from "../../../../features/match/matchThunks";
+import { useRef } from "react";
+import ActionMessage from "../ActionMessage/ActionMessage";
 
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
@@ -37,10 +41,24 @@ export default function ArenaCenter() {
   const isBettingPhase = useAppSelector(selectIsBettingPhase);
   const buttonLabel = useAppSelector(selectActionButtonLabel);
   const currentPlayerIndex = useAppSelector(
-    (state) => state.game.currentMatch.activePlayerIndex,
+    (state) => state.match.activePlayerIndex,
   );
+  const playingMatch = useAppSelector((state) => state.game.isPlaying);
 
   const cleanedKey = designKey.replace("/", "").replace(".png", "");
+
+  const hasInitialFired = useRef(false);
+
+  useEffect(() => {
+    if (playingMatch && phase === "notInGameYet" && !hasInitialFired.current) {
+      hasInitialFired.current = true;
+      dispatch(processArenaAction());
+    }
+
+    if (!playingMatch) {
+      hasInitialFired.current = false;
+    }
+  }, [playingMatch, phase, dispatch]);
 
   const handleBetFinalized = (amount: number, type: BettingActionType) => {
     if (!herosId) return;
@@ -52,8 +70,6 @@ export default function ArenaCenter() {
     if (isHerosTurn && isBettingPhase) {
       return (
         <BettingForm
-          // Adding a key ensures the component resets whenever it's "re-opened"
-          // or when the player changes.
           key={`betting-form-${currentPlayerIndex}-${phase}`}
           currentPot={pot}
           heroMoney={heroMoney}
@@ -71,7 +87,6 @@ export default function ArenaCenter() {
 
   return (
     <div className="arena-center">
-      {/* Deck Stack Visuals */}
       <div className="deck-stack" data-design={cleanedKey}>
         {deck.slice(-8).map((_, index) => (
           <div key={index} className={`card-back layer-${index}`} />
@@ -80,29 +95,22 @@ export default function ArenaCenter() {
       </div>
 
       <div className="arena-center__centerpiece">
+        <div className="pot">
+          <span>Pot </span>
+          <span>{pot}</span>
+        </div>
         <div className="debug-info">
-          <span>Player: {currentPlayerIndex}</span>
           <button type="button" onClick={() => console.log(currentMatch)}>
             State
           </button>
         </div>
 
-        <div className="arena-center__phase-display">
-          <p>{phase}</p>
-        </div>
-
         {currentMatch.actionMessage && (
           <div key={currentMatch.messageId} className="action-message-flash">
-            {currentMatch.actionMessage}
+            <ActionMessage />
           </div>
         )}
 
-        <div className="pot">
-          <p>Pot</p>
-          <span>{pot}</span>
-        </div>
-
-        {/* This container now cleanly swaps between Form and Buttons */}
         <div className="arena-center__action-container">
           {renderActionArea()}
         </div>

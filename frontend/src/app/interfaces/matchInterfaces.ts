@@ -13,73 +13,23 @@ import type {
   DifficultyType,
   HandType,
   LastResultType,
-  MatchLocationType,
   MatchType,
   PlayerType,
   PokerChoiceType,
   NumberOfOpponentsType,
 } from "../types/matchTypes";
+import type { MatchLocationType } from "../types/worldMapTypes";
 import type { GamePhaseInterface } from "./gameInterfaces";
 import type { PlayerProfileInterface } from "./profileInterfaces";
 
-export interface BettingButtonProps {
-  onClick: () => void;
-}
-export interface BettingButtonPropsInterface {
-  label: string;
-  isConfirming?: boolean;
-}
-
-export interface BettingInterface {
-  currentPot?: number;
-  heroMoney?: number;
-  onConfirm: (amount: number, type: BettingActionType) => void;
-  currentTableBet?: number;
-  currentPlayerBet?: number;
-}
-
-export interface CardInterface {
-  value: CardValueType;
-  suit: CardSuitType;
-  side: CardSideType;
-  currentLocation: CurrentLocationType;
-  isDiscarded: boolean;
-  deckDesign: string;
-}
-export interface ChipInterface {
-  color: ChipColorType;
-  icon: ChipIconType;
-  currentLocation: CurrentLocationType;
-}
-export interface ChipMapInterface {
-  white: number;
-  red: number;
-  blue: number;
-  green: number;
-  black: number;
-}
-
-export interface DealCardPayload {
-  target: ContestantType;
-  side: CardSideType;
-  opponentIndex?: number;
-}
-export interface EvaluatedHandInterface {
-  value: number;
-  label: string;
-  rankValue: number;
-  strength: string;
-}
-
-export interface MatchInterface {
+export interface BaseMatchInterface {
+  id: string;
   numberOfOpponents: NumberOfOpponentsType;
   deckStyle: DeckStyleType;
   difficultyLevel: DifficultyType;
   matchLocation: MatchLocationType;
-  matchType: MatchType;
   numberOfDecks: DeckNumberType;
   players: PlayerInterface[];
-  dealersHand: CardInterface[];
   deck: CardInterface[];
   pot: number;
   currentBetOnTable: number;
@@ -109,6 +59,78 @@ export interface MatchInterface {
   };
   playingMatch: boolean;
 }
+export interface BettingButtonProps {
+  onClick: () => void;
+}
+export interface BettingButtonPropsInterface {
+  label: string;
+  isConfirming?: boolean;
+}
+
+export interface BettingInterface {
+  currentPot?: number;
+  heroMoney?: number;
+  onConfirm: (amount: number, type: BettingActionType) => void;
+  currentTableBet?: number;
+  currentPlayerBet?: number;
+}
+
+export interface CardInterface {
+  value: CardValueType;
+  suit: CardSuitType;
+  side: CardSideType;
+  currentLocation: CurrentLocationType;
+  isDiscarded: boolean;
+  deckDesign: string;
+}
+export interface CasinoVariantSpecifics {
+  dealersHand: CardInterface[]; // Only exists for this specific game type
+  houseEdge: number;
+}
+export interface ChipInterface {
+  color: ChipColorType;
+  icon: ChipIconType;
+  currentLocation: CurrentLocationType;
+}
+export interface ChipMapInterface {
+  white: number;
+  red: number;
+  blue: number;
+  green: number;
+  black: number;
+}
+
+export interface DealCardPayload {
+  target: ContestantType;
+  side: CardSideType;
+  opponentIndex?: number;
+}
+
+export interface DrawSpecifics {
+  discardLimit: number;
+  maxDiscardsPerPlayer: number;
+}
+
+export interface EvaluatedHandInterface {
+  label: string;
+  rankValue: number;
+  strength: number;
+}
+
+export interface HoldemSpecifics {
+  communityCards: CardInterface[]; // The Flop, Turn, and River
+  burnCards: CardInterface[]; // The cards discarded before each "street"
+  buttonIndex: number; // The dealer position
+  bigBlind: number;
+  smallBlind: number;
+}
+export type MatchInterface =
+  | (BaseMatchInterface & { matchType: "none"; variantData: NoSpecifics }) // The "Lobby" state
+  | (BaseMatchInterface & { matchType: "draw"; variantData: DrawSpecifics })
+  | (BaseMatchInterface & {
+      matchType: "holdem";
+      variantData: HoldemSpecifics;
+    });
 
 export interface MatchSummaryInterface {
   matchId: string;
@@ -132,8 +154,13 @@ export interface MatchSummaryInterface {
   newLevelReached: boolean;
   unlockedItemIds: string[];
 }
+export interface NoSpecifics {
+  isWaiting: true;
+} // Empty object for the "Lobby" state
 export interface PhaseInstruction {
   cards: number | "variable";
+  target: "players" | "board";
+  side: CardSideType;
   hero?: CardSideType;
   opp?: CardSideType;
   community?: CardSideType;

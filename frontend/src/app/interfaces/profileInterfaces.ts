@@ -1,4 +1,5 @@
-import type { DeckStyleType, MatchLocationType } from "../types/matchTypes";
+import type { DeckStyleType } from "../types/matchTypes";
+import type { MatchLocationType } from "../types/worldMapTypes";
 import type { AchievementCategory } from "../types/profileTypes";
 import type { SessionStatsInterface, PlayerInterface } from "./matchInterfaces";
 import type { FetchStatusType } from "../types/profileTypes";

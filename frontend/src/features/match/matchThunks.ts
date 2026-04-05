@@ -1,64 +1,108 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-import {
-  performAnteUp,
-  advancePhase,
-  dealRound,
-  finishMatch,
-  markNpcDiscard,
-} from "./matchSlice";
+import { advancePhase, dealRound, markNpcDiscard } from "./matchSlice";
 import type { RootState } from "../../app/store/store";
-
+import { evaluatePokerHand, executeTurn } from "../../app/logic/matchLogic";
 import { selectNpcDiscards } from "./matchSelectors";
 import { logGameStep } from "../../functions/utils/utils";
+import { processBet, resolveShowdown } from "./matchSlice";
+import type { MatchInterface } from "../../app/interfaces/matchInterfaces";
 
 export const processArenaAction = createAsyncThunk(
-  "match/processArenaAction", // Changed prefix to match/ for consistency
+  "match/processArenaAction",
   async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
-    logGameStep("Thunk Triggered", state.game);
+    const match = state.match as MatchInterface;
+    const { currentPhase, players, activePlayerIndex } = match;
+    const matchType = match.matchType as string;
+    const phase = currentPhase.phase.toLowerCase();
 
-    // FIX: Pull from state.match instead of state.game
-    const { currentPhase, matchLocation } = state.match;
-    const { phase } = currentPhase;
+    logGameStep(`Processing ${matchType} - Phase: ${phase}`, state.match);
 
-    switch (phase) {
-      case "ante":
-        // FIX: Reference state.match for location
-        dispatch(performAnteUp({ location: matchLocation }));
-        dispatch(dealRound());
-        dispatch(advancePhase());
-        break;
+    // --- 5-CARD DRAW LOGIC ---
+    if (matchType === "draw") {
+      switch (phase) {
+        case "notingameyet":
+        case "ante":
+          dispatch(advancePhase());
+          dispatch(dealRound());
+          break;
 
-      case "draw": {
-        // selectNpcDiscards already uses state.match internally
-        // if you updated it in our previous step!
-        const npcDiscards = selectNpcDiscards(state);
+        case "deal":
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          dispatch(advancePhase());
+          break;
 
-        npcDiscards.forEach((indices, idx) => {
-          // idx 0 is usually the Hero, so we skip them
-          if (idx > 0 && indices.length > 0) {
+        case "draw": {
+          const npcDiscards = selectNpcDiscards(state);
+          npcDiscards.forEach((indices, idx) => {
+            if (idx > 0)
+              dispatch(
+                markNpcDiscard({ playerIndex: idx, cardIndices: indices }),
+              );
+          });
+          dispatch(dealRound());
+          dispatch(advancePhase());
+          break;
+        }
+
+        case "bettingone":
+        case "bettingtwo": {
+          const currentPlayer = players[activePlayerIndex];
+
+          // 1. NPC Turn Logic
+          if (currentPlayer && currentPlayer.type === "computer") {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const evaluation = evaluatePokerHand(
+              currentPlayer.currentMatch.currentHand,
+            );
+            const npcDecision = executeTurn(
+              currentPlayer,
+              evaluation,
+              state.match,
+            );
+
             dispatch(
-              markNpcDiscard({
-                playerIndex: idx,
-                cardIndices: indices,
+              processBet({
+                playerId: npcDecision.playerId ?? "unknown",
+                amount: npcDecision.amount,
+                type: npcDecision.type,
               }),
             );
+            return;
           }
-        });
 
-        dispatch(dealRound());
-        dispatch(advancePhase());
-        break;
+          // 2. Universal Advance Check (Fixed the "Check/Call" hang)
+          const activePlayers = players.filter((p) => !p.currentMatch.isFolded);
+          const allActed = activePlayers.every((p) => p.currentMatch.hasActed);
+          const betsEqual = activePlayers.every(
+            (p) => p.currentMatch.currentBet === state.match.currentBetOnTable,
+          );
+
+          if (allActed && betsEqual) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            dispatch(advancePhase());
+          }
+          break;
+        }
+
+        case "showdown":
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          dispatch(resolveShowdown());
+          break;
+
+        default:
+          break;
       }
+    }
 
-      case "showdown":
-        dispatch(finishMatch());
-        break;
+    // --- TEXAS HOLD'EM LOGIC (Future Gary) ---
+    if (matchType === "holdem") {
+      console.log("let's play some holdem");
+    }
 
-      default:
-        dispatch(advancePhase());
-        break;
+    if (matchType === "stud") {
+      console.log("let's play 7 card stud");
     }
   },
 );

@@ -131,3 +131,14 @@ export const xpMap = {
   five: 80,
   six: 125,
 };
+
+export const locationRewardsMap = {
+  shelter: {
+    xpPerMatch: 1,
+    pleiPerMatch: 5,
+  },
+  "low-vault-lounge": {
+    xpPerMatch: 5,
+    pleiPerMatch: 10,
+  },
+};

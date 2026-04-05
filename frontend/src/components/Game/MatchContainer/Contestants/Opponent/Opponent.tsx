@@ -44,7 +44,6 @@ export default function Opponent({ data }: OpponentPropsInterface) {
         <p className="opponent__stats">${money}</p>
       </div>
 
-      {/* Note: You could even move data.isFolded to a selector if you want to be 100% Redux-led! */}
       {data.currentMatch.isFolded && (
         <div className="opponent__fold-overlay">
           <span>FOLDED</span>
@@ -52,12 +51,12 @@ export default function Opponent({ data }: OpponentPropsInterface) {
       )}
 
       <div className="opponent__bubble"></div>
-      <button
+      {/*       <button
         type="button"
         onClick={() => console.log("Debug Player ID:", playerId, data)}
       >
-        check state
-      </button>
+        state
+      </button> */}
     </div>
   );
 }

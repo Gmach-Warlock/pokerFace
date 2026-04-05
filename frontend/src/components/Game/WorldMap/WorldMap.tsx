@@ -1,9 +1,21 @@
 import "./WorldMap.css";
 import { worldMapRegistry } from "../../../app/assets/worldMapAssets";
+import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
+import { selectProfileData } from "../../../features/profile/profileSelectors";
 
 export const WorldMap = () => {
-  const garyLevel = 1;
+  const navigate = useNavigate();
 
+  // Use the selector! TS now knows 'profile' is defined because of the fallback in the selector.
+  const profile = useSelector(selectProfileData);
+  const garyLevel = profile.level;
+
+  const handleNavigation = (id: string, isLocked: boolean) => {
+    if (!isLocked) {
+      navigate("/game/lobby", { state: { locationId: id } });
+    }
+  };
   return (
     <div className="world-map-wrapper">
       <div className="map-canvas">
@@ -22,6 +34,7 @@ export const WorldMap = () => {
               <div
                 key={node.id}
                 className={`map-node ${isLocked ? "locked" : "active"} map__${locationClass}`}
+                onClick={() => handleNavigation(node.id, isLocked)}
               >
                 <div className="node-pulse" />
                 <div className="node-icon">{isLocked ? "🔒" : "♦"}</div>

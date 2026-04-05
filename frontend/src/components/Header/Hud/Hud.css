@@ -1,14 +1,12 @@
 .hud {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  display: flex;
   align-items: center;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.6); /* Semi-transparent backing */
-  border-bottom: 2px solid #555;
+  justify-content: 间;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 2px solid #333;
   color: #fff;
-  font-family:
-    "Courier New", Courier, monospace; /* Or a font that matches your title */
-  text-transform: uppercase;
+  font-family: "Courier New", Courier, monospace;
   letter-spacing: 1px;
   margin-bottom: 20px;
 }
@@ -16,15 +14,15 @@
 .hud__name {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #f1c40f; /* Gold color to match your Logout button */
+  color: #f1c40f;
   text-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
   margin-bottom: 4px;
 }
 
 .hud__name {
-  font-family: "Courier New", Courier, monospace; /* Example 'gamer' font */
+  font-family: "Courier New", Courier, monospace;
   font-size: 1.1rem;
-  color: gold; /* Match Logout button */
+  color: gold;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
@@ -37,84 +35,126 @@
 }
 
 .hud__level::before {
-  content: "LVL: "; /* Optional prefix */
+  content: "LVL: ";
 }
 
-/* THE XP BAR (Outer Container) */
 .hud__xpBarContainer {
-  width: 150px; /* Fixed width */
-  height: 8px; /* Slim bar */
-  background: rgba(255, 255, 255, 0.05); /* Transparent backing */
-  border: 1px solid rgba(0, 255, 255, 0.3); /* Cyan border (glowing accent) */
-  border-radius: 4px; /* Rounded edges */
-  padding: 1px; /* Creates inner spacing for the fill */
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); /* Soft ambient glow */
-  overflow: hidden; /* Important for the fill calculation */
+  width: 150px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 1px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  overflow: hidden;
 }
 
-/* THE XP FILL (Requires React logic for width) */
 .hud__xpFill {
   height: 100%;
-  background: cyan; /* Base color */
-  border-radius: 3px; /* Smaller radius for fill */
+  background: cyan;
+  border-radius: 3px;
   position: relative;
-  transition: width 0.3s ease; /* Adds smooth transition on gain */
+  transition: width 0.3s ease;
 
-  /* The actual glow effect */
   box-shadow:
     0 0 15px rgba(0, 255, 255, 1),
-    /* Bright inner glow */ 0 0 5px rgba(255, 255, 255, 0.5) inset; /* Slight highlight on top */
+    0 0 5px rgba(255, 255, 255, 0.5) inset;
 }
 
-/* The visual number text */
 .hud__xpText {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Centering trick */
+  transform: translate(-50%, -50%);
   font-size: 0.6rem;
   font-weight: bold;
   color: cyan;
-  text-shadow: 0 0 2px black; /* Outline for readability */
-  pointer-events: none; /* Text won't interfere with interaction */
+  text-shadow: 0 0 2px black;
+  pointer-events: none;
 }
 
-.xp-bar-fill {
-  height: 100%;
+.hud__xpMeter {
+  width: 100%;
+  max-width: 200px;
+  height: 12px;
+  -webkit-appearance: none;
+
+  appearance: none; /* Removes default browser styling */
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+}
+
+.hud__xpMeter::-webkit-meter-bar {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  border: none;
+}
+.hud__xpMeter::-webkit-meter-optimum-value {
   background: linear-gradient(90deg, #00f2ff, #0062ff);
   box-shadow: 0 0 10px #00f2ff;
-  transition: width 0.4s ease-out;
-  width: 0%; /* Default */
+  transition: width 0.4s ease; /* Smooth sliding */
 }
 
-/* Match the data-progress attribute to a width */
-.xp-bar-fill[data-progress^="1"] {
-  width: 10%;
+.hud__xpMeter::-moz-meter-bar {
+  background: linear-gradient(90deg, #00f2ff, #0062ff);
+  border-radius: 8px;
 }
-.xp-bar-fill[data-progress^="2"] {
-  width: 20%;
+
+.hud__xpMeter::-webkit-meter-optimum-value {
+  background: linear-gradient(90deg, #00f2ff, #0062ff);
+  box-shadow: 0 0 10px #00f2ff;
+  border-radius: 8px 0 0 8px;
+  transition: width 0.4s ease;
 }
-.xp-bar-fill[data-progress^="3"] {
-  width: 30%;
+
+.xp-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: none;
 }
-.xp-bar-fill[data-progress^="4"] {
-  width: 40%;
-}
-.xp-bar-fill[data-progress^="5"] {
-  width: 50%;
-}
-.xp-bar-fill[data-progress^="6"] {
-  width: 60%;
-}
-.xp-bar-fill[data-progress^="7"] {
-  width: 70%;
-}
-.xp-bar-fill[data-progress^="8"] {
-  width: 80%;
-}
-.xp-bar-fill[data-progress^="9"] {
-  width: 90%;
-}
-.xp-bar-fill[data-progress="100"] {
+
+.hud__xpMeter {
   width: 100%;
+  height: 14px;
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hud__level-num {
+  font-family: "Courier New", monospace;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  min-width: 30px;
+  text-align: right;
+}
+
+.hud__clickable {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.hud__clickable:hover {
+  filter: brightness(1.5);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.xp-tooltip {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-size: 0.6rem;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  letter-spacing: 2px;
 }

@@ -10,8 +10,8 @@ import {
   selectPlayerById,
 } from "../../../../features/match/matchSelectors";
 import { useEffect, useState } from "react";
-import { quitPlaying } from "../../../../features/game/gameSlice";
 import { prepareNextHand } from "../../../../features/match/matchSlice";
+import { useNavigate } from "react-router";
 
 export default function MatchResultOverlay() {
   const dispatch = useAppDispatch();
@@ -22,11 +22,18 @@ export default function MatchResultOverlay() {
   );
 
   const [displayAmount, setDisplayAmount] = useState(0);
+  const navigate = useNavigate();
 
   // Counter animation logic
-  const winAmount = useAppSelector(
-    (state) => state.game.currentMatch.lastWinAmount || 0,
-  );
+  const winAmount = useAppSelector((state) => state.match.lastWinAmount || 0);
+
+  const handleQuit = () => {
+    navigate("/game/world");
+  };
+
+  const handleNextHand = () => {
+    dispatch(prepareNextHand());
+  };
 
   useEffect(() => {
     // Only trigger if we actually have a win amount to show
@@ -63,10 +70,17 @@ export default function MatchResultOverlay() {
         </div>
 
         <div className="overlay-actions">
-          <button onClick={() => dispatch(prepareNextHand())}>Next Hand</button>
           <button
-            onClick={() => dispatch(quitPlaying())}
-            className="btn-secondary"
+            type="button"
+            className="btn btn--replay"
+            onClick={handleNextHand}
+          >
+            Next Hand
+          </button>
+          <button
+            type="button"
+            onClick={handleQuit}
+            className="btn btn--secondary"
           >
             Quit
           </button>

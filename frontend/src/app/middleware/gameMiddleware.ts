@@ -10,7 +10,8 @@ import {
   resolveShowdown,
 } from "../../features/match/matchSlice";
 import type { RootState } from "../store/store";
-import { getNPCAction } from "../logic/gameLogic";
+import { getNPCAction } from "../logic/matchLogic";
+import { processArenaAction } from "../../features/match/matchThunks";
 
 import { selectPlayerHandEval } from "../../features/match/matchSelectors";
 
@@ -42,8 +43,13 @@ deckListener.startListening({
       difficultyLevel,
       pot,
     } = state.match;
-
-    // 2. NEW GUARD: Only run if a match is actually active
+    if (
+      advancePhase.match(action) &&
+      currentPhase.phase.toLowerCase() === "deal"
+    ) {
+      listenerApi.dispatch(processArenaAction());
+      return; // Exit here so we don't run NPC logic during a deal
+    }
     if (
       currentPhase.phase === "notInGameYet" ||
       currentPhase.phase === "showdown"
@@ -51,12 +57,10 @@ deckListener.startListening({
       return;
     }
 
-    // --- PHASE ADVANCEMENT LOGIC ---
     const activePlayers = players.filter(
       (p) => !p.currentMatch.isFolded && !p.currentMatch.isAllin,
     );
 
-    // Safety check: if everyone folded, processBet handles it, so we exit here
     if (activePlayers.length <= 1) return;
 
     const everyoneActed = activePlayers.every((p) => p.currentMatch.hasActed);
@@ -65,7 +69,6 @@ deckListener.startListening({
     );
 
     if (everyoneActed && betsEqual) {
-      // Guard against infinite loops if the action was already a phase change
       if (isAnyOf(advancePhase, completeDrawPhase, dealRound)(action)) {
         return;
       }
@@ -73,7 +76,6 @@ deckListener.startListening({
       await listenerApi.delay(1000);
       listenerApi.dispatch(advancePhase());
 
-      // Re-fetch to check if we just hit showdown
       const newState = listenerApi.getState() as RootState;
       if (newState.match.currentPhase.phase === "showdown") {
         listenerApi.dispatch(resolveShowdown());
@@ -81,8 +83,7 @@ deckListener.startListening({
       return;
     }
 
-    // --- NPC ACTION LOGIC ---
-    if (activePlayerIndex === 0) return; // Hero's turn
+    if (activePlayerIndex === 0) return;
 
     const currentWaitPlayer = players[activePlayerIndex];
 
@@ -94,7 +95,6 @@ deckListener.startListening({
         currentWaitPlayer.npcTraits?.general.thinkTime || 1000,
       );
 
-      // RE-FETCH STATE: Ensure it's still their turn after the delay
       state = listenerApi.getState() as RootState;
       if (state.match.activePlayerIndex !== activePlayerIndex) return;
 
