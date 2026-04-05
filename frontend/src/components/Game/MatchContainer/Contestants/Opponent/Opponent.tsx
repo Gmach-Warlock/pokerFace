@@ -4,7 +4,7 @@ import {
   useAppSelector,
   useMediaQuery,
 } from "../../../../../app/hooks/gameHooks";
-import ChipStacks from "../../../../ChipStacks/ChipStacks";
+import ChipStacks from "../../../../general/ChipStacks/ChipStacks";
 import {
   selectDeckStyle,
   selectOpponentStatusClass,

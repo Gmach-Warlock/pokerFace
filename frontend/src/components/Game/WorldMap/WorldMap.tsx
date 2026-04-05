@@ -1,5 +1,5 @@
 import "./WorldMap.css";
-import { worldMapRegistry } from "../../../app/assets/worldMapAssets";
+import { worldMapRegistry } from "../../../app/assets/world/worldAssets";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { selectProfileData } from "../../../features/profile/profileSelectors";

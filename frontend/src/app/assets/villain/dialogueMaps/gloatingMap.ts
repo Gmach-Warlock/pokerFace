@@ -1,0 +1,43 @@
+export const gloatingMap = {
+  classic: [
+    "Splendid! Simply splendid.",
+    "Better luck next time, my dear.",
+    "This pot is already mine. I'm just letting you hold the chips for a second.",
+    "This is starting to get amusing..",
+    "....",
+  ],
+  gritty: [
+    "Easiest money I made all day.",
+    "Next time, bring a bigger wallet.",
+    "You ever seen a man lose everything over a pair of deuces? Keep pushing.",
+    "This pot is already mine. I'm just letting you hold the chips for a second.",
+    "I hope you've got a bus ticket home, kid.",
+    "....",
+  ],
+  modern: [
+    "L + Ratio + No Chips.",
+    "Ez game, ez life.",
+    "Chat, is he actually going to call this?",
+    "Full send. We don't fold in this house.",
+    "Wait, that's actually a 'FeelsBadMan' for you if I have it.",
+    "Imagine being this lucky. Actually unreal.",
+    "What's the play here, chat? Do we send it or nah?",
+    "....",
+  ],
+  pro: [
+    "Standard result. I played the math.",
+    "Don't tap the glass on the fish.",
+    "Standard GTO play here, don't take it personally.",
+    "....",
+    "....",
+  ],
+  classy: [
+    "A pleasure doing business with you.",
+    "Quality usually prevails in the end.",
+    "I find your betting style... aggressive. How primitive.",
+    "A gentleman never reveals his hand, but he always collects his winnings.",
+    "Is that a bluff? How wonderfully quaint.",
+    "Do you always play with such... reckless abandon?",
+    "....",
+  ],
+};

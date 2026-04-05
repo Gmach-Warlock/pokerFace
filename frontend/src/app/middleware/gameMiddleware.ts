@@ -10,7 +10,7 @@ import {
   resolveShowdown,
 } from "../../features/match/matchSlice";
 import type { RootState } from "../store/store";
-import { getNPCAction } from "../logic/matchLogic";
+import { getNPCAction } from "../logic/match/ai/ai";
 import { processArenaAction } from "../../features/match/matchThunks";
 
 import { selectPlayerHandEval } from "../../features/match/matchSelectors";
@@ -48,7 +48,7 @@ deckListener.startListening({
       currentPhase.phase.toLowerCase() === "deal"
     ) {
       listenerApi.dispatch(processArenaAction());
-      return; // Exit here so we don't run NPC logic during a deal
+      return;
     }
     if (
       currentPhase.phase === "notInGameYet" ||

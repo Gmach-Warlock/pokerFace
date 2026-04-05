@@ -2,9 +2,9 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import { advancePhase, dealRound, markNpcDiscard } from "./matchSlice";
 import type { RootState } from "../../app/store/store";
-import { evaluatePokerHand, executeTurn } from "../../app/logic/matchLogic";
+import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
+import { executeTurn, logGameStep } from "../../app/logic/match/utils/utils";
 import { selectNpcDiscards } from "./matchSelectors";
-import { logGameStep } from "../../functions/utils/utils";
 import { processBet, resolveShowdown } from "./matchSlice";
 import type { MatchInterface } from "../../app/interfaces/matchInterfaces";
 

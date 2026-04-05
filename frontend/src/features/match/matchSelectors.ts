@@ -1,14 +1,12 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store/store";
-import { createChips } from "../../functions/factory/factory";
-import { INITIAL_SESSION_STATS } from "../../app/assets/profileAssets";
+import { createChips } from "../../app/logic/factory/factoryFunctions";
+import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
 import type { MatchLocationType } from "../../app/types/worldMapTypes";
 import type { CardSuitType, DeckStyleType } from "../../app/types/matchTypes";
-import {
-  evaluatePokerHand,
-  getAIDiscardIndices,
-} from "../../app/logic/matchLogic";
-import { cardSuitIcons, handRanks } from "../../app/assets/matchAssets";
+import { getAIDiscardIndices } from "../../app/logic/match/ai/ai";
+import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
+import { cardSuitIcons, handRanks } from "../../app/assets/match/matchAssets";
 
 /**
  * ============================================================
@@ -261,3 +259,13 @@ export const selectPlayerHandEval = createSelector(
     return evaluatePokerHand(hand);
   },
 );
+
+export const selectIsBigPot = (state: RootState) => {
+  const { pot, players } = state.match;
+  return pot > players.length * 100;
+};
+
+export const selectActiveNPC = (state: RootState) => {
+  const activeIdx = state.match.activePlayerIndex;
+  return state.match.players[activeIdx];
+};

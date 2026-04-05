@@ -1,8 +1,8 @@
 import { useState } from "react";
 import "./TitleScreenCards.css";
 import "./TitleScreenAnimations.css";
-import Hand from "../../../Hand/Hand";
-import { royalFlush } from "../../../../app/assets/matchAssets";
+import Hand from "../../../general/Hand/Hand";
+import { royalFlush } from "../../../../app/assets/match/matchAssets";
 
 const PATTERNS = [
   "standard",

@@ -1,6 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store/store";
-import { calculateXpProgress } from "../../functions/utils/profile";
+import { calculateXpProgress } from "../../app/logic/profile/profileLogic";
 
 const selectProfileState = (state: RootState) => state.authorize;
 

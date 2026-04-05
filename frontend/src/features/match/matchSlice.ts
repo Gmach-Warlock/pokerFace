@@ -16,21 +16,26 @@ import type {
   PlayerInterface,
   SessionStatsInterface,
 } from "../../app/interfaces/matchInterfaces";
-import { generateDeck, shuffleDeck } from "../../functions/factory/factory";
-import { createVillain } from "../../functions/factory/factory";
+import {
+  generateDeck,
+  createVillain,
+} from "../../app/logic/factory/factoryFunctions";
 import {
   matchMap,
   matchPhaseMap,
   startingChips,
   gamePhaseSequences,
-} from "../../app/assets/matchAssets";
+} from "../../app/assets/match/matchAssets";
+import {
+  getNextActivePlayerIndex,
+  shuffleDeck,
+} from "../../app/logic/match/utils/utils";
+import { pickAnteAmount } from "../../app/logic/match/utils/utils";
 import {
   calculateCardsNeeded,
-  pickAnteAmount,
-  getNextActivePlayerIndex,
   evaluatePokerHand,
-} from "../../app/logic/matchLogic";
-import { generateRandomString } from "../../functions/utils/utils";
+} from "../../app/logic/match/evaluators/evaluators";
+import { generateRandomString } from "../../app/logic/general/generalUtils";
 
 const initialMatchState: MatchInterface = {
   id: generateRandomString(10),

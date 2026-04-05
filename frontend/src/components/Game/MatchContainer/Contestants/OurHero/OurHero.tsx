@@ -2,7 +2,7 @@ import {
   useAppSelector,
   useMediaQuery,
 } from "../../../../../app/hooks/gameHooks";
-import ChipStacks from "../../../../ChipStacks/ChipStacks";
+import ChipStacks from "../../../../general/ChipStacks/ChipStacks";
 import "./OurHero.css";
 
 import {
@@ -14,7 +14,7 @@ import {
   selectDeckStyle,
   selectHeroHandRank,
 } from "../../../../../features/match/matchSelectors";
-import Hand from "../../../../Hand/Hand";
+import Hand from "../../../../general/Hand/Hand";
 
 export default function Hero() {
   const name = useAppSelector(selectHeroName);

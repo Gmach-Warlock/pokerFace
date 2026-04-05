@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { SessionStatsInterface } from "../../app/interfaces/matchInterfaces";
 import type { ProfileInterface } from "../../app/interfaces/profileInterfaces";
-import { startingChips } from "../../app/assets/matchAssets";
+import { startingChips } from "../../app/assets/match/matchAssets";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 const initialProfileState: ProfileInterface = {

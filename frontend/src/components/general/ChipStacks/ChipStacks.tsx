@@ -1,6 +1,6 @@
 import "./ChipStacks.css";
-import Chip from "../general/Chip/Chip";
-import type { ChipColorType } from "../../app/types/matchTypes";
+import Chip from "../Chip/Chip";
+import type { ChipColorType } from "../../../app/types/matchTypes";
 
 interface ChipStacksPropsInterface {
   white: number;
