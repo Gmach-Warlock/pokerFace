@@ -1,11 +1,10 @@
+import { useEffect, useRef } from "react";
 import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../app/hooks/gameHooks";
-import { useEffect } from "react";
 
 import type { BettingActionType } from "../../../../app/types/matchTypes";
-
 import {
   selectActionButtonLabel,
   selectMatch,
@@ -18,39 +17,51 @@ import {
   selectIsBettingPhase,
   selectPot,
 } from "../../../../features/match/matchSelectors";
-import { processBet } from "../../../../features/match/matchSlice";
+
+import { handleBet } from "../../../../features/match/matchSlice";
+import { processArenaAction } from "../../../../features/match/matchThunks";
+
 import BettingForm from "../BettingForm/BettingForm";
-import "./ArenaCenter.css";
+import ActionMessage from "../ActionMessage/ActionMessage";
 import DrawButton from "./buttons/DrawButton/DrawButton";
 import DealButton from "./buttons/DealButton/DealButton";
-import { processArenaAction } from "../../../../features/match/matchThunks";
-import { useRef } from "react";
-import ActionMessage from "../ActionMessage/ActionMessage";
+import "./ArenaCenter.css";
 
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
+  const hasInitialFired = useRef(false);
 
+  // Selectors
   const currentMatch = useAppSelector(selectMatch);
   const deck = useAppSelector(selectDeck);
   const designKey = useAppSelector(selectDeckStyle);
   const pot = useAppSelector(selectPot);
-  const phase = useAppSelector(selectCurrentPhase);
+
+  // Destructure phase and type from the object-returning selector
+  const { phase } = useAppSelector(selectCurrentPhase);
+
   const herosId = useAppSelector(selectHerosId);
   const heroMoney = useAppSelector(selectHeroMoney);
   const discardCount = useAppSelector(selectDiscardCount);
   const isBettingPhase = useAppSelector(selectIsBettingPhase);
   const buttonLabel = useAppSelector(selectActionButtonLabel);
   const currentPlayerIndex = useAppSelector(
-    (state) => state.match.activePlayerIndex,
+    (state) => state.match.currentHand.activePlayerIndex,
   );
   const playingMatch = useAppSelector((state) => state.game.isPlaying);
 
   const cleanedKey = designKey.replace("/", "").replace(".png", "");
 
-  const hasInitialFired = useRef(false);
-
+  // 1. Initial Game Trigger
   useEffect(() => {
-    if (playingMatch && phase === "notInGameYet" && !hasInitialFired.current) {
+    // We cast phase as a string here to satisfy TS string-literal comparisons
+    const currentPhaseStr = phase as string;
+
+    if (
+      playingMatch &&
+      currentPhaseStr === "notInGameYet" &&
+      !hasInitialFired.current
+    ) {
       hasInitialFired.current = true;
       dispatch(processArenaAction());
     }
@@ -60,17 +71,21 @@ export default function ArenaCenter() {
     }
   }, [playingMatch, phase, dispatch]);
 
-  const handleBetFinalized = (amount: number, type: BettingActionType) => {
+  // 2. Betting Logic
+  const handleBetFinalized = (amount: number, betType: BettingActionType) => {
     if (!herosId) return;
-    dispatch(processBet({ playerId: herosId, amount, type }));
+    dispatch(handleBet({ playerId: herosId, amount, type: betType }));
   };
 
   const isHerosTurn = isBettingPhase && currentPlayerIndex === 0;
+
   const renderActionArea = () => {
+    const currentPhaseStr = phase as string;
+
     if (isHerosTurn && isBettingPhase) {
       return (
         <BettingForm
-          key={`betting-form-${currentPlayerIndex}-${phase}`}
+          key={`betting-form-${currentPlayerIndex}-${currentPhaseStr}`}
           currentPot={pot}
           heroMoney={heroMoney}
           onConfirm={handleBetFinalized}
@@ -78,7 +93,7 @@ export default function ArenaCenter() {
       );
     }
 
-    if (phase === "draw") {
+    if (currentPhaseStr === "draw") {
       return <DrawButton label={buttonLabel} isConfirming={discardCount > 0} />;
     }
 
@@ -99,20 +114,24 @@ export default function ArenaCenter() {
           <span>Pot </span>
           <span>{pot}</span>
         </div>
-        <div className="debug-info">
-          <button type="button" onClick={() => console.log(currentMatch)}>
-            State
-          </button>
-        </div>
 
-        {currentMatch.actionMessage && (
-          <div key={currentMatch.messageId} className="action-message-flash">
+        {currentMatch.currentHand.actionMessage && (
+          <div
+            key={`${currentMatch.currentHand.messageId}-${currentMatch.currentHand.actionMessage}`}
+            className="action-message-flash"
+          >
             <ActionMessage />
           </div>
         )}
 
         <div className="arena-center__action-container">
           {renderActionArea()}
+        </div>
+
+        <div className="debug-info">
+          <button type="button" onClick={() => console.log(currentMatch)}>
+            Log State
+          </button>
         </div>
       </div>
     </div>

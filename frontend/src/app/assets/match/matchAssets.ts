@@ -1,11 +1,15 @@
 import type {
   CardSuitType,
-  GamePhaseType,
-  GamePhaseConfigType,
+  MatchPhaseType,
+  MatchPhaseConfigType,
 } from "../../types/matchTypes";
 import type {
   CardInterface,
+  CasinoVariantSpecifics,
   ChipMapInterface,
+  HoldemSpecifics,
+  DrawSpecifics,
+  NoSpecificsInterface,
 } from "../../interfaces/matchInterfaces";
 import type { MatchMapInterface } from "../../interfaces/worldMapInterfaces";
 
@@ -61,7 +65,7 @@ export const deckDesigns = {
   redFire: "/redFire.png",
   theFlyingCow: "/theFlyingCow.png",
 };
-export const gamePhaseSequences: Record<string, GamePhaseType[]> = {
+export const gamePhaseSequences: Record<string, MatchPhaseType[]> = {
   draw: ["ante", "deal", "bettingOne", "draw", "bettingTwo", "showdown"],
   holdem: ["ante", "deal", "flop", "turn", "river", "showdown"],
   stud: [
@@ -127,6 +131,31 @@ export const handRanks = {
   },
 };
 
+export const INITIAL_NO_SPECIFICS: NoSpecificsInterface = {
+  isWaiting: true,
+  lobbyMessage: "Waiting for match to begin...",
+  readyPlayers: [],
+};
+
+export const INITIAL_CASINO_SPECIFICS: CasinoVariantSpecifics = {
+  dealersHand: [],
+  houseEdge: 0.05, // 5% edge default
+  payoutMultiplier: 1,
+};
+
+export const INITIAL_HOLDEM_SPECIFICS: HoldemSpecifics = {
+  communityCards: [],
+  burnCards: [],
+  buttonIndex: 0,
+  bigBlind: 20,
+  smallBlind: 10,
+};
+
+export const INITIAL_DRAW_SPECIFICS: DrawSpecifics = {
+  discardLimit: 3,
+  maxDiscardsPerPlayer: 3,
+};
+
 export const matchPhaseMessages = {
   holdem: {
     preFlop: "Place your bets",
@@ -154,19 +183,16 @@ export const matchPhaseMessages = {
   },
 };
 
-export const matchPhaseMap: GamePhaseConfigType = {
+export const matchPhaseMap: MatchPhaseConfigType = {
   draw: {
     notInGameYet: { cards: 0, target: "players", side: "face-down" },
     ante: { cards: 0, target: "players", side: "face-down" },
-    deal: {
-      cards: 5,
-      target: "players",
-      side: "face-down",
-      hero: "face-up",
-      opp: "face-down",
-    },
+    deal: { cards: 5, target: "players", side: "face-down" },
+    bettingOne: { cards: 0, target: "players", side: "face-up" }, // Add this!
     discard: { cards: 0, target: "players", side: "face-up" },
     draw: { cards: "variable", target: "players", side: "face-up" },
+    bettingTwo: { cards: 0, target: "players", side: "face-up" }, // Add this!
+    showdown: { cards: 0, target: "players", side: "face-up" }, // Add this!
   },
   holdem: {
     ante: { cards: 0, target: "players", side: "face-down" },

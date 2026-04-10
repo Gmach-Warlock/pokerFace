@@ -1,16 +1,12 @@
-import express from "express";
-import path from "path";
+import express, { Request, Response } from "express";
+import userRoutes from "./routes/user/userRoutes";
 
 const app = express();
+app.use(express.json());
+app.use("/api/users", userRoutes);
 
-const PORT = 3000;
-
-app.get("/", (req, res) => {
-  res.send(`Welcome to my server!`);
+app.get("/api/health", (req: Request, res: Response) => {
+  res.status(200).json({ status: "ok" });
 });
 
-app.use("/assets", express.static(path.join(__dirname, "../assets")));
-
-app.listen(PORT, () => {
-  console.log(`server is listening on port ${PORT}`);
-});
+export default app;

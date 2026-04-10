@@ -16,6 +16,7 @@ const initialProfileState: ProfileInterface = {
     id: "abcde123",
     name: "GMach",
     type: "human",
+    isDealer: false,
     money: 500,
     currentMatch: {
       chips: startingChips,
@@ -55,6 +56,7 @@ const profileSlice = createSlice({
         // You can add level-up logic here later!
       }
     },
+
     createUser: (state, action) => {
       state.meta.username = action.payload.username;
       state.meta.email = action.payload.email;
@@ -94,7 +96,7 @@ const profileSlice = createSlice({
     },
     // Logic for updating money or match status can go here
     updateMoney: (state, action: PayloadAction<number>) => {
-      state.playerData.money += action.payload;
+      state.playerData.account.totalMoney += action.payload;
     },
   },
 });

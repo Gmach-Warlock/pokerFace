@@ -5,6 +5,7 @@ import type {
   IconSizeType,
 } from "../../../app/types/matchTypes";
 import type { CardInterface } from "../../../app/interfaces/matchInterfaces";
+import { numberToTextMap, getPipRotation } from "../../../app/utils/cardUtils";
 import "./Card.css";
 
 export default function Card({
@@ -40,57 +41,31 @@ export default function Card({
   }, [value]);
 
   const renderCenterPiece = (val: CardValueType) => {
-    // Face Card Logic (J, Q, K, A)
     if (typeof val === "string") {
       return (
         <div
           className={`card__centerpiece-face place-center items-center border-${suitColor}`}
         >
-          <div>{renderSuitIcon("large")}</div>
+          {renderSuitIcon("large")}
         </div>
       );
     }
 
-    // Number Card Logic (2-10)
-    const numberMap: Record<number, string> = {
-      2: "two",
-      3: "three",
-      4: "four",
-      5: "five",
-      6: "six",
-      7: "seven",
-      8: "eight",
-      9: "nine",
-      10: "ten",
-    };
-
     const count = val as number;
-    const prefix = numberMap[count];
+    const prefix = numberToTextMap[count];
 
     return (
       <div className={containerClass}>
         {Array(count)
           .fill(null)
-          .map((_, i) => {
-            const shouldRotate = (() => {
-              if (count === 3) return i === 2; // Bottom pip rotates
-              if (count === 6) return i >= 4;
-
-              if (count === 7) return i >= 5; // Only rotate the bottom two
-              if (count === 8) return i >= 5; // Only rotate the bottom two
-
-              return i >= Math.ceil(count / 2);
-            })();
-
-            return (
-              <div
-                key={i}
-                className={`${prefix}-${String.fromCharCode(97 + i)} place-center ${shouldRotate ? "rotate-180" : ""}`}
-              >
-                {renderSuitIcon("medium")}
-              </div>
-            );
-          })}
+          .map((_, i) => (
+            <div
+              key={i}
+              className={`${prefix}-${String.fromCharCode(97 + i)} place-center ${getPipRotation(count, i) ? "rotate-180" : ""}`}
+            >
+              {renderSuitIcon("medium")}
+            </div>
+          ))}
       </div>
     );
   };

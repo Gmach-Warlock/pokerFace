@@ -18,7 +18,7 @@ interface OpponentPropsInterface {
 }
 
 export default function Opponent({ data }: OpponentPropsInterface) {
-  const playerId = data.id;
+  const playerId = data.general.id;
   const name = useAppSelector((state) => selectPlayerName(state, playerId));
   const money = useAppSelector((state) => selectPlayerMoney(state, playerId));
   const chipMap = useAppSelector((state) => selectPlayerChips(state, playerId));
@@ -44,7 +44,7 @@ export default function Opponent({ data }: OpponentPropsInterface) {
         <p className="opponent__stats">${money}</p>
       </div>
 
-      {data.currentMatch.isFolded && (
+      {data.state.isFolded && (
         <div className="opponent__fold-overlay">
           <span>FOLDED</span>
         </div>

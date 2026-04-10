@@ -9,8 +9,8 @@ export const calculateHandResults = (
   winnerIds: string[],
   totalPot: number,
 ): SessionStatsInterface => {
-  const currentStats = { ...player.currentMatch.sessionStats };
-  const isWinner = winnerIds.includes(player.id ?? "");
+  const currentStats = { ...player.stats };
+  const isWinner = winnerIds.includes(player.general.id ?? "");
   const isTie = isWinner && winnerIds.length > 1;
 
   currentStats.handsPlayed += 1;

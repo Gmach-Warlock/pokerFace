@@ -9,7 +9,9 @@ import { selectDeckStyle } from "../../../features/match/matchSelectors";
 export default function Hand(props: HandInterface) {
   const { matchType, cards, currentLocation, isTitle } = props;
   const dispatch = useAppDispatch();
-  const phase = useAppSelector((state) => state.match.currentPhase.phase);
+  const phase = useAppSelector(
+    (state) => state.match.currentHand.currentPhase.phase,
+  );
 
   const design = useAppSelector(selectDeckStyle);
 

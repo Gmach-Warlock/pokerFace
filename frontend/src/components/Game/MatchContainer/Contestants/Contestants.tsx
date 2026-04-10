@@ -7,13 +7,16 @@ import OurHero from "./OurHero/OurHero";
 
 export default function Contestants() {
   const opponents = useAppSelector(selectOpponents);
+  const visibleOpponents = opponents.filter(
+    (p) => !p.general.isDealer && p.general.type !== "human",
+  );
 
   return (
     <div className="match__contestants">
       <div className="contestants__container">
         <div className="opponents">
-          {opponents.map((opponent, index) => (
-            <div key={index} className="opponent">
+          {visibleOpponents.map((opponent) => (
+            <div key={opponent.general.id} className="opponent">
               <Opponent data={opponent} />
             </div>
           ))}

@@ -35,6 +35,45 @@ export const createChips = (pot: number): ChipMapInterface => {
 
 export const createComment = () => {};
 
+export const createDealer = (): PlayerInterface => ({
+  general: {
+    id: "dealer-001",
+    name: "Dealer",
+    type: "computer", // Or a new type 'system' if you prefer
+    isDealer: true, // The new property you mentioned
+  },
+  state: {
+    hand: [],
+    chips: {
+      white: 0,
+      red: 0,
+      blue: 0,
+      green: 0,
+      black: 0,
+    },
+    currentBet: 0,
+    isFolded: false,
+    isAllIn: false,
+    hasActed: false,
+    position: 2,
+  },
+  account: {
+    totalMoney: 0,
+    plei: 0,
+    level: 1,
+    xp: 0,
+    unlockedDecks: ["arrowBolt"],
+    currentDeckChoice: "arrowBolt",
+  },
+  flags: {
+    isInitialLoad: true,
+    isProcessingAction: false,
+    isWinner: false,
+    hasTurnFocus: false,
+  },
+  stats: INITIAL_SESSION_STATS,
+});
+
 export const createVillain = (
   theme: VillainThemeType,
   nameOverride?: string,
@@ -48,21 +87,39 @@ export const createVillain = (
   const chipMap = createChips(500);
 
   const newVillain: PlayerInterface = {
-    id: generateRandomString(8),
-    name: newVillainName,
-    type: "computer",
-    difficulty: "normal",
-    money: 500,
-
-    currentMatch: {
-      isFolded: false,
+    general: {
+      id: generateRandomString(8),
+      name: newVillainName,
+      type: "computer",
+      isDealer: false,
+      difficulty: "normal",
+    },
+    state: {
+      hand: [],
       chips: chipMap,
       currentBet: 0,
+      isFolded: false,
+      isAllIn: false,
       hasActed: false,
-      isAllin: false,
-      currentHand: [],
-      sessionStats: INITIAL_SESSION_STATS,
+      lastAction: "check",
+      isDiscarding: false,
+      position: 0,
     },
+    account: {
+      totalMoney: 1000,
+      plei: 0,
+      level: 1,
+      xp: 0,
+      unlockedDecks: ["arrowBolt"],
+      currentDeckChoice: "arrowBolt",
+    },
+    flags: {
+      isInitialLoad: false,
+      isProcessingAction: false,
+      isWinner: false,
+      hasTurnFocus: false,
+    },
+    stats: INITIAL_SESSION_STATS,
   };
 
   return newVillain;

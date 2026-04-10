@@ -4,7 +4,7 @@ import {
 } from "../../../../../app/hooks/gameHooks";
 import type { BettingInterface } from "../../../../../app/interfaces/matchInterfaces";
 import { selectHerosId } from "../../../../../features/match/matchSelectors";
-import { processBet } from "../../../../../features/match/matchSlice";
+import { handleBet } from "../../../../../features/match/matchSlice";
 
 export default function CallButton({
   currentTableBet = 0,
@@ -18,8 +18,9 @@ export default function CallButton({
 
   const handleCall = () => {
     if (!herosId) return;
+
     dispatch(
-      processBet({
+      handleBet({
         playerId: herosId,
         amount: amountToCall,
         type: isCheck ? "check" : "call",

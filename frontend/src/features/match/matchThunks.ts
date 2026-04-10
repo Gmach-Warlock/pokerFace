@@ -3,105 +3,91 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { advancePhase, dealRound, markNpcDiscard } from "./matchSlice";
 import type { RootState } from "../../app/store/store";
 import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
-import { executeTurn, logGameStep } from "../../app/logic/match/utils/utils";
-import { selectNpcDiscards } from "./matchSelectors";
-import { processBet, resolveShowdown } from "./matchSlice";
-import { logBettingState } from "../../app/logic/match/debuggers/matchDebuggers";
+import {
+  executeTurn,
+  getNPCDiscardDecision,
+} from "../../app/logic/match/utils/utils";
+import { handleBet } from "./matchSlice";
+import type { MatchInterface } from "../../app/interfaces/matchInterfaces";
 
 export const processArenaAction = createAsyncThunk(
   "match/processArenaAction",
   async (_, { getState, dispatch }) => {
-    // 1. Get initial snapshot
-    const initialState = getState() as RootState;
-    const matchType = initialState.match.matchType as string;
-    const phase = initialState.match.currentPhase.phase.toLowerCase();
-    const activePlayerIndex = initialState.match.activePlayerIndex;
-    const players = initialState.match.players;
+    // 1. Fresh state grab
+    const state = (getState() as RootState).match as MatchInterface;
+    const { activePlayerIndex, players, isRoundTransitioning } =
+      state.currentHand;
+    const { matchType } = state.general;
+    const currentPhase = state.currentHand.currentPhase.phase;
 
-    logGameStep(
-      `Processing ${matchType} - Phase: ${phase}`,
-      initialState.match,
-    );
-    console.log("DEBUG: Thunk is running for phase:", phase); // <--- ADD THIS
+    // 2. REGULATION: Check if the Reducer signaled a Phase Change
+    if (isRoundTransitioning) {
+      console.log(`Round transition detected at ${currentPhase}. Advancing...`);
 
+      // Dramatic pause so the user sees the final call/fold
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // This action must reset isRoundTransitioning to false
+      dispatch(advancePhase());
+      return; // Exit thunk; the next cycle will handle the new phase
+    }
+
+    // 3. GAME LOGIC: Handle specific game types (e.g., Draw Poker)
     if (matchType === "draw") {
-      switch (phase) {
-        case "notingameyet":
+      switch (currentPhase) {
+        case "notInGameYet":
         case "ante":
-          dispatch(advancePhase());
           dispatch(dealRound());
+          // Note: In your slice, dealRound or a follow-up should trigger the phase advance
           break;
 
         case "deal":
+          dispatch(dealRound());
+          // If dealRound is async/animated, we wait here
           await new Promise((resolve) => setTimeout(resolve, 1500));
           dispatch(advancePhase());
           break;
 
         case "draw": {
-          const npcDiscards = selectNpcDiscards(initialState);
-          npcDiscards.forEach((indices, idx) => {
-            if (idx > 0)
+          // NPC Discard Logic
+          players.forEach((player, idx) => {
+            if (player.general.type === "computer" && !player.state.isFolded) {
+              const indices = getNPCDiscardDecision(player); // Pass the specific player
               dispatch(
                 markNpcDiscard({ playerIndex: idx, cardIndices: indices }),
               );
+            }
           });
           dispatch(dealRound());
-          dispatch(advancePhase());
           break;
         }
 
         case "bettingOne":
         case "bettingTwo": {
-          const latestState = getState() as RootState;
           const currentPlayer = players[activePlayerIndex];
-          logBettingState("Before Advance Check", latestState.match);
-          console.log("testing one two three");
 
-          // 1. NPC Turn Logic
-          if (currentPlayer && currentPlayer.type === "computer") {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            const evaluation = evaluatePokerHand(
-              currentPlayer.currentMatch.currentHand,
-            );
-            const npcDecision = executeTurn(
-              currentPlayer,
-              evaluation,
-              initialState.match,
-            );
+          // 4. NPC TURN REGULATION
+          if (
+            currentPlayer &&
+            currentPlayer.general.type === "computer" &&
+            !currentPlayer.state.isFolded
+          ) {
+            // "Thinking" delay
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+
+            const evaluation = evaluatePokerHand(currentPlayer.state.hand);
+            const npcDecision = executeTurn(currentPlayer, evaluation, state);
 
             dispatch(
-              processBet({
-                playerId: npcDecision.playerId ?? "unknown",
+              handleBet({
+                playerId: currentPlayer.general.id ?? "unknown",
                 amount: npcDecision.amount,
                 type: npcDecision.type,
               }),
             );
-            return;
-          }
-
-          const activePlayers = players.filter((p) => !p.currentMatch.isFolded);
-          const allActed = activePlayers.every((p) => p.currentMatch.hasActed);
-          const currentBetOnTable = initialState.match.currentBetOnTable;
-
-          // Use the currentBetOnTable from the LATEST state
-          const betsEqual = activePlayers.every(
-            (p) => p.currentMatch.currentBet === currentBetOnTable,
-          );
-
-          if (allActed && betsEqual) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            dispatch(advancePhase());
           }
           break;
         }
-
-        case "showdown":
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          dispatch(resolveShowdown());
-          break;
-
-        default:
-          break;
       }
     }
   },

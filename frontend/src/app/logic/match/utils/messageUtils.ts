@@ -10,21 +10,21 @@ export const generateBettingMessage = (
   actionType: BettingActionType,
   amount: number,
 ): string => {
-  if (player.currentMatch.isFolded) {
-    return `${player.name} folds`;
+  if (player.state.isFolded) {
+    return `${player.general.name} folds`;
   }
 
-  if (player.currentMatch.isAllin) {
-    return `${player.name} is ALL IN!`;
+  if (player.state.isAllIn) {
+    return `${player.general.name} is ALL IN!`;
   }
 
   switch (actionType) {
     case "raise":
-      return `${player.name} raises to $${match.currentBetOnTable}`;
+      return `${player.general.name} raises to $${match.currentHand.currentBetOnTable}`;
     case "call":
-      return `${player.name} calls $${amount}`;
+      return `${player.general.name} calls $${amount}`;
     case "check":
-      return `${player.name} checks`;
+      return `${player.general.name} checks`;
     default:
       return "";
   }

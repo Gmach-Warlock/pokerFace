@@ -25,7 +25,9 @@ export default function MatchResultOverlay() {
   const navigate = useNavigate();
 
   // Counter animation logic
-  const winAmount = useAppSelector((state) => state.match.lastWinAmount || 0);
+  const winAmount = useAppSelector(
+    (state) => state.match.results.lastWinAmount || 0,
+  );
 
   const handleQuit = () => {
     navigate("/game/world");
@@ -61,7 +63,7 @@ export default function MatchResultOverlay() {
   return (
     <div className="match-overlay">
       <div className="match-overlay__content">
-        <h2>{winner?.name} Wins!</h2>
+        <h2>{winner?.general.name} Wins!</h2>
         <p className="hand-type">{handLabel}</p>
 
         <div className="pot-win">

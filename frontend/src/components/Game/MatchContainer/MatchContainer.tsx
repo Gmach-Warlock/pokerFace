@@ -11,7 +11,7 @@ import {
 
 export default function MatchContainer() {
   const opponents = useAppSelector(selectOpponents || []);
-  const phase = useAppSelector(selectCurrentPhase);
+  const { phase } = useAppSelector(selectCurrentPhase);
   const winnerId = useAppSelector((state) => state.game.currentMatch.winnerId);
 
   const navigate = useNavigate();

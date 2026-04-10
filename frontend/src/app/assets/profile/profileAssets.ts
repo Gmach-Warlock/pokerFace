@@ -124,48 +124,48 @@ export const LEVEL_UP_REWARDS: Record<
   },
 };
 
-export const xpMap = {
-  two: 5,
-  three: 20,
-  four: 45,
-  five: 80,
-  six: 125,
-  seven: 180,
-  eight: 245,
-  nine: 320,
-  ten: 405,
-  eleven: 500,
-};
-
 export const locationRewardsMap: Record<
   string,
   { xpBase: number; pleiBase: number }
 > = {
   shelter: {
-    xpBase: 20,
+    xpBase: 50,
     pleiBase: 5,
   },
+  lowVaultLounge: {
+    xpBase: 100,
+    pleiBase: 10,
+  },
+  neonAlleyClub: {
+    xpBase: 250,
+    pleiBase: 25,
+  },
   halls: {
-    xpBase: 50,
+    xpBase: 550,
     pleiBase: 15,
   },
-  neonAlley: {
-    xpBase: 120,
-    pleiBase: 40,
+  compound: {
+    xpBase: 150,
+    pleiBase: 20,
   },
-};
-
-export const MAX_LEVEL = 50;
-export const BASE_XP = 100; // XP needed for Level 1 -> 2
-export const EXPONENT = 1.5; // Controls how steep the curve is (1.5 is classic MMO)
-
-/**
- * Calculates total XP required to reach a specific level.
- * Formula: BaseXP * (Level ^ Exponent)
- */
-export const getXpRequiredForLevel = (level: number): number => {
-  if (level >= MAX_LEVEL) return 999_999_999; // The "Endless" cap
-
-  // This creates a curve: Level 2 ≈ 282, Level 10 ≈ 3,162, Level 49 ≈ 34,300
-  return Math.floor(BASE_XP * Math.pow(level, EXPONENT));
+  holdemHotel: {
+    xpBase: 300,
+    pleiBase: 30,
+  },
+  drawDen: {
+    xpBase: 200,
+    pleiBase: 20,
+  },
+  studStay: {
+    xpBase: 500,
+    pleiBase: 10,
+  },
+  atrium: {
+    xpBase: 1000,
+    pleiBase: 50,
+  },
+  zenith: {
+    xpBase: 5000,
+    pleiBase: 100,
+  },
 };

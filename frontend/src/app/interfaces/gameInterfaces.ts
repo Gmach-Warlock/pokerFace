@@ -4,13 +4,16 @@ import type {
   DeckStyleType,
   DifficultyType,
   GameDisplayType,
-  GamePhaseType,
   HandType,
   MatchType,
   NumberOfOpponentsType,
 } from "../types/matchTypes";
 import type { MatchLocationType } from "../types/worldMapTypes";
-import type { CardInterface, PlayerInterface } from "./matchInterfaces";
+import type {
+  CardInterface,
+  PlayerInterface,
+  MatchPhaseInterface,
+} from "./matchInterfaces";
 
 export interface GameInterface {
   isPlaying: boolean;
@@ -29,7 +32,7 @@ export interface GameInterface {
     currentBetOnTable: number;
     lastRaiserId: string | null;
     activePlayerIndex: number;
-    currentPhase: GamePhaseInterface;
+    currentPhase: MatchPhaseInterface;
     winnerId?: string;
     winningHand?: string;
     lastWinAmount?: number;
@@ -58,10 +61,6 @@ export interface GamePayloadInterface {
   numberOfDecks: DeckNumberType;
   deckStyle: DeckStyleType;
   hero: PlayerInterface;
-}
-export interface GamePhaseInterface {
-  type: MatchType;
-  phase: GamePhaseType;
 }
 
 export interface HandInterface {

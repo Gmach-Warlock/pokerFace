@@ -11,17 +11,18 @@ export const calculateBetResults = (
   amount: number,
   currentPot: number,
 ) => {
-  if (amount > player.money) {
+  if (amount > player.account.totalMoney) {
     throw new Error("Insufficient chips");
   }
 
   return {
-    newPlayerChips: player.money - amount,
+    newPlayerChips: player.account.totalMoney - amount,
     newPot: currentPot + amount,
     betConfirmed: true,
   };
 };
 
+// evaluators.ts -> calculateCardsNeeded
 export const calculateCardsNeeded = (
   type: string,
   phase: string,
@@ -29,20 +30,40 @@ export const calculateCardsNeeded = (
 ): number => {
   const config = matchPhaseMap[type]?.[phase];
 
-  if (!config) return 0;
-
-  if (config.cards === "variable") {
-    return 5 - currentHandLength;
+  if (!config) {
+    console.warn(`[calculateCardsNeeded] No config found for ${type}:${phase}`);
+    return 0;
   }
 
+  // 1. Handle "variable" (usually for the Draw phase)
+  if (config.cards === "variable") {
+    const needed = 5 - currentHandLength;
+    console.log(`[calc] Variable mode: 5 - ${currentHandLength} = ${needed}`);
+    return needed;
+  }
+
+  // 2. Ensure we don't try to deal to players if the target is the board
   if (config.target === "board") {
     return 0;
   }
 
+  // 3. Handle standard numeric deals (Ante/Deal phases)
   if (typeof config.cards === "number") {
-    if (currentHandLength < config.cards) {
-      return config.cards - currentHandLength;
+    const targetTotal = config.cards;
+    const needed = targetTotal - currentHandLength;
+
+    // Fixed the log to use the narrowed targetTotal variable
+    if (currentHandLength === 0 && phase === "ante") {
+      console.log(
+        `[MATH CHECK] Target: ${targetTotal} | Current: ${currentHandLength} | Needs: ${needed}`,
+      );
     }
+
+    console.log(
+      `[calc] Numeric mode: Target ${targetTotal} - Current ${currentHandLength} = ${needed}`,
+    );
+
+    return needed > 0 ? needed : 0;
   }
 
   return 0;
@@ -52,25 +73,29 @@ export const calculateShowdown = (
   isFirstMatch: boolean,
   isFirstWin: boolean,
 ) => {
-  const activePlayers = match.players.filter((p) => !p.currentMatch.isFolded);
+  const activePlayers = match.currentHand.players.filter(
+    (p) => !p.state.isFolded,
+  );
   if (activePlayers.length === 0) return;
 
   const evaluations = activePlayers.map((p) => ({
-    id: p.id,
-    ...evaluatePokerHand(p.currentMatch.currentHand),
+    id: p.general.id,
+    ...evaluatePokerHand(p.state.hand),
   }));
 
   const winner = evaluations.reduce((prev, curr) =>
     curr.rankValue > prev.rankValue ? curr : prev,
   );
 
-  match.winnerId = winner.id ?? "";
-  match.winningHand = winner.label;
+  match.results.winnerId = winner.id ?? "";
+  match.results.winningHand = winner.label;
 
-  const hero = match.players.find((p) => p.type === "human");
+  const hero = match.currentHand.players.find(
+    (p) => p.general.type === "human",
+  );
 
-  if (match.winnerId === hero?.id && hero?.profile) {
-    const xpGained = Math.floor(match.pot * 0.1) + 50;
+  if (match.results.winnerId === hero?.general.id && hero?.profile) {
+    const xpGained = Math.floor(match.currentHand.pot * 0.1) + 50;
     const currentLevel = hero.profile.level;
     const currentXp = hero.profile.xp;
 
@@ -81,7 +106,7 @@ export const calculateShowdown = (
 
     const baseRewards = {
       xp: xpGained,
-      plei: match.pot,
+      plei: match.currentHand.pot,
       bonuses: [],
       isFirstMatch,
       isFirstWin,

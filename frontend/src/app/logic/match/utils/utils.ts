@@ -5,26 +5,29 @@ import type {
   MatchInterface,
 } from "../../../interfaces/matchInterfaces";
 import type { GameInterface } from "../../../interfaces/gameInterfaces";
-import { getNPCAction } from "../ai/ai";
+import { getNPCAction, getAIDiscardIndices } from "../ai/ai";
 import type { MatchLocationType } from "../../../types/worldMapTypes";
 import type {
   CurrentLocationType,
-  GamePhaseType,
-  GamePhaseConfigType,
+  MatchPhaseType,
+  MatchPhaseConfigType,
   MatchType,
 } from "../../../types/matchTypes";
 import { anteMap, matchPhaseMap } from "../../../assets/match/matchAssets";
 import { INITIAL_SESSION_STATS } from "../../../assets/profile/profileAssets";
 
 export const checkLastManStanding = (state: MatchInterface) => {
-  const activePlayers = getActivePlayers(state.players);
+  const activePlayers = getActivePlayers(state.currentHand.players);
 
-  if (activePlayers.length === 1 && state.currentPhase.phase !== "showdown") {
+  if (
+    activePlayers.length === 1 &&
+    state.currentHand.currentPhase.phase !== "showdown"
+  ) {
     const winner = activePlayers[0];
-    winner.money += state.pot;
-    state.winnerId = winner.id ?? "";
-    state.pot = 0;
-    state.currentPhase.phase = "showdown";
+    winner.account.totalMoney += state.currentHand.pot;
+    state.results.winnerId = winner.general.id ?? "";
+    state.currentHand.pot = 0;
+    state.currentHand.currentPhase.phase = "showdown";
     return true;
   }
   return false;
@@ -34,7 +37,8 @@ export const executeTurn = (
   evaluation: EvaluatedHandInterface,
   match: MatchInterface,
 ) => {
-  const { difficultyLevel, pot, currentBetOnTable } = match;
+  const { pot, currentBetOnTable } = match.currentHand;
+  const { difficultyLevel } = match.general;
 
   const decision = getNPCAction(
     npc,
@@ -46,29 +50,26 @@ export const executeTurn = (
 
   let amount = 0;
   if (decision === "call") {
-    amount = Math.max(
-      0,
-      currentBetOnTable - (npc.currentMatch.currentBet || 0),
-    );
+    amount = Math.max(0, currentBetOnTable - (npc.state.currentBet || 0));
   } else if (decision === "raise") {
-    amount = currentBetOnTable + 50 - (npc.currentMatch.currentBet || 0);
+    amount = currentBetOnTable + 50 - (npc.state.currentBet || 0);
   }
 
   return {
-    playerId: npc.id,
+    playerId: npc.general.id,
     type: decision,
     amount: amount,
   };
 };
 export const getActivePlayers = (players: PlayerInterface[]) => {
-  return players.filter((p) => !p.currentMatch.isFolded);
+  return players.filter((p) => !p.state.isFolded);
 };
 export const getCardDestination = (
   matchType: MatchType,
-  phase: GamePhaseType,
+  phase: MatchPhaseType,
   playerIndex: number,
 ): CurrentLocationType => {
-  const config = (matchPhaseMap as GamePhaseConfigType)[matchType]?.[phase];
+  const config = (matchPhaseMap as MatchPhaseConfigType)[matchType]?.[phase];
 
   if (config?.target === "board") {
     return "board";
@@ -78,43 +79,56 @@ export const getCardDestination = (
 };
 
 export const getNextActivePlayerIndex = (match: MatchInterface) => {
-  const totalPlayers = match.players.length;
-  let nextIndex = (match.activePlayerIndex + 1) % totalPlayers;
+  const totalPlayers = match.currentHand.players.length;
+  // Start checking from the next person
+  let nextIndex = (match.currentHand.activePlayerIndex + 1) % totalPlayers;
 
   for (let i = 0; i < totalPlayers; i++) {
-    const player = match.players[nextIndex];
+    const player = match.currentHand.players[nextIndex];
 
-    if (!player.currentMatch.isFolded && !player.currentMatch.isAllin) {
+    // ELIGIBILITY CRITERIA:
+    // 1. Not the Dealer entity (if dealer is a non-playing NPC)
+    // 2. Not folded
+    // 3. Not all-in
+    if (
+      !player.general.isDealer &&
+      !player.state.isFolded &&
+      !player.state.isAllIn
+    ) {
       return nextIndex;
     }
     nextIndex = (nextIndex + 1) % totalPlayers;
   }
 
-  return match.activePlayerIndex; // Fallback
+  return match.currentHand.activePlayerIndex;
 };
-
+export const getNPCDiscardDecision = (player: PlayerInterface): number[] => {
+  if (player.general.type === "computer" && !player.state.isFolded) {
+    // This is the AI logic that picks which cards to swap
+    return getAIDiscardIndices(player.state.hand);
+  }
+  return [];
+};
 export const handleFoldLogic = (state: GameInterface, playerId: string) => {
   const match = state.currentMatch;
 
-  if (playerId === match.players[0].id) {
+  if (playerId === match.players[0].general.id) {
     state.currentlyDisplayed = "postGame";
     return;
   } else {
-    const opponent = match.players.find((o) => o.id === playerId);
-    if (opponent) opponent.currentMatch.isFolded = true;
+    const opponent = match.players.find((o) => o.general.id === playerId);
+    if (opponent) opponent.state.isFolded = true;
   }
 
-  const activeOpponents = match.players.filter(
-    (opp) => !opp.currentMatch.isFolded,
-  );
+  const activeOpponents = match.players.filter((opp) => !opp.state.isFolded);
   const heroFolded = state.currentlyDisplayed === "postGame";
 
   if (activeOpponents.length === 0 && !heroFolded) {
-    match.players[0].money += match.pot;
+    match.players[0].account.totalMoney += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
   } else if (activeOpponents.length === 1 && heroFolded) {
-    activeOpponents[0].money += match.pot;
+    activeOpponents[0].account.totalMoney += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
   }
@@ -125,32 +139,33 @@ export const logGameStep = (
   match: MatchInterface,
   actionType?: string,
 ) => {
-  const activePlayer = match.players[match.activePlayerIndex];
+  const activePlayer =
+    match.currentHand.players[match.currentHand.activePlayerIndex];
 
   console.group(
     `%c[MATCH STEP]: ${stage}`,
     "color: #00f3ff; font-weight: bold; text-shadow: 0 0 5px #00f3ff;",
   );
   console.log(
-    `%cType: %c${match.matchType.toUpperCase()} | Phase: %c${match.currentPhase.phase}`,
+    `%cType: %c${match.general.matchType.toUpperCase()} | Phase: %c${match.currentHand.currentPhase.phase}`,
     "font-weight: bold",
     "color: #ff00ff",
     "color: #00ff00",
   );
   console.log(
-    `Active: ${activePlayer?.name || "None"} (Index: ${match.activePlayerIndex}) action type: ${actionType}`,
+    `Active: ${activePlayer?.general.name || "None"} (Index: ${match.currentHand.activePlayerIndex}) action type: ${actionType}`,
   );
   console.log(
-    `Pot: $${match.pot} | Table Bet: $${match.currentBetOnTable} | Deck: ${match.deck.length}`,
+    `Pot: $${match.currentHand.pot} | Table Bet: $${match.currentHand.currentBetOnTable} | Deck: ${match.currentHand.deck.length}`,
   );
 
   console.table(
-    match.players.map((p) => ({
-      name: p.name,
-      chips: p.money,
-      folded: p.currentMatch.isFolded,
-      acted: p.currentMatch.hasActed,
-      last: p.currentMatch.lastAction,
+    match.currentHand.players.map((p) => ({
+      name: p.general.name,
+      chips: p.account.totalMoney,
+      folded: p.state.isFolded,
+      acted: p.state.hasActed,
+      last: p.state.lastAction,
     })),
   );
 
@@ -170,18 +185,18 @@ export const pickWeightedIndex = (arrayLength: number): number => {
 
 export const prepareNewPhase = (
   state: MatchInterface,
-  nextPhase: GamePhaseType,
+  nextPhase: MatchPhaseType,
 ) => {
-  state.currentPhase.phase = nextPhase;
-  state.currentBetOnTable = 0;
-  state.lastRaiserId = null;
-  state.players.forEach((p) => {
-    p.currentMatch.hasActed = false;
-    p.currentMatch.currentBet = 0;
+  state.currentHand.currentPhase.phase = nextPhase;
+  state.currentHand.currentBetOnTable = 0;
+  state.currentHand.lastRaiserId = null;
+  state.currentHand.players.forEach((p) => {
+    p.state.hasActed = false;
+    p.state.currentBet = 0;
   });
-  state.activePlayerIndex = getNextActivePlayerIndex(state);
-  state.actionMessage = `Phase: ${nextPhase.toUpperCase()}`;
-  state.messageId += 1;
+  state.currentHand.activePlayerIndex = getNextActivePlayerIndex(state);
+  state.currentHand.actionMessage = `Phase: ${nextPhase.toUpperCase()}`;
+  state.currentHand.messageId += 1;
 };
 
 export const shuffleDeck = (deck: CardInterface[]): CardInterface[] => {

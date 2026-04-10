@@ -170,6 +170,17 @@ export default function Lobby() {
               ))}
             </select>
           </div>
+          <div className="setting">
+            <label>Number of Decks</label>
+            <select
+              name="number-of-decks"
+              title="number of decks"
+              defaultValue="1"
+            >
+              <option value="1">1 Deck</option>
+              <option value="2">2 Decks</option>
+            </select>
+          </div>
 
           <div className="setting">
             <label>Current Locale</label>

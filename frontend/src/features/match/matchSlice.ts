@@ -1,71 +1,135 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+// 1. TYPES & INTERFACES
 import type {
-  GamePhaseType,
-  GamePhaseConfigType,
-} from "../../app/types/matchTypes";
-import type { MatchLocationType } from "../../app/types/worldMapTypes";
-import type {
+  MatchPhaseType,
+  MatchPhaseConfigType,
   CurrentLocationType,
   CardSideType,
   BettingActionType,
 } from "../../app/types/matchTypes";
+import type { MatchLocationType } from "../../app/types/worldMapTypes";
 import type { GamePayloadInterface } from "../../app/interfaces/gameInterfaces";
 import type {
   MatchInterface,
   PlayerInterface,
-  SessionStatsInterface,
 } from "../../app/interfaces/matchInterfaces";
+
+// 2. CORE LOGIC & UTILITIES
 import {
   generateDeck,
   createVillain,
+  createDealer,
 } from "../../app/logic/factory/factoryFunctions";
+import {
+  checkLastManStanding,
+  prepareNewPhase,
+  shuffleDeck,
+  pickAnteAmount,
+} from "../../app/logic/match/utils/utils";
+import {
+  calculateCardsNeeded,
+  evaluatePokerHand,
+} from "../../app/logic/match/evaluators/evaluators";
+import {
+  getNextActivePlayerIndex,
+  validateBetAction,
+  resolveBetState,
+} from "../../app/logic/betting/bettingUtils";
+import { generateRandomString } from "../../app/logic/general/generalUtils";
+
+// 3. ASSETS & MAPS
 import {
   matchMap,
   matchPhaseMap,
   startingChips,
   gamePhaseSequences,
+  INITIAL_DRAW_SPECIFICS,
+  INITIAL_HOLDEM_SPECIFICS,
 } from "../../app/assets/match/matchAssets";
-import {
-  checkLastManStanding,
-  getActivePlayers,
-  getNextActivePlayerIndex,
-  prepareNewPhase,
-  shuffleDeck,
-} from "../../app/logic/match/utils/utils";
-import { pickAnteAmount } from "../../app/logic/match/utils/utils";
-import {
-  calculateCardsNeeded,
-  evaluatePokerHand,
-} from "../../app/logic/match/evaluators/evaluators";
-import { generateRandomString } from "../../app/logic/general/generalUtils";
-import { generateBettingMessage } from "../../app/logic/match/utils/messageUtils";
+import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
 
 const initialMatchState: MatchInterface = {
-  id: generateRandomString(10),
-  numberOfOpponents: null,
-  deckStyle: "arrowBolt",
-  difficultyLevel: "normal",
-  matchLocation: "shelter",
-  matchType: "draw",
-  numberOfDecks: 1,
-  players: [],
-  deck: [],
-  pot: 0,
-  currentBetOnTable: 0,
-  lastRaiserId: null,
-  actionMessage: "",
-  messageId: 0,
-  activePlayerIndex: 0,
-  currentPhase: {
-    type: "draw",
-    phase: "notInGameYet",
+  general: {
+    id: generateRandomString(10),
+    numberOfOpponents: 1,
+    deckStyle: "arrowBolt",
+    difficultyLevel: "normal",
+    matchLocation: "shelter",
+    matchType: "draw",
+    numberOfDecks: 1,
+    playingMatch: false,
   },
-
-  playingMatch: false,
-  variantData: {
-    discardLimit: 3,
-    maxDiscardsPerPlayer: 5,
+  config: {
+    rules: {
+      ante: 1,
+      minBet: 0,
+      maxBet: 1000,
+      blindStructure: "static",
+      turnTimer: 1000,
+    },
+    limits: {
+      maxPlayers: 5,
+      minBuyIn: 1,
+    },
+  },
+  variantSpecifics: {
+    casinoVariantSpecifics: {
+      dealersHand: [],
+      houseEdge: 0,
+      payoutMultiplier: 0,
+      minDealerQualifyingRank: 1,
+    },
+    drawSpecifics: {
+      discardLimit: 4,
+      maxDiscardsPerPlayer: 4,
+    },
+    holdemSpecifics: {
+      communityCards: [],
+      burnCards: [],
+      buttonIndex: 0,
+      bigBlind: 0,
+      smallBlind: 0,
+    },
+    noSpecifics: {
+      isWaiting: true,
+      lobbyMessage: "",
+      readyPlayers: [],
+    },
+    studSpecifics: {
+      upCards: [],
+      downCards: [],
+    },
+  },
+  currentHand: {
+    players: [],
+    handNumber: 1,
+    dealerIndex: 2,
+    deck: [],
+    pot: 0,
+    currentBetOnTable: 0,
+    activePlayerIndex: 0,
+    lastRaiserId: "",
+    isRoundTransitioning: false,
+    actionMessage: "",
+    messageId: 0,
+    currentPhase: {
+      type: "draw",
+      phase: "notInGameYet",
+      step: 0,
+    },
+  },
+  results: {
+    winnerId: "",
+    winningHand: "",
+    lastWinAmount: 0,
+    isGameOver: false,
+  },
+  visuals: {
+    theme: "classic",
+    skylineStatus: "active",
+    tableColor: "green1",
+    activeEffects: [],
   },
 };
 
@@ -74,45 +138,62 @@ const matchSlice = createSlice({
   initialState: initialMatchState,
   reducers: {
     addToPot: (state, action: PayloadAction<number>) => {
-      state.pot += action.payload;
+      state.currentHand.pot += action.payload;
     },
     advancePhase: (state) => {
-      const { type, phase } = state.currentPhase;
-      const sequence = gamePhaseSequences[type];
-      if (!sequence) {
-        console.error(`No sequence found for match type: ${type}`);
-        return;
-      }
+      const sequence = gamePhaseSequences[state.currentHand.currentPhase.type];
+      const oldPhase = state.currentHand.currentPhase.phase; // Keep for the log
+      console.log("ADVANCE ATTEMPT:", { oldPhase, sequence }); // Is this firing?
+      if (!sequence) return;
 
-      const currentIdx = sequence.indexOf(phase);
+      const currentIdx = sequence.indexOf(oldPhase);
 
       if (currentIdx < sequence.length - 1) {
         const nextPhase = sequence[currentIdx + 1];
+
         prepareNewPhase(state, nextPhase);
+
+        // LOG THE ACTUAL STATE PROPERTY, NOT A LOCAL VARIABLE
+        console.log(`--- PHASE SHIFT SUCCESSFUL ---`);
+        console.log(
+          `Moved from [${oldPhase}] to [${state.currentHand.currentPhase.phase}]`,
+        );
+        console.log(
+          `Next Actor: ${state.currentHand.players[state.currentHand.activePlayerIndex]?.general.name}`,
+        );
       }
+      state.currentHand.players.forEach((p) => {
+        p.state.hasActed = false; // Reset for the new round!
+      });
+      state.currentHand.isRoundTransitioning = false;
     },
     checkAndRefillDeck: (state) => {
-      const { deck, numberOfDecks, deckStyle } = state;
+      const { numberOfDecks, deckStyle } = state.general;
+      const { deck } = state.currentHand;
       const threshold = 15;
       if (deck.length < threshold) {
         const freshCards = generateDeck(numberOfDecks, deckStyle);
         const shuffledCards = shuffleDeck(freshCards);
-        state.deck = [...deck, ...shuffledCards];
+        state.currentHand.deck = [...deck, ...shuffledCards];
       }
     },
+    // --- Fixed completeDrawPhase ---
     completeDrawPhase: (state) => {
-      const match = state;
+      state.currentHand.currentPhase.phase = "bettingTwo";
+      state.currentHand.currentBetOnTable = 0;
+      state.currentHand.lastRaiserId = null;
 
-      match.currentPhase.phase = "bettingTwo";
-      match.currentBetOnTable = 0;
-      match.lastRaiserId = null;
-      match.players.forEach((p) => {
-        p.currentMatch.hasActed = false;
-        p.currentMatch.currentBet = 0;
+      state.currentHand.players.forEach((p) => {
+        p.state.hasActed = false;
+        p.state.currentBet = 0;
+        // reset lastAction for the new round
+        p.state.lastAction = null;
       });
 
-      match.activePlayerIndex = match.players[0].currentMatch.isFolded
-        ? getNextActivePlayerIndex(match)
+      // Check if player 0 is folded before setting them as active
+      state.currentHand.activePlayerIndex = state.currentHand.players[0].state
+        .isFolded
+        ? getNextActivePlayerIndex(state.currentHand.players, 0)
         : 0;
 
       console.log("Draw complete. Starting Betting Round 2.");
@@ -125,45 +206,48 @@ const matchSlice = createSlice({
         side: CardSideType;
       }>,
     ) => {
-      const { deck } = state;
+      const { deck } = state.currentHand;
       const { target, index, side } = action.payload;
       const card = deck.pop();
       if (!card) return;
       const dealtCard = { ...card, side };
       if (target === "hero") {
         dealtCard.currentLocation = "p1";
-        state.players[0].currentMatch.currentHand.push(dealtCard);
+        state.currentHand.players[0].state.hand.push(dealtCard);
       } else if (target === "opponent" && typeof index === "number") {
-        const opponent = state.players[index];
+        const opponent = state.currentHand.players[index];
         if (opponent) {
-          if (!opponent.currentMatch.currentHand)
-            opponent.currentMatch.currentHand = [];
+          if (!opponent.state.hand) opponent.state.hand = [];
           dealtCard.currentLocation = `p${index + 1}` as CurrentLocationType;
-          opponent.currentMatch.currentHand.push(dealtCard);
+          opponent.state.hand.push(dealtCard);
         }
       }
     },
+    // matchSlice.ts -> dealRound reducer
     dealRound: (state) => {
-      const match = state as MatchInterface;
-      const { currentPhase } = match;
+      console.log("!!! REDUCER START: dealRound hit !!!"); // Is this at the absolute top?
+      const { currentPhase, deck, players } = state.currentHand;
+      const { matchType } = state.general;
       const { type, phase } = currentPhase;
-      const matchType = match.matchType as string;
 
-      const config = (matchPhaseMap as GamePhaseConfigType)[type]?.[phase];
-
+      const config = (matchPhaseMap as MatchPhaseConfigType)[type]?.[phase];
+      console.log(
+        `[Deal Check] Phase: ${phase} | Target: ${config?.target} | Cards: ${config?.cards}`,
+      );
       if (!config) {
-        console.error(`Missing config for ${type} phase: ${phase}`);
+        console.error(`[dealRound] Missing config for ${type} phase: ${phase}`);
         return;
       }
 
-      // --- 1. BOARD / COMMUNITY DEALING (Hold'em & Stud) ---
+      // --- 1. BOARD / COMMUNITY DEALING ---
       if (config.target === "board") {
-        if (match.matchType === "holdem") {
+        if (matchType === "holdem" && state.variantSpecifics) {
           const cardsToDeal = config.cards as number;
+          console.log(`[dealRound] Dealing ${cardsToDeal} to board.`);
           for (let i = 0; i < cardsToDeal; i++) {
-            const card = match.deck.pop();
+            const card = deck.pop();
             if (card) {
-              match.variantData.communityCards.push({
+              state.variantSpecifics.holdemSpecifics.communityCards.push({
                 ...card,
                 side: "face-up",
                 currentLocation: "board",
@@ -172,39 +256,45 @@ const matchSlice = createSlice({
             }
           }
         }
-        // Future Note: Add Stud board logic here if Stud uses common cards
         return;
       }
 
-      // --- 2. PLAYER DEALING (Draw, Hold'em Hole, & Stud Streets) ---
-      match.players.forEach((player, idx) => {
-        if (player.currentMatch.isFolded) return;
+      // --- 2. PLAYER DEALING ---
+      players.forEach((player, idx) => {
+        if (player.general.isDealer || player.state.isFolded) return;
 
-        // Standard Draw Discard Cleanup
-        player.currentMatch.currentHand =
-          player.currentMatch.currentHand.filter((card) => !card.isDiscarded);
+        // Filter out discarded cards before calculating needs
+        const prevHandCount = player.state.hand.length;
+        player.state.hand = player.state.hand.filter(
+          (card) => !card.isDiscarded,
+        );
+        const handCountAfterFilter = player.state.hand.length;
 
-        const cardsNeeded = calculateCardsNeeded(
-          type,
-          phase,
-          player.currentMatch.currentHand.length,
+        const handBefore = player.state.hand.length;
+
+        // Log the specific config we are using
+        console.log(
+          `[Reducer Deep Dive] ${player.general.name} | Phase: ${phase} | ConfigCards: ${config.cards}`,
+        );
+
+        const cardsNeeded = calculateCardsNeeded(type, phase, handBefore);
+
+        console.log(
+          `[dealRound] Player: ${player.general.name} | Hand size (prev/clean): ${prevHandCount}/${handCountAfterFilter} | Cards Needed: ${cardsNeeded}`,
+        );
+
+        // Log the specific config we are using
+        console.log(
+          `[Reducer Deep Dive] ${player.general.name} | Phase: ${phase} | ConfigCards: ${config.cards}`,
         );
 
         for (let i = 0; i < cardsNeeded; i++) {
-          const card = match.deck.pop();
+          const card = deck.pop();
           if (card) {
-            // Logic for determining side (Face-up vs Face-down)
             let finalSide = config.side;
+            if (player.general.type === "human") finalSide = "face-up";
 
-            if (player.type === "human") {
-              finalSide = "face-up"; // Gary always sees his own cards
-            } else if (matchType === "stud") {
-              // Stud specific: some NPC cards are face-up, some are face-down
-              // This uses the phase config to decide (e.g. 3rd street is up)
-              finalSide = config.side;
-            }
-
-            player.currentMatch.currentHand.push({
+            player.state.hand.push({
               ...card,
               side: finalSide,
               currentLocation: `p${idx + 1}` as CurrentLocationType,
@@ -215,35 +305,138 @@ const matchSlice = createSlice({
       });
     },
     finishMatch: (state) => {
-      state.playingMatch = false;
+      state.general.playingMatch = false;
     },
     foldHand: (state, action: PayloadAction<{ playerId: string }>) => {
       const { playerId } = action.payload;
-      const player = state.players.find((p) => p.id === playerId);
+      const player = state.currentHand.players.find(
+        (p) => p.general.id === playerId,
+      );
 
       if (!player) return;
 
-      player.currentMatch.isFolded = true;
-      player.currentMatch.hasActed = true;
-      player.currentMatch.lastAction = "fold";
-      state.actionMessage = `${player.name} folds`;
-      state.messageId += 1;
+      player.state.isFolded = true;
+      player.state.hasActed = true;
+      player.state.lastAction = "fold";
+      state.currentHand.actionMessage = `${player.general.name} folds`;
+      state.currentHand.messageId += 1;
 
       if (checkLastManStanding(state)) return;
 
-      const activePlayers = getActivePlayers(state.players);
-      const roundOver = activePlayers.every((p) => p.currentMatch.hasActed);
+      // Crucial: Use the new signature here
+      state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
+        state.currentHand.players,
+        state.currentHand.activePlayerIndex,
+      );
+    },
 
-      if (roundOver) {
-        const { type, phase } = state.currentPhase;
-        const sequence = gamePhaseSequences[type];
-        const currentIdx = sequence.indexOf(phase);
+    handleBet: (
+      state,
+      action: PayloadAction<{
+        playerId: string;
+        amount: number;
+        type: BettingActionType;
+      }>,
+    ) => {
+      const { playerId, amount, type } = action.payload;
+      const player = state.currentHand.players.find(
+        (p) => p.general.id === playerId,
+      );
 
-        if (currentIdx < sequence.length - 1) {
-          prepareNewPhase(state, sequence[currentIdx + 1]);
-        }
+      if (!player || player.general.isDealer) return;
+
+      // 1. Handle Folds
+      if (type === "fold") {
+        player.state.isFolded = true;
+        player.state.lastAction = "fold";
+        player.state.hasActed = true;
+        state.currentHand.actionMessage = `${player.general.name} folds.`;
+        state.currentHand.messageId += 1;
+
+        // Check if only one person is left (Game Over for this hand)
+        if (checkLastManStanding(state)) return;
+
+        state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
+          state.currentHand.players,
+          state.currentHand.activePlayerIndex,
+        );
+        return;
+      }
+
+      // 2. Validate Action
+      const { valid, reason } = validateBetAction(
+        player,
+        amount,
+        state.currentHand.currentBetOnTable,
+        type,
+      );
+
+      if (!valid) {
+        state.currentHand.actionMessage = reason || "Invalid Move";
+        state.currentHand.messageId += 1;
+        return;
+      }
+
+      // 3. Resolve Financials
+      const { newPlayerMoney, newPlayerBet, newPot, isAllIn } = resolveBetState(
+        player,
+        amount,
+        state.currentHand.pot,
+      );
+
+      // 4. Update Global & Player State
+      player.account.totalMoney = newPlayerMoney;
+      player.state.currentBet = newPlayerBet;
+      player.state.hasActed = true;
+      player.state.isAllIn = isAllIn;
+      player.state.lastAction = type;
+      state.currentHand.pot = newPot;
+
+      if (type === "raise") {
+        state.currentHand.currentBetOnTable = newPlayerBet;
+        state.currentHand.lastRaiserId = playerId;
+        state.currentHand.actionMessage = `${player.general.name} raises to $${newPlayerBet}.`;
+
+        // The "Price Jump" Rule: Reset everyone who isn't all-in or folded
+        state.currentHand.players.forEach((p) => {
+          if (
+            p.general.id !== playerId &&
+            !p.state.isFolded &&
+            !p.state.isAllIn &&
+            !p.general.isDealer
+          ) {
+            p.state.hasActed = false;
+          }
+        });
       } else {
-        state.activePlayerIndex = getNextActivePlayerIndex(state);
+        state.currentHand.actionMessage =
+          type === "call"
+            ? `${player.general.name} calls.`
+            : `${player.general.name} checks.`;
+      }
+
+      state.currentHand.messageId += 1;
+
+      // 5. Determine Next Turn or Round End
+      // We check if the betting round is complete BEFORE moving the index
+      const roundComplete = state.currentHand.players
+        .filter(
+          (p) => !p.general.isDealer && !p.state.isFolded && !p.state.isAllIn,
+        )
+        .every(
+          (p) =>
+            p.state.hasActed &&
+            p.state.currentBet === state.currentHand.currentBetOnTable,
+        );
+
+      if (roundComplete) {
+        // This flag tells our middleware/thunk to trigger the next dealer phase
+        state.currentHand.isRoundTransitioning = true;
+      } else {
+        state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
+          state.currentHand.players,
+          state.currentHand.activePlayerIndex,
+        );
       }
     },
     handlePlayerBroke: (
@@ -251,17 +444,19 @@ const matchSlice = createSlice({
       action: PayloadAction<{ playerId: string; method: "plei" | "daily" }>,
     ) => {
       const { playerId, method } = action.payload;
-      const player = state.players.find((p) => p.id === playerId);
+      const player = state.currentHand.players.find(
+        (p) => p.general.id === playerId,
+      );
 
       if (!player || !player.profile) return;
 
       if (method === "plei" && (player.profile.plei ?? 0) >= 10) {
         player.profile.plei! -= 10;
-        player.money += 500;
+        player.account.totalMoney += 500;
       }
 
       if (method === "daily") {
-        player.money = 100;
+        player.account.totalMoney = 100;
       }
     },
     markNpcDiscard: (
@@ -269,12 +464,12 @@ const matchSlice = createSlice({
       action: PayloadAction<{ playerIndex: number; cardIndices: number[] }>,
     ) => {
       const { playerIndex, cardIndices } = action.payload;
-      const player = state.players[playerIndex];
+      const player = state.currentHand.players[playerIndex];
 
-      if (player && player.currentMatch.currentHand) {
+      if (player && player.state.hand) {
         cardIndices.forEach((index) => {
-          if (player.currentMatch.currentHand[index]) {
-            player.currentMatch.currentHand[index].isDiscarded = true;
+          if (player.state.hand[index]) {
+            player.state.hand[index].isDiscarded = true;
           }
         });
       }
@@ -287,9 +482,10 @@ const matchSlice = createSlice({
       const match = state;
       const amount = pickAnteAmount(location);
 
-      match.players.forEach((player) => {
-        player.money -= amount;
-        match.pot += amount;
+      match.currentHand.players.forEach((player) => {
+        if (player.general.isDealer) return;
+        player.account.totalMoney -= amount;
+        match.currentHand.pot += amount;
       });
     },
     playerRaise: (
@@ -298,130 +494,59 @@ const matchSlice = createSlice({
     ) => {
       const { playerId, amount } = action.payload;
       const match = state;
-      const player = match.players.find((p) => p.id === playerId);
+      const player = match.currentHand.players.find(
+        (p) => p.general.id === playerId,
+      );
 
-      if (player && player.money >= amount) {
-        player.currentMatch.currentBet += amount;
-        player.money -= amount;
-        player.currentMatch.hasActed = true;
-        player.currentMatch.lastAction = "raise";
-        if (player.money === 0) player.currentMatch.isAllin = true;
-        match.pot += amount;
+      if (player && player.account.totalMoney >= amount) {
+        player.state.currentBet += amount;
+        player.account.totalMoney -= amount;
+        player.state.hasActed = true;
+        player.state.lastAction = "raise";
+        if (player.account.totalMoney === 0) player.state.isAllIn = true;
+        match.currentHand.pot += amount;
 
-        match.players.forEach((p) => {
+        match.currentHand.players.forEach((p) => {
           if (
-            p.id !== playerId &&
-            !p.currentMatch.isFolded &&
-            !p.currentMatch.isAllin
+            p.general.id !== playerId &&
+            !p.state.isFolded &&
+            !p.state.isAllIn
           ) {
-            p.currentMatch.hasActed = false;
+            p.state.hasActed = false;
           }
         });
       }
     },
     prepareNextHand: (state) => {
       const match = state;
-      match.lastWinAmount = 0;
-      match.pot = 0;
-      match.currentBetOnTable = 0;
-      match.lastRaiserId = null;
-      match.activePlayerIndex = 0;
+      match.results.lastWinAmount = 0;
+      match.currentHand.pot = 0;
+      match.currentHand.currentBetOnTable = 0;
+      match.currentHand.lastRaiserId = null;
+      match.currentHand.activePlayerIndex = 0;
 
-      delete match.winnerId;
-      delete match.winningHand;
+      match.results.winnerId = "";
+      match.results.winningHand = "";
 
-      match.players.forEach((player) => {
-        player.currentMatch.currentHand = [];
-        player.currentMatch.isFolded = false;
-        player.currentMatch.isAllin = false;
-        player.currentMatch.currentBet = 0;
-        player.currentMatch.hasActed = false;
+      match.currentHand.players.forEach((player) => {
+        player.state.hand = [];
+        player.state.isFolded = false;
+        player.state.isAllIn = false;
+        player.state.currentBet = 0;
+        player.state.hasActed = false;
       });
 
-      const gameType = match.currentPhase.type;
-      const phaseSequence = Object.keys(
-        matchPhaseMap[gameType],
-      ) as GamePhaseType[];
-      match.currentPhase.phase = phaseSequence[1];
-      match.actionMessage = "New Hand Started";
-      match.messageId += 1;
-    },
-    processBet: (
-      state,
-      action: PayloadAction<{
-        playerId: string;
-        amount: number;
-        type: BettingActionType;
-      }>,
-    ) => {
-      const { playerId, amount, type } = action.payload;
-      const match = state;
-      const player = match.players.find((p) => p.id === playerId);
-
-      if (!player) return;
-
-      player.currentMatch.hasActed = true;
-      player.currentMatch.lastAction = type;
-
-      if (type === "fold") {
-        player.currentMatch.isFolded = true;
-      } else {
-        const actualAmount = Math.min(player.money, amount);
-        player.money -= actualAmount;
-        player.currentMatch.currentBet += actualAmount;
-        match.pot += actualAmount;
-
-        if (player.money === 0 && actualAmount > 0) {
-          player.currentMatch.isAllin = true;
-        }
-
-        if (type === "raise") {
-          match.currentBetOnTable = player.currentMatch.currentBet;
-          match.lastRaiserId = playerId;
-
-          match.players.forEach((p) => {
-            if (
-              p.id !== playerId &&
-              !p.currentMatch.isFolded &&
-              !p.currentMatch.isAllin
-            ) {
-              p.currentMatch.hasActed = false;
-            }
-          });
-        }
-
-        if (
-          type === "call" &&
-          player.currentMatch.currentBet > match.currentBetOnTable
-        ) {
-          match.currentBetOnTable = player.currentMatch.currentBet;
-        }
-      }
-
-      if (type === "call" || type === "check") {
-        // Calculate exactly what they owe to match the table
-        const amountNeeded =
-          match.currentBetOnTable - player.currentMatch.currentBet;
-        const actualDeduction = Math.min(player.money, amountNeeded);
-
-        player.money -= actualDeduction;
-        player.currentMatch.currentBet += actualDeduction;
-        match.pot += actualDeduction;
-        player.currentMatch.hasActed = true;
-      }
-
-      state.actionMessage = generateBettingMessage(player, match, type, amount);
-      state.messageId += 1;
-
-      if (checkLastManStanding(state)) return;
-
-      match.activePlayerIndex = getNextActivePlayerIndex(match);
+      const gameType = match.currentHand.currentPhase.type;
+      const sequence = gamePhaseSequences[gameType];
+      match.currentHand.currentPhase.phase = sequence[1];
+      match.currentHand.actionMessage = "New Hand Started";
+      match.currentHand.messageId += 1;
     },
     quitMatch: (state) => {
-      state.numberOfOpponents = 1;
-      state.players = [];
-      state.pot = 0;
-      state.playingMatch = false;
+      state.general.numberOfOpponents = 1;
+      state.currentHand.players = [];
+      state.currentHand.pot = 0;
+      state.general.playingMatch = false;
     },
     resetGame: () => {
       return initialMatchState;
@@ -429,17 +554,17 @@ const matchSlice = createSlice({
     resolveShowdown: (state) => {
       const match = state;
 
-      const activePlayers = match.players.filter(
-        (p) => !p.currentMatch.isFolded,
+      const activePlayers = match.currentHand.players.filter(
+        (p) => !p.state.isFolded,
       );
 
       if (activePlayers.length === 0) return;
 
       const results = activePlayers.map((player) => {
-        const evaluation = evaluatePokerHand(player.currentMatch.currentHand);
+        const evaluation = evaluatePokerHand(player.state.hand);
         return {
-          id: player.id,
-          name: player.name,
+          id: player.general.id,
+          name: player.general.name,
           rankValue: evaluation.rankValue,
           handName: evaluation.label,
         };
@@ -449,20 +574,35 @@ const matchSlice = createSlice({
         prev.rankValue > current.rankValue ? prev : current,
       );
 
-      const winningPlayer = match.players.find((p) => p.id === winnerResult.id);
+      const winningPlayer = match.currentHand.players.find(
+        (p) => p.general.id === winnerResult.id,
+      );
 
       if (winningPlayer) {
-        winningPlayer.money += match.pot;
+        winningPlayer.account.totalMoney += match.currentHand.pot;
 
-        match.winnerId = winningPlayer.id ?? "";
-        match.winningHand = winnerResult.handName;
-        match.lastWinAmount = match.pot;
+        match.results.winnerId = winningPlayer.general.id ?? "";
+        match.results.winningHand = winnerResult.handName;
+        match.results.lastWinAmount = match.currentHand.pot;
 
         console.log(
-          `${winningPlayer.name} wins $${match.pot} with ${winnerResult.handName}!`,
+          `${winningPlayer.general.name} wins $${match.currentHand.pot} with ${winnerResult.handName}!`,
         );
       }
-      match.pot = 0;
+      match.currentHand.pot = 0;
+    },
+    rotateDealer: (state) => {
+      const len = state.currentHand.players.length;
+      if (len === 0) return;
+
+      // The logic: (Current - 1 + Length) % Length
+      // Adding length handles the "0 to Top" jump automatically
+      state.currentHand.dealerIndex =
+        (state.currentHand.dealerIndex - 1 + len) % len;
+
+      console.log(
+        `Dealer rotated to index: ${state.currentHand.dealerIndex} (${state.currentHand.players[state.currentHand.dealerIndex].general.name})`,
+      );
     },
     startMatch: (state, action: PayloadAction<GamePayloadInterface>) => {
       const {
@@ -472,12 +612,30 @@ const matchSlice = createSlice({
         hero,
         deckStyle,
         difficultyLevel,
+        matchType,
       } = action.payload;
 
-      state.playingMatch = true;
+      // 1. General & Hand Setup
+      state.general.playingMatch = true;
+      state.general.matchType = matchType;
+      state.general.matchLocation = matchLocation;
+      state.general.deckStyle = deckStyle;
+      state.general.difficultyLevel = difficultyLevel;
 
-      const count =
-        numberOfOpponents === null ? 1 : (numberOfOpponents as number);
+      state.currentHand.dealerIndex = numberOfOpponents; // Dealer is usually the last entity
+      state.currentHand.currentPhase.type = matchType;
+
+      // 2. Variant Reset (Only reset the one we need, or all to defaults)
+      if (matchType === "draw") {
+        state.variantSpecifics.drawSpecifics = { ...INITIAL_DRAW_SPECIFICS };
+      } else if (matchType === "holdem") {
+        state.variantSpecifics.holdemSpecifics = {
+          ...INITIAL_HOLDEM_SPECIFICS,
+        };
+      }
+
+      // 3. Opponent Generation
+      const count = numberOfOpponents ?? 1;
       const availableThemes = matchMap[
         matchLocation as keyof typeof matchMap
       ] || ["classic"];
@@ -489,70 +647,89 @@ const matchSlice = createSlice({
 
       while (newOpponents.length < count) {
         const candidate = createVillain(selectedTheme);
-        if (!usedNames.has(candidate.name)) {
+        if (!usedNames.has(candidate.general.name)) {
           newOpponents.push({
             ...candidate,
-            currentMatch: {
-              currentHand: [],
-              isFolded: false,
-              isAllin: false,
-              currentBet: 0,
-              hasActed: false,
+            state: {
+              hand: [],
               chips: startingChips,
-              sessionStats: {} as SessionStatsInterface,
+              currentBet: 0,
+              isFolded: false,
+              isAllIn: false,
+              hasActed: false,
+              position: newOpponents.length + 1, // Hero is 0
             },
+            flags: {
+              isInitialLoad: false,
+              isProcessingAction: false,
+              isWinner: false,
+              hasTurnFocus: false,
+            },
+            stats: { ...INITIAL_SESSION_STATS },
           });
-          usedNames.add(candidate.name);
+          usedNames.add(candidate.general.name);
         }
       }
 
-      state.players = [
+      // 4. Final Player List Assembly
+      const dealerEntity = createDealer();
+
+      state.currentHand.players = [
         {
           ...hero,
-          id: hero.id || "hero-1",
-          name: hero.name || "Gary",
-          type: "human",
-          money: hero.money || 500,
-          currentMatch: {
-            currentHand: [],
+          general: {
+            ...hero.general,
+            type: "human",
+            isDealer: false,
+          },
+          state: {
+            hand: [],
+            chips: startingChips,
             currentBet: 0,
             hasActed: false,
             isFolded: false,
-            isAllin: false,
-            chips: startingChips,
-            sessionStats: {} as SessionStatsInterface,
+            isAllIn: false,
+            position: 0,
           },
+          flags: {
+            isInitialLoad: false,
+            isProcessingAction: false,
+            isWinner: false,
+            hasTurnFocus: false,
+          },
+          stats: hero.stats || { ...INITIAL_SESSION_STATS },
         },
         ...newOpponents,
+        dealerEntity,
       ];
 
-      state.deck = shuffleDeck(generateDeck(numberOfDecks, deckStyle));
-      state.matchLocation = matchLocation;
-      state.deckStyle = deckStyle;
-      state.difficultyLevel = difficultyLevel;
-
-      const gameType = state.currentPhase.type;
-      const phaseSequence = Object.keys(matchPhaseMap[gameType]);
-      state.currentPhase.phase = phaseSequence[0] as GamePhaseType;
+      // 5. Deck & Phase Finalization
+      state.currentHand.deck = shuffleDeck(
+        generateDeck(numberOfDecks, deckStyle),
+      );
+      const phaseSequence = gamePhaseSequences[matchType];
+      state.currentHand.currentPhase.phase = phaseSequence[0] as MatchPhaseType;
     },
 
     subtractOpponentMoney: (
       state,
       action: PayloadAction<{ opponentIndex: number; amount: number }>,
     ) => {
-      const opponent = state.players[action.payload.opponentIndex];
+      const opponent = state.currentHand.players[action.payload.opponentIndex];
       if (opponent) {
-        opponent.money -= action.payload.amount;
+        opponent.account.totalMoney -= action.payload.amount;
       }
     },
     toggleDiscard: (state, action: PayloadAction<number>) => {
       const cardIndex = action.payload;
 
-      const hero = state.players.find((p) => p.type === "human");
+      const hero = state.currentHand.players.find(
+        (p) => p.general.type === "human",
+      );
 
-      if (hero && hero.currentMatch.currentHand[cardIndex]) {
-        hero.currentMatch.currentHand[cardIndex].isDiscarded =
-          !hero.currentMatch.currentHand[cardIndex].isDiscarded;
+      if (hero && hero.state.hand[cardIndex]) {
+        hero.state.hand[cardIndex].isDiscarded =
+          !hero.state.hand[cardIndex].isDiscarded;
       }
     },
   },
@@ -567,17 +744,18 @@ export const {
   dealRound,
   finishMatch,
   foldHand,
+  handleBet,
   handlePlayerBroke,
   markNpcDiscard,
   performAnteUp,
-  playerRaise,
   prepareNextHand,
-  processBet,
   quitMatch,
   resetGame,
   resolveShowdown,
+  rotateDealer,
   startMatch,
   subtractOpponentMoney,
   toggleDiscard,
 } = matchSlice.actions;
+
 export default matchSlice.reducer;

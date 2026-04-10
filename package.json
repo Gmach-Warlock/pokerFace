@@ -1,0 +1,30 @@
+{
+  "name": "pokerface",
+  "version": "1.0.0",
+  "description": "🛰️ Project pokerFace: Naming & Architecture Manifest",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
+    "install-all": "npm install && npm install --prefix frontend && npm install --prefix backend",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"node -r dotenv/config backend/src/app.ts\" \"npm run dev --prefix frontend\""
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gmach-Warlock/pokerFace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Gmach-Warlock/pokerFace/issues"
+  },
+  "homepage": "https://github.com/Gmach-Warlock/pokerFace#readme",
+  "private": true
+}

@@ -6,7 +6,7 @@ const initialGameState: GameInterface = {
   isPlaying: false,
   currentlyDisplayed: "title",
   currentMatch: {
-    numberOfOpponents: null,
+    numberOfOpponents: 1,
     deckStyle: "arrowBolt",
     difficultyLevel: "normal",
     matchLocation: "shelter",
@@ -22,6 +22,7 @@ const initialGameState: GameInterface = {
     currentPhase: {
       type: "draw",
       phase: "notInGameYet",
+      step: 0,
     },
   },
   isMatchStarted: false,

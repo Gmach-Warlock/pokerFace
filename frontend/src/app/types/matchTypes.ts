@@ -1,7 +1,20 @@
 import type { VillainThemeType } from "./villainsTypes";
-import type { PhaseInstruction } from "../interfaces/matchInterfaces";
+import type {
+  PhaseInstruction,
+  DrawSpecifics,
+  HoldemSpecifics,
+  StudSpecifics,
+  CasinoVariantSpecifics,
+  NoSpecificsInterface,
+} from "../interfaces/matchInterfaces";
 import type { MatchLocationType } from "./worldMapTypes";
 
+export type PokerVariantData =
+  | DrawSpecifics
+  | HoldemSpecifics
+  | StudSpecifics
+  | CasinoVariantSpecifics
+  | NoSpecificsInterface;
 export type AttributeValueType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type BettingActionType = "call" | "raise" | "fold" | "check";
 export type CardValueType =
@@ -68,12 +81,12 @@ export type GameDisplayType =
   | "mainMenu"
   | "settings"
   | "preGame";
-export type GamePhaseType =
+export type MatchPhaseType =
   | DrawPhaseType
   | HoldemPhaseType
   | StudPhaseType
   | "notInGameYet";
-export type GamePhaseConfigType = Record<
+export type MatchPhaseConfigType = Record<
   string,
   Record<string, PhaseInstruction>
 >;
@@ -103,7 +116,7 @@ export type MatchType = "draw" | "holdem" | "stud";
 export type MatchMapType = Partial<
   Record<MatchLocationType, VillainThemeType[]>
 >;
-export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5 | null;
+export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5;
 export type PlayerType = "human" | "computer";
 export type PokerChoiceType =
   | "ante"
@@ -112,6 +125,7 @@ export type PokerChoiceType =
   | "fold"
   | "raise"
   | null;
+
 export type StudPhaseType =
   | "ante"
   | "thirdStreet"

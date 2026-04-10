@@ -3,130 +3,92 @@ import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import {
   advancePhase,
   checkAndRefillDeck,
-  completeDrawPhase,
   dealCard,
   dealRound,
-  processBet,
-  resolveShowdown,
+  handleBet,
 } from "../../features/match/matchSlice";
 import type { RootState } from "../store/store";
-import { getNPCAction } from "../logic/match/ai/ai";
 import { processArenaAction } from "../../features/match/matchThunks";
-
-import { selectPlayerHandEval } from "../../features/match/matchSelectors";
 
 const deckListener = createListenerMiddleware();
 
-// 2. Deck Management
 deckListener.startListening({
   matcher: isAnyOf(dealCard, dealRound),
   effect: async (_, listenerApi) => {
     const state = listenerApi.getState() as RootState;
-    const { deck } = state.match;
-    if (deck.length < 15) {
+    if (state.match.currentHand.deck.length < 15) {
       listenerApi.dispatch(checkAndRefillDeck());
     }
   },
 });
 
-// 2. GAME FLOW & NPC STRATEGY MANAGER
 deckListener.startListening({
-  matcher: isAnyOf(processBet, advancePhase, dealRound, completeDrawPhase),
+  matcher: isAnyOf(handleBet, advancePhase),
   effect: async (action, listenerApi) => {
-    // 1. Pull everything from state.match
-    let state = listenerApi.getState() as RootState;
-    const {
-      activePlayerIndex,
-      players,
-      currentBetOnTable,
-      currentPhase,
-      difficultyLevel,
-      pot,
-    } = state.match;
-    if (
-      advancePhase.match(action) &&
-      currentPhase.phase.toLowerCase() === "deal"
-    ) {
+    const state = listenerApi.getState() as RootState;
+    const { players, currentBetOnTable, currentPhase, activePlayerIndex } =
+      state.match.currentHand;
+    const phase = currentPhase.phase;
+    const currentPlayer = players[activePlayerIndex];
+
+    // 1. SYSTEM PHASES: (Ante, Deal, Draw)
+    // These phases require automation regardless of who the 'activePlayer' is.
+    const isSystemPhase = ["ante", "deal", "draw"].includes(phase);
+
+    if (isSystemPhase) {
+      console.log(
+        `MIDDLEWARE: System Phase [${phase}] automation triggering...`,
+      );
+      await listenerApi.delay(1000);
       listenerApi.dispatch(processArenaAction());
-      return;
-    }
-    if (
-      currentPhase.phase === "notInGameYet" ||
-      currentPhase.phase === "showdown"
-    ) {
-      return;
+      return; // Exit here; don't run betting logic
     }
 
-    const activePlayers = players.filter(
-      (p) => !p.currentMatch.isFolded && !p.currentMatch.isAllin,
-    );
-
-    if (activePlayers.length <= 1) return;
-
-    const everyoneActed = activePlayers.every((p) => p.currentMatch.hasActed);
-    const betsEqual = activePlayers.every(
-      (p) => p.currentMatch.currentBet === currentBetOnTable,
-    );
-
-    if (everyoneActed && betsEqual) {
-      if (isAnyOf(advancePhase, completeDrawPhase, dealRound)(action)) {
+    // 2. BETTING PHASES: (Wait for Human)
+    if (phase.includes("betting")) {
+      // Use the 'as string' trick to bypass the TS error
+      if ((currentPlayer?.general.type as string) === "human") {
+        console.log("MIDDLEWARE: Betting Phase - Waiting for Hero.");
         return;
       }
 
-      await listenerApi.delay(1000);
-      listenerApi.dispatch(advancePhase());
+      // Check for Round Completion
+      const activePlayers = players.filter((p) => !p.state.isFolded);
+      const everyoneActed = activePlayers.every((p) => p.state.hasActed);
+      const betsEqual = activePlayers.every(
+        (p) => p.state.currentBet === currentBetOnTable,
+      );
 
-      const newState = listenerApi.getState() as RootState;
-      if (newState.match.currentPhase.phase === "showdown") {
-        listenerApi.dispatch(resolveShowdown());
+      // If the round isn't over yet, we handle the current turn
+      if (!everyoneActed || !betsEqual) {
+        if ((currentPlayer?.general.type as string) === "human") {
+          console.log(
+            "MIDDLEWARE: Hero turn detected. Waiting for player input...",
+          );
+          return; // STOP HERE. Do not advance, do not call thunk.
+        }
+
+        if (
+          (currentPlayer?.general.type as string) === "computer" &&
+          !currentPlayer.state.hasActed
+        ) {
+          console.log(
+            `MIDDLEWARE: NPC ${currentPlayer.general.name} is thinking...`,
+          );
+          await listenerApi.delay(1200);
+          listenerApi.dispatch(processArenaAction());
+          return;
+        }
       }
-      return;
-    }
 
-    if (activePlayerIndex === 0) return;
-
-    const currentWaitPlayer = players[activePlayerIndex];
-
-    if (
-      currentWaitPlayer?.type === "computer" &&
-      !currentWaitPlayer.currentMatch.hasActed
-    ) {
-      await listenerApi.delay(
-        currentWaitPlayer.npcTraits?.general.thinkTime || 1000,
-      );
-
-      state = listenerApi.getState() as RootState;
-      if (state.match.activePlayerIndex !== activePlayerIndex) return;
-
-      const evaluation = selectPlayerHandEval(state, activePlayerIndex);
-
-      const decision = getNPCAction(
-        currentWaitPlayer,
-        evaluation,
-        difficultyLevel,
-        pot,
-        currentBetOnTable,
-      );
-
-      const amountToCall = Math.max(
-        0,
-        currentBetOnTable - (currentWaitPlayer.currentMatch.currentBet || 0),
-      );
-
-      let amountToSend = 0;
-      if (decision === "call") amountToSend = amountToCall;
-      else if (decision === "raise") amountToSend = amountToCall + 20;
-
-      const finalType =
-        decision === "fold" && amountToCall === 0 ? "check" : decision;
-
-      listenerApi.dispatch(
-        processBet({
-          playerId: currentWaitPlayer.id ?? "",
-          type: finalType,
-          amount: amountToSend,
-        }),
-      );
+      // ONLY if the round is actually finished, we advance
+      if (everyoneActed && betsEqual) {
+        if (action.type !== advancePhase.type) {
+          console.log("!!! Round complete. Advancing Phase !!!");
+          await listenerApi.delay(1000);
+          listenerApi.dispatch(advancePhase());
+        }
+      }
     }
   },
 });

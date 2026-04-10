@@ -1,8 +1,8 @@
-import type { GamePhaseType } from "../../../../app/types/matchTypes";
+import type { MatchPhaseType } from "../../../../app/types/matchTypes";
 import "./PhaseAlert.css";
 
 interface PhaseAlertProps {
-  phase: GamePhaseType;
+  phase: MatchPhaseType;
 }
 
 export default function PhaseAlert({ phase }: PhaseAlertProps) {

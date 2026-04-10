@@ -4,7 +4,6 @@ import { createChips } from "../../app/logic/factory/factoryFunctions";
 import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
 import type { MatchLocationType } from "../../app/types/worldMapTypes";
 import type { CardSuitType, DeckStyleType } from "../../app/types/matchTypes";
-import { getAIDiscardIndices } from "../../app/logic/match/ai/ai";
 import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
 import { cardSuitIcons, handRanks } from "../../app/assets/match/matchAssets";
 
@@ -20,27 +19,35 @@ export const selectMatch = (state: RootState) => state.match;
  * GLOBAL GAME STATE (Table, Pot, Phase)
  * ============================================================
  */
-export const selectCurrentPhase = createSelector(
+// matchSelectors.ts
+
+// 1. Keep this for components that just want the string (like your buttons)
+export const selectCurrentPhaseName = (state: RootState) =>
+  state.match.currentHand.currentPhase.phase;
+
+// 2. Use this for components that need the type AND phase (like ArenaCenter)
+export const selectCurrentPhase = (state: RootState) =>
+  state.match.currentHand.currentPhase;
+export const selectPot = createSelector(
   [selectMatch],
-  (m) => m.currentPhase.phase,
+  (m) => m.currentHand.pot,
 );
-export const selectPot = createSelector([selectMatch], (m) => m.pot);
 export const selectMatchLocation = createSelector(
   [selectMatch],
-  (m) => m.matchLocation,
+  (m) => m.general.matchLocation,
 );
 export const selectDeckStyle = createSelector(
   [selectMatch],
-  (m) => m.deckStyle,
+  (m) => m.general.deckStyle,
 );
 
 export const selectIsBettingPhase = createSelector(
-  [selectCurrentPhase],
+  [selectCurrentPhaseName],
   (phase) => phase === "bettingOne" || phase === "bettingTwo",
 );
 
 export const selectCurrentMaxBet = createSelector([selectMatch], (match) => {
-  const allBets = match.players.map((p) => p.currentMatch.currentBet ?? 0);
+  const allBets = match.currentHand.players.map((p) => p.state.currentBet ?? 0);
   return Math.max(...allBets, 0);
 });
 /**
@@ -49,28 +56,31 @@ export const selectCurrentMaxBet = createSelector([selectMatch], (match) => {
  * ============================================================
  */
 export const selectHero = createSelector([selectMatch], (match) =>
-  match.players.find((p) => p.type === "human"),
+  match.currentHand.players.find((p) => p.general.type === "human"),
 );
-export const selectHerosId = createSelector([selectHero], (h) => h?.id ?? "");
+export const selectHerosId = createSelector(
+  [selectHero],
+  (h) => h?.general.id ?? "",
+);
 export const selectHeroName = createSelector(
   [selectHero],
-  (h) => h?.name ?? "Unknown",
+  (h) => h?.general.name ?? "Unknown",
 );
 export const selectHeroMoney = createSelector(
   [selectHero],
-  (h) => h?.money ?? 0,
+  (h) => h?.account.totalMoney ?? 0,
 );
 export const selectHeroIsFolded = createSelector(
   [selectHero],
-  (h) => h?.currentMatch.isFolded ?? false,
+  (h) => h?.state.isFolded ?? false,
 );
 export const selectHeroHand = createSelector(
   [selectHero],
-  (h) => h?.currentMatch.currentHand ?? [],
+  (h) => h?.state.hand ?? [],
 );
 export const selectHeroCurrentBet = createSelector(
   [selectHero],
-  (h) => h?.currentMatch.currentBet ?? 0,
+  (h) => h?.state.currentBet ?? 0,
 );
 
 export const selectHeroChips = createSelector([selectHeroMoney], (money) =>
@@ -93,57 +103,63 @@ export const selectHeroAmountToCall = createSelector(
  * GENERIC PLAYER SELECTORS (Hero or Opponent by ID)
  * ============================================================
  */
+export const selectDealer = createSelector([selectMatch], (match) => {
+  const { players, dealerIndex } = match.currentHand;
+  return players[dealerIndex] || null;
+});
 
+// This helper is great for UI if you ever decide to show a "Dealer" label
+export const selectIsPlayerDealer = (playerId: string) =>
+  createSelector(
+    [selectMatch],
+    (match) =>
+      match.currentHand.players[match.currentHand.dealerIndex]?.general.id ===
+      playerId,
+  );
 export const selectPlayerById = createSelector(
   [selectMatch, (_state: RootState, playerId: string | null) => playerId],
   (match, playerId) => {
     if (!playerId) return null;
-    return match.players.find((p) => p.id === playerId) || null;
+    return (
+      match.currentHand.players.find((p) => p.general.id === playerId) || null
+    );
   },
 );
 
-export const selectPlayers = (state: RootState) => state.match.players;
-
-export const selectNpcDiscards = createSelector([selectMatch], (match) => {
-  // Returns an array of arrays: [[indices for NPC 1], [indices for NPC 2]]
-  return match.players.map((player) => {
-    if (player.type === "computer" && !player.currentMatch.isFolded) {
-      return getAIDiscardIndices(player.currentMatch.currentHand);
-    }
-    return [];
-  });
-});
+export const selectPlayers = (state: RootState) =>
+  state.match.currentHand.players;
 
 export const selectOpponents = createSelector([selectMatch], (match) => {
-  return match.players.filter((player) => player.type === "computer");
+  return match.currentHand.players.filter(
+    (player) => player.general.type === "computer",
+  );
 });
 
 export const selectOpponentStatusClass = createSelector(
   [selectPlayerById],
   (player) => {
     if (!player) return "";
-    if (player.currentMatch.isFolded) return "opponent__card--folded";
-    if (player.currentMatch.isAllin) return "opponent__card--all-in";
+    if (player.state.isFolded) return "opponent__card--folded";
+    if (player.state.isAllIn) return "opponent__card--all-in";
     return "opponent__card--active";
   },
 );
 
 export const selectPlayerName = createSelector(
   [selectPlayerById],
-  (p) => p?.name ?? "Unknown",
+  (p) => p?.general.name ?? "Unknown",
 );
 export const selectPlayerMoney = createSelector(
   [selectPlayerById],
-  (p) => p?.money ?? 0,
+  (p) => p?.account.totalMoney ?? 0,
 );
 export const selectIsPlayerFolded = createSelector(
   [selectPlayerById],
-  (p) => p?.currentMatch.isFolded ?? false,
+  (p) => p?.state.isFolded ?? false,
 );
 export const selectPlayerChips = createSelector(
   [selectPlayerById],
-  (p) =>
-    p?.currentMatch.chips ?? { white: 0, red: 0, blue: 0, green: 0, black: 0 },
+  (p) => p?.state.chips ?? { white: 0, red: 0, blue: 0, green: 0, black: 0 },
 );
 
 /**
@@ -151,11 +167,15 @@ export const selectPlayerChips = createSelector(
  * Betting & UI SELECTORS
  * ============================================================
  */
-
-export const selectWinnerId = createSelector([selectMatch], (m) => m.winnerId);
+export const selectCurrentPot = (state: RootState) =>
+  state.match.currentHand.pot;
+export const selectWinnerId = createSelector(
+  [selectMatch],
+  (m) => m.results.winnerId,
+);
 export const selectWinningHandLabel = createSelector(
   [selectMatch],
-  (m) => m.winningHand,
+  (m) => m.results.winningHand,
 );
 
 export const selectWinnerName = createSelector(
@@ -172,25 +192,35 @@ export const selectDiscardCount = createSelector(
 );
 export const selectActionButtonLabel = createSelector(
   [selectCurrentPhase, selectDiscardCount, selectHeroAmountToCall],
-  (phase, discardCount, amountToCall) => {
-    const p = phase.toLowerCase(); // Safety first
+  (currentPhase, discardCount, amountToCall) => {
+    // 1. Phase names are case-sensitive. Let's force lowercase for comparison
+    // to avoid "bettingOne" vs "bettingone" bugs.
+    const p = currentPhase.phase.toLowerCase();
+
     switch (p) {
       case "ante":
         return "Ante Up & Deal";
+      case "deal":
+        // This is where you were getting stuck.
+        // If the cards are dealt but the phase hasn't advanced yet:
+        return "Start Betting";
       case "draw":
         return discardCount > 0 ? `Swap ${discardCount} Cards` : "Stand Pat";
       case "bettingone":
       case "bettingtwo":
-        // This is the core fix for the "Check" vs "Call" label
         return amountToCall > 0 ? `Call $${amountToCall}` : "Check";
       case "showdown":
         return "See Results";
       default:
-        return "Next Phase";
+        // Use a more descriptive fallback for debugging
+        return `Finish ${currentPhase.phase}`;
     }
   },
 );
-export const selectDeck = createSelector([selectMatch], (match) => match.deck);
+export const selectDeck = createSelector(
+  [selectMatch],
+  (match) => match.currentHand.deck,
+);
 
 export const selectMinBetAmount = createSelector(
   [selectHeroAmountToCall],
@@ -256,21 +286,57 @@ export const selectAvailableLocations = (state: RootState) =>
 
 export const selectPlayerHandEval = createSelector(
   [
-    (state: RootState) => state.match.players,
+    (state: RootState) => state.match.currentHand.players,
     (_state: RootState, index: number) => index,
   ],
   (players, index) => {
-    const hand = players[index]?.currentMatch.currentHand || [];
+    const hand = players[index]?.state.hand || [];
     return evaluatePokerHand(hand);
   },
 );
 
 export const selectIsBigPot = (state: RootState) => {
-  const { pot, players } = state.match;
+  const { pot, players } = state.match.currentHand;
   return pot > players.length * 100;
 };
 
 export const selectActiveNPC = (state: RootState) => {
-  const activeIdx = state.match.activePlayerIndex;
-  return state.match.players[activeIdx];
+  const activeIdx = state.match.currentHand.activePlayerIndex;
+  return state.match.currentHand.players[activeIdx];
 };
+
+export const selectActivePlayers = (state: RootState) =>
+  state.match.currentHand.players.filter(
+    (p) => !p.state.isFolded && !p.state.isAllIn,
+  );
+
+export const selectIsRoundOver = (state: RootState) => {
+  const activeAndNotAllIn = state.match.currentHand.players.filter(
+    (p) => !p.state.isFolded && !p.state.isAllIn,
+  );
+
+  const { currentBetOnTable, currentPhase } = state.match.currentHand;
+
+  if (["ante", "deal", "showdown"].includes(currentPhase.phase)) return false;
+
+  // If 0 or 1 person can still act, the round is essentially over
+  if (activeAndNotAllIn.length <= 1) {
+    // Check if everyone else has matched the current bet on table
+    const activePlayers = state.match.currentHand.players.filter(
+      (p) => !p.state.isFolded,
+    );
+    return activePlayers.every(
+      (p) => p.state.currentBet === currentBetOnTable || p.state.isAllIn,
+    );
+  }
+
+  const everyoneActed = activeAndNotAllIn.every((p) => p.state.hasActed);
+  const betsEqual = activeAndNotAllIn.every(
+    (p) => p.state.currentBet === currentBetOnTable,
+  );
+
+  return everyoneActed && betsEqual;
+};
+
+export const selectCurrentTurnPlayer = (state: RootState) =>
+  state.match.currentHand.players[state.match.currentHand.activePlayerIndex];

@@ -5,7 +5,10 @@ import {
 import type { BettingButtonPropsInterface } from "../../../../../../app/interfaces/matchInterfaces";
 import { selectMatchLocation } from "../../../../../../features/match/matchSelectors";
 import { processArenaAction } from "../../../../../../features/match/matchThunks";
-import { performAnteUp } from "../../../../../../features/match/matchSlice";
+import {
+  advancePhase,
+  performAnteUp,
+} from "../../../../../../features/match/matchSlice";
 
 export default function DealButton({
   label,
@@ -15,7 +18,7 @@ export default function DealButton({
   const dispatch = useAppDispatch();
   const handleDeal = () => {
     dispatch(performAnteUp({ location: location }));
-
+    dispatch(advancePhase());
     dispatch(processArenaAction());
   };
 

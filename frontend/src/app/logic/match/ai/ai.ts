@@ -7,6 +7,9 @@ import type {
   DifficultyType,
 } from "../../../types/matchTypes";
 import { evaluatePokerHand } from "../evaluators/evaluators";
+import { logNPCDecision } from "../debuggers/matchDebuggers";
+import type { RootState } from "../../../store/store";
+import { selectPlayerHandEval } from "../../../../features/match/matchSelectors";
 
 export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
   const evaluation = evaluatePokerHand(hand);
@@ -46,60 +49,92 @@ export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
   return indicesToDiscard.slice(0, 4);
 };
 
+export const getNPCDecisionPayload = (state: RootState, npcIndex: number) => {
+  const { match } = state;
+  const npc = match.currentHand.players[npcIndex];
+  const evaluation = selectPlayerHandEval(state, npcIndex);
+
+  const decision = getNPCAction(
+    npc,
+    evaluation,
+    match.general.difficultyLevel,
+    match.currentHand.pot,
+    match.currentHand.currentBetOnTable,
+  );
+
+  const amountToCall = Math.max(
+    0,
+    match.currentHand.currentBetOnTable - (npc.state.currentBet || 0),
+  );
+  const amountToSend =
+    decision === "call"
+      ? amountToCall
+      : decision === "raise"
+        ? amountToCall + 20
+        : 0;
+  const finalType =
+    decision === "fold" && amountToCall === 0 ? "check" : decision;
+
+  return { playerId: npc.general.id, type: finalType, amount: amountToSend };
+};
+
 export const getNPCAction = (
   npc: PlayerInterface,
-  evaluation: { rankValue: number; label: string }, // Matches evaluatePokerHand
+  evaluation: { rankValue: number; label: string },
   currentDifficulty: DifficultyType,
   currentPot: number,
   currentBet: number,
 ): BettingActionType => {
   const { rankValue } = evaluation;
-
   const normalizedStrength = (rankValue / 900) * 100;
-
-  const amountToCall = currentBet - (npc.currentMatch.currentBet || 0);
+  const amountToCall = currentBet - (npc.state.currentBet || 0);
   const canCheck = amountToCall <= 0;
 
   const defaultPassAction: BettingActionType = canCheck ? "check" : "call";
   const defaultFailAction: BettingActionType = canCheck ? "check" : "fold";
-  console.log(amountToCall, normalizedStrength);
+
+  let finalAction: BettingActionType;
+
+  // Logic Blocks
   switch (currentDifficulty) {
     case "easy":
-      if (rankValue >= 200) return "raise";
-      if (rankValue >= 100) return "call";
-
-      if (rankValue < 300 && amountToCall > 60) return "fold";
-      return defaultPassAction;
+      if (rankValue >= 200) finalAction = "raise";
+      else if (rankValue >= 100) finalAction = "call";
+      else if (rankValue < 300 && amountToCall > 60) finalAction = "fold";
+      else finalAction = defaultPassAction;
+      break;
 
     case "normal":
-      // Raise on Pair or better
-      if (rankValue >= 100) {
-        console.log(`${currentBet} ${evaluation}, ${normalizedStrength} raise`);
-        return "raise";
-      }
-      // Call if we have a decent high card or the pot is worth it
-      if (normalizedStrength > 15) {
-        console.log(`${currentBet} ${evaluation}, ${normalizedStrength} call`);
-        return "call";
-      }
-      return defaultFailAction;
+      if (rankValue >= 100) finalAction = "raise";
+      else if (normalizedStrength > 15) finalAction = "call";
+      else finalAction = defaultFailAction;
+      break;
 
     case "hard": {
-      const isTroll = npc.npcTraits?.general.isTroll ?? 0;
-      // Bluffing logic
-      if (isTroll && Math.random() < 0.3) return "raise";
-
+      const isTroll = npc.personality?.traits.isTroll ?? 0;
       const potCommitment = currentPot > 500 ? 10 : 0;
 
-      if (rankValue >= 300 || normalizedStrength + potCommitment > 85)
-        return "raise";
-      if (normalizedStrength + potCommitment > 50) return "call";
-      return defaultFailAction;
+      if (isTroll && Math.random() < 0.3) finalAction = "raise";
+      else if (rankValue >= 300 || normalizedStrength + potCommitment > 85)
+        finalAction = "raise";
+      else if (normalizedStrength + potCommitment > 50) finalAction = "call";
+      else finalAction = defaultFailAction;
+      break;
     }
 
     default:
-      return defaultPassAction;
+      finalAction = defaultPassAction;
   }
+
+  // --- TRIGGER DEBUGGER ---
+  logNPCDecision(npc, evaluation, finalAction, {
+    strength: normalizedStrength,
+    toCall: amountToCall,
+    pot: currentPot,
+    diff: currentDifficulty,
+  });
+
+  return finalAction;
 };
 
 /* function getSituation(player: PlayerInterface, personality: CharacterPersonality): CurrentSituationType {
