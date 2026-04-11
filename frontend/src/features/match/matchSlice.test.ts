@@ -10,7 +10,10 @@ import {
   INITIAL_HOLDEM_SPECIFICS,
   INITIAL_NO_SPECIFICS,
 } from "../../app/assets/match/matchAssets";
-import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
+import {
+  INITIAL_LIFETIME_STATS,
+  INITIAL_SESSION_STATS,
+} from "../../app/assets/profile/profileAssets";
 
 describe("matchSlice dealRound reducer", () => {
   let initialState: MatchInterface;
@@ -32,13 +35,18 @@ describe("matchSlice dealRound reducer", () => {
         hasActed: false,
         position: 0,
       },
-      account: {
-        totalMoney: 500,
-        plei: 0,
+      profile: {
         level: 1,
         xp: 0,
-        unlockedDecks: ["arrowBolt"],
-        currentDeckChoice: "arrowBolt",
+        nextLevel: 1000,
+        money: 1000,
+        plei: 0,
+        availableLocations: [],
+        availableDecks: [],
+        locationsVisited: [],
+        locationsMastered: [],
+        currentDeckChoice: null,
+        isSpecial: false,
       },
       flags: {
         isInitialLoad: false,
@@ -46,7 +54,10 @@ describe("matchSlice dealRound reducer", () => {
         isWinner: false,
         hasTurnFocus: true,
       },
-      stats: { ...INITIAL_SESSION_STATS },
+      stats: {
+        lifetime: INITIAL_LIFETIME_STATS,
+        session: INITIAL_SESSION_STATS,
+      },
     };
 
     initialState = {

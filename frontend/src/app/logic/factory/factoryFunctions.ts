@@ -2,7 +2,10 @@ import type { VillainThemeType } from "../../types/villainsTypes";
 import { villainPool } from "../../assets/villain/villainAssets";
 import { cardSuitIcons, cardRankValues } from "../../assets/match/matchAssets";
 import { generateRandomString } from "../general/generalUtils";
-import { INITIAL_SESSION_STATS } from "../../assets/profile/profileAssets";
+import {
+  INITIAL_LIFETIME_STATS,
+  INITIAL_SESSION_STATS,
+} from "../../assets/profile/profileAssets";
 import type {
   CardInterface,
   ChipMapInterface,
@@ -35,44 +38,47 @@ export const createChips = (pot: number): ChipMapInterface => {
 
 export const createComment = () => {};
 
-export const createDealer = (): PlayerInterface => ({
-  general: {
-    id: "dealer-001",
-    name: "Dealer",
-    type: "computer", // Or a new type 'system' if you prefer
-    isDealer: true, // The new property you mentioned
-  },
-  state: {
-    hand: [],
-    chips: {
-      white: 0,
-      red: 0,
-      blue: 0,
-      green: 0,
-      black: 0,
+export const createDealer = (): PlayerInterface => {
+  return {
+    general: {
+      id: "dealer-001",
+      name: "Dealer",
+      type: "computer",
+      isDealer: true,
     },
-    currentBet: 0,
-    isFolded: false,
-    isAllIn: false,
-    hasActed: false,
-    position: 2,
-  },
-  account: {
-    totalMoney: 0,
-    plei: 0,
-    level: 1,
-    xp: 0,
-    unlockedDecks: ["arrowBolt"],
-    currentDeckChoice: "arrowBolt",
-  },
-  flags: {
-    isInitialLoad: true,
-    isProcessingAction: false,
-    isWinner: false,
-    hasTurnFocus: false,
-  },
-  stats: INITIAL_SESSION_STATS,
-});
+    state: {
+      hand: [],
+      chips: { white: 0, red: 0, blue: 0, green: 0, black: 0 },
+      currentBet: 0,
+      isFolded: false,
+      isAllIn: false,
+      hasActed: false,
+      position: 2,
+    },
+    profile: {
+      level: 1,
+      xp: 0,
+      nextLevel: 100,
+      money: 0,
+      plei: 0,
+      availableLocations: [],
+      availableDecks: ["arrowBolt"],
+      locationsVisited: [],
+      locationsMastered: [],
+      currentDeckChoice: "arrowBolt",
+    },
+    stats: {
+      lifetime: INITIAL_LIFETIME_STATS,
+      session: INITIAL_SESSION_STATS,
+    },
+    flags: {
+      isInitialLoad: true,
+      isProcessingAction: false,
+      isWinner: false,
+      hasTurnFocus: false,
+    },
+  };
+};
 
 export const createVillain = (
   theme: VillainThemeType,
@@ -105,13 +111,18 @@ export const createVillain = (
       isDiscarding: false,
       position: 0,
     },
-    account: {
-      totalMoney: 1000,
-      plei: 0,
+    profile: {
       level: 1,
       xp: 0,
-      unlockedDecks: ["arrowBolt"],
-      currentDeckChoice: "arrowBolt",
+      nextLevel: 0,
+      money: 500,
+      plei: 0,
+      availableLocations: [],
+      availableDecks: [],
+      locationsVisited: [],
+      locationsMastered: [],
+      currentDeckChoice: null,
+      isSpecial: false,
     },
     flags: {
       isInitialLoad: false,
@@ -119,11 +130,89 @@ export const createVillain = (
       isWinner: false,
       hasTurnFocus: false,
     },
-    stats: INITIAL_SESSION_STATS,
+    stats: {
+      lifetime: {
+        matches: {
+          hand: {
+            handsPlayed: 0,
+            handsWon: 0,
+            handsLost: 0,
+            handsTied: 0,
+          },
+          streak: {
+            currentWinStreak: 0,
+            currentLossStreak: 0,
+            longestWinStreak: 0,
+          },
+          monetary: {
+            totalProfit: 0,
+            biggestPotWon: 0,
+            biggestLoss: 0,
+            totalBuyIn: 0,
+            totalCashOut: 0,
+            allTimeHighBalance: 0,
+            totalRakePaid: 0, // If your game has a "house" fee
+            biggestSuckout: 0,
+          },
+          various: {
+            vpipCount: 0,
+            pfrCount: 0,
+            bluffsAttempted: 0,
+            bluffsSucceeded: 0,
+            showdownsReached: 0,
+            showdownsWon: 0,
+          },
+          log: {
+            startTime: new Date().toISOString(),
+            endTime: null,
+            lastHandResult: null,
+          },
+        },
+        opponents: {
+          opponentsPlayed: {
+            classy: [],
+            classic: [],
+            gritty: [],
+            modern: [],
+            pro: [],
+          },
+          totalPlayed: 0,
+          opponentsBeaten: {
+            classy: [],
+            classic: [],
+            gritty: [],
+            modern: [],
+            pro: [],
+          },
+          totalBeaten: 0,
+        },
+        achievements: {
+          unlocked: [],
+
+          milestones: {
+            highestLevelReached: 1,
+            totalXpEarned: 0,
+          },
+          processedTiers: {
+            winCount: 0,
+            profitMilestone: 0,
+          },
+          rarityCounts: {
+            common: 0,
+            rare: 0,
+            epic: 0,
+            legendary: 0,
+          },
+          lastUnlockedAt: null,
+        },
+      },
+      session: INITIAL_SESSION_STATS,
+    },
   };
 
   return newVillain;
 };
+
 export const generateDeck = (
   count: number = 1,
   design: DeckStyleType,

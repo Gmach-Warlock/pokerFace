@@ -11,12 +11,12 @@ export const calculateBetResults = (
   amount: number,
   currentPot: number,
 ) => {
-  if (amount > player.account.totalMoney) {
+  if (amount > player.profile.money) {
     throw new Error("Insufficient chips");
   }
 
   return {
-    newPlayerChips: player.account.totalMoney - amount,
+    newPlayerChips: player.profile.money - amount,
     newPot: currentPot + amount,
     betConfirmed: true,
   };

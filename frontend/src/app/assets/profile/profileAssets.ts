@@ -69,6 +69,82 @@ export const INITIAL_SESSION_STATS: SessionStatsInterface = {
   endTime: null, // The "Neo Tokyo" start clock
   lastHandResult: null,
 };
+
+export const INITIAL_LIFETIME_STATS = {
+  matches: {
+    hand: {
+      handsPlayed: 0,
+      handsWon: 0,
+      handsLost: 0,
+      handsTied: 0,
+    },
+    streak: {
+      currentWinStreak: 0,
+      currentLossStreak: 0,
+      longestWinStreak: 0,
+    },
+    monetary: {
+      totalProfit: 0,
+      biggestPotWon: 0,
+      biggestLoss: 0,
+      totalBuyIn: 0,
+      totalCashOut: 0,
+      allTimeHighBalance: 0,
+      totalRakePaid: 0, // If your game has a "house" fee
+      biggestSuckout: 0,
+    },
+    various: {
+      vpipCount: 0,
+      pfrCount: 0,
+      bluffsAttempted: 0,
+      bluffsSucceeded: 0,
+      showdownsReached: 0,
+      showdownsWon: 0,
+    },
+    log: {
+      startTime: new Date().toISOString(),
+      endTime: null,
+      lastHandResult: null,
+    },
+  },
+  opponents: {
+    opponentsPlayed: {
+      classy: [],
+      classic: [],
+      gritty: [],
+      modern: [],
+      pro: [],
+    },
+    totalPlayed: 0,
+    opponentsBeaten: {
+      classy: [],
+      classic: [],
+      gritty: [],
+      modern: [],
+      pro: [],
+    },
+    totalBeaten: 0,
+  },
+  achievements: {
+    unlocked: [],
+
+    milestones: {
+      highestLevelReached: 1,
+      totalXpEarned: 0,
+    },
+    processedTiers: {
+      winCount: 0,
+      profitMilestone: 0,
+    },
+    rarityCounts: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+    },
+    lastUnlockedAt: null,
+  },
+};
 export const LEVEL_UP_REWARDS: Record<
   number,
   { message: string; perk?: string; unlockId?: string }

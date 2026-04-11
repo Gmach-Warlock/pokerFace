@@ -20,7 +20,10 @@ import type {
 } from "../types/matchTypes";
 import type { VillainThemeType } from "../types/villainsTypes";
 import type { MatchLocationType } from "../types/worldMapTypes";
-import type { PlayerProfileInterface } from "./profileInterfaces";
+import type {
+  AchievementInterface,
+  LifetimeStatsInterface,
+} from "./profileInterfaces";
 
 export interface BaseMatchInterface {
   general: {
@@ -233,7 +236,6 @@ export interface PhaseInstruction {
   community?: CardSideType;
 }
 export interface PlayerInterface {
-  // Identity: Who is this? (Static)
   general: {
     id: string | null;
     name: string;
@@ -241,8 +243,6 @@ export interface PlayerInterface {
     difficulty?: DifficultyType;
     isDealer: boolean;
   };
-
-  // State: What are they doing right now? (Volatile - Resets every hand)
   state: {
     hand: CardInterface[];
     chips: ChipMapInterface;
@@ -254,30 +254,30 @@ export interface PlayerInterface {
     isDiscarding?: boolean;
     position: number; // Table seat index
   };
-
-  // Account: What do they own? (Persistent - RPG/Database layer)
-  account: {
-    totalMoney: number;
-    plei: number;
+  profile: {
     level: number;
     xp: number;
-    unlockedDecks: DeckStyleType[];
-    currentDeckChoice: DeckStyleType;
+    nextLevel: number;
+    money: number;
+    plei: number;
+    availableLocations: MatchLocationType[];
+    availableDecks: DeckStyleType[] | null;
+    locationsVisited: MatchLocationType[];
+    locationsMastered: MatchLocationType[];
+    currentDeckChoice?: DeckStyleType | null;
+    isSpecial?: boolean;
   };
-
-  // Flags: UI & Logic gates (Boolean hell, contained)
+  stats: {
+    lifetime: LifetimeStatsInterface;
+    session: SessionStatsInterface;
+  };
+  achievements?: AchievementInterface[];
   flags: {
     isInitialLoad: boolean;
     isProcessingAction: boolean;
     isWinner: boolean;
     hasTurnFocus: boolean;
   };
-
-  // Analytics: What have they done? (History)
-  stats: SessionStatsInterface;
-  profile?: PlayerProfileInterface;
-  // Behavior: How do they think? (NPC Logic Layer)
-
   personality?: {
     archetype: VillainThemeType; // and so on
     situations: Record<string, number>;
@@ -291,9 +291,9 @@ export interface PlayerInterface {
     };
     traits: {
       isTroll: boolean;
-      bluffModifier: number; // 0.0 - 1.0
-      aggression: number; // 0.0 - 1.0 (frequency of raising)
-      thinkTime: number; // ms delay for "immersion"
+      bluffModifier: number;
+      aggression: number;
+      thinkTime: number;
       tilt: {
         limit: number;
         comment: string;
@@ -312,7 +312,7 @@ export interface SessionStatsInterface {
   currentLossStreak: number;
   longestWinStreak: number;
 
-  totalSessionProfit: number; // Can be negative
+  totalSessionProfit: number;
   biggestPotWon: number;
   biggestLoss: number;
   totalBuyIn: number;
@@ -331,8 +331,6 @@ export interface SessionStatsInterface {
 }
 
 export interface StudSpecifics {
-  // Define any Stud-specific properties here
-  // For example:
-  upCards: CardInterface[]; // Cards that are face-up
-  downCards: CardInterface[]; // Cards that are face-down
+  upCards: CardInterface[];
+  downCards: CardInterface[];
 }

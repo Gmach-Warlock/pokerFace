@@ -38,7 +38,7 @@ export const validateBetAction = (
 ): BetValidationResultInterface => {
   const amountToCall = currentMaxBet - (player.state.currentBet || 0);
 
-  if (type === "call" && player.account.totalMoney < amountToCall) {
+  if (type === "call" && player.profile.money < amountToCall) {
     return { valid: false, reason: "Insufficient funds to call" };
   }
 
@@ -60,11 +60,11 @@ export const resolveBetState = (
   amount: number,
   currentPot: number,
 ) => {
-  const isAllIn = amount >= player.account.totalMoney;
-  const finalAmount = Math.min(amount, player.account.totalMoney);
+  const isAllIn = amount >= player.profile.money;
+  const finalAmount = Math.min(amount, player.profile.money);
 
   return {
-    newPlayerMoney: player.account.totalMoney - finalAmount,
+    newPlayerMoney: player.profile.money - finalAmount,
     newPlayerBet: (player.state.currentBet || 0) + finalAmount,
     newPot: currentPot + finalAmount,
     isAllIn,

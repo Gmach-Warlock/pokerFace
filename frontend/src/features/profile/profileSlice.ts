@@ -3,6 +3,10 @@ import type { SessionStatsInterface } from "../../app/interfaces/matchInterfaces
 import type { ProfileInterface } from "../../app/interfaces/profileInterfaces";
 import { startingChips } from "../../app/assets/match/matchAssets";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import {
+  INITIAL_LIFETIME_STATS,
+  INITIAL_SESSION_STATS,
+} from "../../app/assets/profile/profileAssets";
 
 const initialProfileState: ProfileInterface = {
   meta: {
@@ -13,35 +17,45 @@ const initialProfileState: ProfileInterface = {
     password: "",
   },
   playerData: {
-    id: "abcde123",
-    name: "GMach",
-    type: "human",
-    isDealer: false,
-    money: 500,
-    currentMatch: {
+    general: {
+      id: "abcde123",
+      name: "GMach",
+      type: "human",
+      isDealer: false,
+    },
+    state: {
+      hand: [],
       chips: startingChips,
       currentBet: 0,
-      hasActed: false,
       isFolded: false,
-      isAllin: false,
-      currentHand: [],
-      sessionStats: {} as SessionStatsInterface,
+      isAllIn: false,
+      hasActed: false,
+      lastAction: "check",
+      isDiscarding: false,
+      position: 0,
     },
     profile: {
       level: 1,
       xp: 0,
       nextLevel: 5,
+      money: 1000,
       plei: 0,
       availableLocations: ["shelter", "halls"],
       availableDecks: ["arrowBolt", "inBloom", "theFlyingCow"],
       currentDeckChoice: "arrowBolt",
       locationsVisited: [],
       locationsMastered: [],
-      stats: {
-        lifetime: {} as SessionStatsInterface,
-      },
-      achievements: [],
       isSpecial: false,
+    },
+    flags: {
+      isInitialLoad: true,
+      isProcessingAction: false,
+      isWinner: false,
+      hasTurnFocus: false,
+    },
+    stats: {
+      lifetime: INITIAL_LIFETIME_STATS,
+      session: INITIAL_SESSION_STATS,
     },
   },
 };
@@ -68,35 +82,32 @@ const profileSlice = createSlice({
       action: PayloadAction<SessionStatsInterface>,
     ) => {
       const stats = action.payload;
-      const profile = state.playerData.profile;
+      const profile = state.playerData;
 
       if (!profile || !profile.achievements) return;
 
       profile.achievements.forEach((ach) => {
         if (ach.isUnlocked) return;
 
-        // Trace change: plei is now inside profile
         if (ach.id === "high_roller_1") {
-          ach.currentProgress = profile.plei ?? 0;
+          ach.currentProgress = profile.profile.plei ?? 0;
         }
 
         if (ach.id === "bluff_master") {
           ach.currentProgress = stats.bluffsSucceeded;
         }
 
-        // Check for Unlock
         if (ach.currentProgress >= ach.targetValue) {
           ach.isUnlocked = true;
           // Trace change: updating plei inside the nest
-          if (profile.plei !== null) {
-            profile.plei += ach.rewardPlei;
+          if (profile.profile.plei !== null) {
+            profile.profile.plei += ach.rewardPlei;
           }
         }
       });
     },
-    // Logic for updating money or match status can go here
     updateMoney: (state, action: PayloadAction<number>) => {
-      state.playerData.account.totalMoney += action.payload;
+      state.playerData.profile.money += action.payload;
     },
   },
 });

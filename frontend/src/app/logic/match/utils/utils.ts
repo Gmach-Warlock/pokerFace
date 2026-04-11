@@ -24,7 +24,7 @@ export const checkLastManStanding = (state: MatchInterface) => {
     state.currentHand.currentPhase.phase !== "showdown"
   ) {
     const winner = activePlayers[0];
-    winner.account.totalMoney += state.currentHand.pot;
+    winner.profile.money += state.currentHand.pot;
     state.results.winnerId = winner.general.id ?? "";
     state.currentHand.pot = 0;
     state.currentHand.currentPhase.phase = "showdown";
@@ -124,11 +124,11 @@ export const handleFoldLogic = (state: GameInterface, playerId: string) => {
   const heroFolded = state.currentlyDisplayed === "postGame";
 
   if (activeOpponents.length === 0 && !heroFolded) {
-    match.players[0].account.totalMoney += match.pot;
+    match.players[0].profile.money += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
   } else if (activeOpponents.length === 1 && heroFolded) {
-    activeOpponents[0].account.totalMoney += match.pot;
+    activeOpponents[0].profile.money += match.pot;
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
   }
@@ -162,7 +162,7 @@ export const logGameStep = (
   console.table(
     match.currentHand.players.map((p) => ({
       name: p.general.name,
-      chips: p.account.totalMoney,
+      chips: p.profile.money,
       folded: p.state.isFolded,
       acted: p.state.hasActed,
       last: p.state.lastAction,

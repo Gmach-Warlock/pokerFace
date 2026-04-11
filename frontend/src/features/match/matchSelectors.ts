@@ -1,11 +1,18 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store/store";
 import { createChips } from "../../app/logic/factory/factoryFunctions";
-import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
-import type { MatchLocationType } from "../../app/types/worldMapTypes";
-import type { CardSuitType, DeckStyleType } from "../../app/types/matchTypes";
+import {
+  INITIAL_SESSION_STATS,
+  INITIAL_LIFETIME_STATS,
+} from "../../app/assets/profile/profileAssets";
+import type { CardSuitType } from "../../app/types/matchTypes";
 import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
-import { cardSuitIcons, handRanks } from "../../app/assets/match/matchAssets";
+import {
+  cardSuitIcons,
+  handRanks,
+  startingChips,
+} from "../../app/assets/match/matchAssets";
+import type { PlayerInterface } from "../../app/interfaces/matchInterfaces";
 
 /**
  * ============================================================
@@ -68,7 +75,7 @@ export const selectHeroName = createSelector(
 );
 export const selectHeroMoney = createSelector(
   [selectHero],
-  (h) => h?.account.totalMoney ?? 0,
+  (h) => h?.profile.money ?? 0,
 );
 export const selectHeroIsFolded = createSelector(
   [selectHero],
@@ -151,7 +158,7 @@ export const selectPlayerName = createSelector(
 );
 export const selectPlayerMoney = createSelector(
   [selectPlayerById],
-  (p) => p?.account.totalMoney ?? 0,
+  (p) => p?.profile.money ?? 0,
 );
 export const selectIsPlayerFolded = createSelector(
   [selectPlayerById],
@@ -251,29 +258,44 @@ export const selectSuitMetadata = createSelector(
 export const selectPlayerData = (state: RootState) => state.profile.playerData;
 export const selectInitialHeroState = createSelector(
   [selectPlayerData],
-  (player) => ({
-    ...player,
-    isFolded: false,
-    currentHand: [],
-    currentBet: 0,
-    hasActed: false,
-    actionMessage: "",
-    isAllin: false,
-    sessionStats: INITIAL_SESSION_STATS,
+  (player): PlayerInterface => ({
+    general: {
+      id: player?.general?.id || null,
+      name: player?.general?.name || "Player 1",
+      type: "human", // Assuming this is for the user
+      isDealer: false,
+    },
+    state: {
+      hand: [],
+      chips: startingChips,
+      currentBet: 0,
+      isFolded: false,
+      isAllIn: false,
+      hasActed: false,
+      position: 0,
+    },
     profile: {
       level: 1,
       xp: 0,
-      nextLevel: 5,
-      availableLocations: ["shelter"] as MatchLocationType[],
-      availableDecks: ["arrowBolt"] as DeckStyleType[],
-      locationsVisited: ["none"] as MatchLocationType[],
-      locationsMastered: ["none"] as MatchLocationType[],
-      currentDeckChoice: "arrowBolt" as DeckStyleType,
+      nextLevel: 1000,
+      money: 0,
       plei: 0,
+      availableLocations: ["shelter"],
+      availableDecks: ["arrowBolt"],
+      locationsVisited: [],
+      locationsMastered: [],
+      currentDeckChoice: "arrowBolt",
       isSpecial: false,
-      stats: {
-        lifetime: INITIAL_SESSION_STATS,
-      },
+    },
+    stats: {
+      lifetime: INITIAL_LIFETIME_STATS,
+      session: INITIAL_SESSION_STATS,
+    },
+    flags: {
+      isInitialLoad: true,
+      isProcessingAction: false,
+      isWinner: false,
+      hasTurnFocus: false,
     },
   }),
 );

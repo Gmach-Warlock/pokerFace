@@ -47,7 +47,10 @@ import {
   INITIAL_DRAW_SPECIFICS,
   INITIAL_HOLDEM_SPECIFICS,
 } from "../../app/assets/match/matchAssets";
-import { INITIAL_SESSION_STATS } from "../../app/assets/profile/profileAssets";
+import {
+  INITIAL_SESSION_STATS,
+  INITIAL_LIFETIME_STATS,
+} from "../../app/assets/profile/profileAssets";
 
 const initialMatchState: MatchInterface = {
   general: {
@@ -385,7 +388,7 @@ const matchSlice = createSlice({
       );
 
       // 4. Update Global & Player State
-      player.account.totalMoney = newPlayerMoney;
+      player.profile.money = newPlayerMoney;
       player.state.currentBet = newPlayerBet;
       player.state.hasActed = true;
       player.state.isAllIn = isAllIn;
@@ -452,11 +455,11 @@ const matchSlice = createSlice({
 
       if (method === "plei" && (player.profile.plei ?? 0) >= 10) {
         player.profile.plei! -= 10;
-        player.account.totalMoney += 500;
+        player.profile.money += 500;
       }
 
       if (method === "daily") {
-        player.account.totalMoney = 100;
+        player.profile.money = 100;
       }
     },
     markNpcDiscard: (
@@ -484,7 +487,7 @@ const matchSlice = createSlice({
 
       match.currentHand.players.forEach((player) => {
         if (player.general.isDealer) return;
-        player.account.totalMoney -= amount;
+        player.profile.money -= amount;
         match.currentHand.pot += amount;
       });
     },
@@ -498,12 +501,12 @@ const matchSlice = createSlice({
         (p) => p.general.id === playerId,
       );
 
-      if (player && player.account.totalMoney >= amount) {
+      if (player && player.profile.money >= amount) {
         player.state.currentBet += amount;
-        player.account.totalMoney -= amount;
+        player.profile.money -= amount;
         player.state.hasActed = true;
         player.state.lastAction = "raise";
-        if (player.account.totalMoney === 0) player.state.isAllIn = true;
+        if (player.profile.money === 0) player.state.isAllIn = true;
         match.currentHand.pot += amount;
 
         match.currentHand.players.forEach((p) => {
@@ -579,7 +582,7 @@ const matchSlice = createSlice({
       );
 
       if (winningPlayer) {
-        winningPlayer.account.totalMoney += match.currentHand.pot;
+        winningPlayer.profile.money += match.currentHand.pot;
 
         match.results.winnerId = winningPlayer.general.id ?? "";
         match.results.winningHand = winnerResult.handName;
@@ -609,7 +612,7 @@ const matchSlice = createSlice({
         numberOfOpponents,
         matchLocation,
         numberOfDecks,
-        hero,
+        hero, // This should now carry the LifetimeStats from your profile
         deckStyle,
         difficultyLevel,
         matchType,
@@ -622,10 +625,10 @@ const matchSlice = createSlice({
       state.general.deckStyle = deckStyle;
       state.general.difficultyLevel = difficultyLevel;
 
-      state.currentHand.dealerIndex = numberOfOpponents; // Dealer is usually the last entity
+      state.currentHand.dealerIndex = numberOfOpponents;
       state.currentHand.currentPhase.type = matchType;
 
-      // 2. Variant Reset (Only reset the one we need, or all to defaults)
+      // 2. Variant Reset
       if (matchType === "draw") {
         state.variantSpecifics.drawSpecifics = { ...INITIAL_DRAW_SPECIFICS };
       } else if (matchType === "holdem") {
@@ -651,13 +654,14 @@ const matchSlice = createSlice({
           newOpponents.push({
             ...candidate,
             state: {
-              hand: [],
-              chips: startingChips,
-              currentBet: 0,
-              isFolded: false,
-              isAllIn: false,
-              hasActed: false,
-              position: newOpponents.length + 1, // Hero is 0
+              ...candidate.state,
+              chips: startingChips, // Using your helper-defined starting chips
+              position: newOpponents.length + 1,
+            },
+            // Villains start with fresh session stats
+            stats: {
+              lifetime: { ...INITIAL_LIFETIME_STATS },
+              session: { ...INITIAL_SESSION_STATS },
             },
             flags: {
               isInitialLoad: false,
@@ -665,40 +669,41 @@ const matchSlice = createSlice({
               isWinner: false,
               hasTurnFocus: false,
             },
-            stats: { ...INITIAL_SESSION_STATS },
           });
           usedNames.add(candidate.general.name);
         }
       }
 
-      // 4. Final Player List Assembly
+      // 4. Final Player List Assembly (The Hero Logic)
       const dealerEntity = createDealer();
 
-      state.currentHand.players = [
-        {
-          ...hero,
-          general: {
-            ...hero.general,
-            type: "human",
-            isDealer: false,
-          },
-          state: {
-            hand: [],
-            chips: startingChips,
-            currentBet: 0,
-            hasActed: false,
-            isFolded: false,
-            isAllIn: false,
-            position: 0,
-          },
-          flags: {
-            isInitialLoad: false,
-            isProcessingAction: false,
-            isWinner: false,
-            hasTurnFocus: false,
-          },
-          stats: hero.stats || { ...INITIAL_SESSION_STATS },
+      // Incorporate Lifetime Stats here
+      const heroWithStats: PlayerInterface = {
+        ...hero,
+        general: {
+          ...hero.general,
+          type: "human",
         },
+        state: {
+          ...hero.state,
+          chips: startingChips,
+          position: 0,
+        },
+        // CRITICAL: Map the persistent lifetime stats from the profile payload
+        stats: {
+          lifetime: hero.stats?.lifetime || { ...INITIAL_LIFETIME_STATS },
+          session: { ...INITIAL_SESSION_STATS }, // Reset session for the new match
+        },
+        flags: {
+          isInitialLoad: false,
+          isProcessingAction: false,
+          isWinner: false,
+          hasTurnFocus: false,
+        },
+      };
+
+      state.currentHand.players = [
+        heroWithStats,
         ...newOpponents,
         dealerEntity,
       ];
@@ -717,7 +722,7 @@ const matchSlice = createSlice({
     ) => {
       const opponent = state.currentHand.players[action.payload.opponentIndex];
       if (opponent) {
-        opponent.account.totalMoney -= action.payload.amount;
+        opponent.profile.money -= action.payload.amount;
       }
     },
     toggleDiscard: (state, action: PayloadAction<number>) => {

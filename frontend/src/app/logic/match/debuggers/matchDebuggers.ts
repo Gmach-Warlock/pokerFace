@@ -24,7 +24,7 @@ export const logBettingState = (context: string, match: MatchInterface) => {
     activePlayers.map((p) => ({
       Name: p.general.name,
       Type: p.general.type,
-      Money: `$${p.account.totalMoney}`,
+      Money: `$${p.profile.money}`,
       CurrentBet: `$${p.state.currentBet}`,
       HasActed: p.state.hasActed,
       IsAllIn: p.state.isAllIn,
