@@ -1,5 +1,5 @@
-import type { SessionStatsInterface } from "./matchInterfaces";
 import type { MatchLocationType } from "../types/worldMapTypes";
+import type { SessionStatsInterface } from "./profileInterfaces";
 
 export interface LevelTier {
   level: number;

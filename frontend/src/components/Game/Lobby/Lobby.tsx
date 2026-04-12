@@ -5,10 +5,6 @@ import {
   useSound,
 } from "../../../app/hooks/gameHooks";
 import { startMatch } from "../../../features/match/matchSlice";
-import {
-  selectAvailableDecks,
-  selectInitialHeroState,
-} from "../../../features/match/matchSelectors";
 import "./Lobby.css";
 import { useNavigate, useLocation } from "react-router";
 import type {
@@ -20,6 +16,10 @@ import type {
 } from "../../../app/types/matchTypes";
 import type { MatchLocationType } from "../../../app/types/worldMapTypes";
 import MatchTransition from "../MatchContainer/overlays/MatchTransition/MatchTransition";
+import {
+  selectAvailableDecks,
+  selectInitialHeroState,
+} from "../../../features/match/selectors/heroSelectors";
 
 interface PendingMatchData {
   location: string;
@@ -30,10 +30,9 @@ interface PendingMatchData {
 export default function Lobby() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // Access the state passed from WorldMap
+  const location = useLocation();
   const { playSound } = useSound();
 
-  // 1. Determine the active locale from router state, defaulting to shelter
   const activeLocale =
     (location.state?.locationId as MatchLocationType) ?? "shelter";
 
@@ -61,12 +60,10 @@ export default function Lobby() {
       (fullData.get("matchType") as MatchType) || "draw";
     dispatch(
       startMatch({
-        // Ensure this is cast correctly to the numeric literal types
         numberOfOpponents: Number(
           fullData.get("number-of-opponents"),
         ) as Exclude<NumberOfOpponentsType, "tbd">,
 
-        // FIX: Change 'levelOfDifficulty' to 'difficultyLevel'
         difficultyLevel:
           (fullData.get("difficulty-level") as DifficultyType) || "normal",
 
@@ -76,6 +73,7 @@ export default function Lobby() {
           fullData.get("number-of-decks"),
         ) as DeckNumberType,
         deckStyle: fullData.get("deck-style") as DeckStyleType,
+
         hero: initialHero,
       }),
     );
@@ -122,7 +120,6 @@ export default function Lobby() {
             </select>
           </div>
 
-          {/* --- Opponents --- */}
           <div className="setting">
             <label>Opponents</label>
             <select name="number-of-opponents" title="number of opponents">
@@ -134,7 +131,6 @@ export default function Lobby() {
             </select>
           </div>
 
-          {/* --- Difficulty --- */}
           <div className="setting">
             <label htmlFor="difficulty-level">Difficulty</label>
             <select name="difficulty-level" id="difficulty-level">
@@ -144,7 +140,6 @@ export default function Lobby() {
             </select>
           </div>
 
-          {/* --- Deck Style with Reactive Preview --- */}
           <div className="setting setting--style">
             <div className="label-with-preview">
               <label>Deck Style</label>
@@ -191,6 +186,14 @@ export default function Lobby() {
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={() => {
+              console.log("initial hero state", initialHero);
+            }}
+          >
+            Test
+          </button>
           <div className="matchStartButton">
             <button type="submit">PREPARE MATCH</button>
           </div>

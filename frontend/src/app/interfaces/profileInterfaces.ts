@@ -5,7 +5,7 @@ import type {
 } from "../types/matchTypes";
 import type { MatchLocationType } from "../types/worldMapTypes";
 import type { AchievementCategory } from "../types/profileTypes";
-import type { SessionStatsInterface, PlayerInterface } from "./matchInterfaces";
+import type { PlayerInterface } from "./matchInterfaces";
 import type { FetchStatusType } from "../types/profileTypes";
 import type {
   ClassicNameType,
@@ -172,30 +172,42 @@ export interface LifetimeStatsInterface {
   };
 }
 
-/* export interface SessionStatsInterface {
-  handsPlayed: number;
-  handsWon: number;
-  handsLost: number;
-  handsTied: number;
+export interface SessionStatsInterface {
+  hands: {
+    played: number;
+    won: number;
+    lost: number;
+    tied: number;
+    showdownsReached: number;
+    showdownsWon: number;
+  };
 
-  currentWinStreak: number;
-  currentLossStreak: number;
-  longestWinStreak: number;
+  monetary: {
+    totalBet: number; // Volume of chips pushed in
+    totalProfit: number; // Current session +/-
+    biggestPotWon: number;
+    biggestLoss: number;
+    totalBuyIn: number;
+    totalCashOut: number;
+  };
 
-  totalSessionProfit: number;
-  biggestPotWon: number;
-  biggestLoss: number;
-  totalBuyIn: number;
-  totalCashOut: number;
+  // This group is gold for NPC "Emotional Intelligence" logic
+  activity: {
+    vpipCount: number; // Voluntarily Put In Pot
+    pfrCount: number; // Pre-Flop Raise
+    bluffsAttempted: number;
+    bluffsSucceeded: number;
+  };
 
-  vpipCount: number; // Voluntarily Put In Pot
-  pfrCount: number; // Pre-Flop Raise
-  bluffsAttempted: number;
-  bluffsSucceeded: number;
-  showdownsReached: number;
-  showdownsWon: number;
+  streak: {
+    currentWin: number;
+    currentLoss: number;
+    longestWin: number;
+  };
 
-  startTime: string;
-  endTime: string | null;
-  lastHandResult: LastResultType;
-} */
+  log: {
+    startTime: string; // ISO string
+    endTime: string | null;
+    lastHandResult: LastResultType;
+  };
+}

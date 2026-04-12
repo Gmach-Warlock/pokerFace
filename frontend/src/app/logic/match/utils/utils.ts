@@ -15,23 +15,54 @@ import type {
 } from "../../../types/matchTypes";
 import { anteMap, matchPhaseMap } from "../../../assets/match/matchAssets";
 import { INITIAL_SESSION_STATS } from "../../../assets/profile/profileAssets";
+import { createChips } from "../../factory/factoryFunctions";
+
+export const awardPotToPlayer = (state: MatchInterface, playerId: string) => {
+  const winner = state.currentHand.players.find(
+    (p) => p.general.id === playerId,
+  );
+  const potAmount = state.currentHand.pot;
+
+  if (winner && potAmount > 0) {
+    // 1. Update the Master Balance
+    winner.profile.money += potAmount;
+
+    // 2. Update the Visual Chips
+    const winningChips = createChips(potAmount);
+    Object.keys(winningChips).forEach((color) => {
+      const key = color as keyof typeof winningChips;
+      winner.state.chips[key] += winningChips[key];
+    });
+
+    // 3. Record for UI/Results
+    state.results.winnerId = winner.general.id;
+    state.results.lastWinAmount = potAmount;
+
+    // 4. Reset table
+    state.currentHand.pot = 0;
+  }
+};
 
 export const checkLastManStanding = (state: MatchInterface) => {
   const activePlayers = getActivePlayers(state.currentHand.players);
 
+  // If only 1 person hasn't folded
   if (
     activePlayers.length === 1 &&
     state.currentHand.currentPhase.phase !== "showdown"
   ) {
     const winner = activePlayers[0];
-    winner.profile.money += state.currentHand.pot;
-    state.results.winnerId = winner.general.id ?? "";
-    state.currentHand.pot = 0;
+
+    // Use the unified payout logic
+    awardPotToPlayer(state, winner.general.id);
+
     state.currentHand.currentPhase.phase = "showdown";
+    state.currentHand.actionMessage = `${winner.general.name} wins the pot!`;
     return true;
   }
   return false;
 };
+
 export const executeTurn = (
   npc: PlayerInterface,
   evaluation: EvaluatedHandInterface,

@@ -1,9 +1,9 @@
-import type {
-  PlayerInterface,
-  SessionStatsInterface,
-} from "../../interfaces/matchInterfaces";
+import type { PlayerInterface } from "../../interfaces/matchInterfaces";
 import type { MatchLocationType } from "../../types/worldMapTypes";
-import type { LifetimeStatsInterface } from "../../interfaces/profileInterfaces";
+import type {
+  LifetimeStatsInterface,
+  SessionStatsInterface,
+} from "../../interfaces/profileInterfaces";
 
 export const calculateHandResults = (
   player: PlayerInterface,
@@ -14,21 +14,16 @@ export const calculateHandResults = (
   const isWinner = winnerIds.includes(playerId);
   const isTie = isWinner && winnerIds.length > 1;
 
-  // Calculate share of the pot
   const share = isTie
     ? Math.floor(totalPot / winnerIds.length)
     : isWinner
       ? totalPot
       : 0;
 
-  // The 'cost' of this hand (the chips the player put in this round)
   const amountInvested = player.state.currentBet;
   const netProfit = share - amountInvested;
-
   const currentLifetime = player.stats.lifetime;
   const currentSession = player.stats.session;
-
-  // Update logic for nested Lifetime stats
   const updatedLifetime: LifetimeStatsInterface = {
     ...currentLifetime,
     matches: {
@@ -77,18 +72,17 @@ export const calculateHandResults = (
       },
       various: {
         ...currentLifetime.matches.various,
-        // Increment VPIP if the player put money in (excluding blinds logic if handled elsewhere)
+
         vpipCount:
           amountInvested > 0
             ? currentLifetime.matches.various.vpipCount + 1
             : currentLifetime.matches.various.vpipCount,
-        // Add more logic here for bluffs and showdowns as you build the engine
       },
     },
   };
 
   return {
-    session: currentSession, // You can apply similar logic here or keep it simplified
+    session: currentSession,
     lifetime: updatedLifetime,
   };
 };
@@ -100,26 +94,20 @@ export const calculateGainedXp = (
 ): number => {
   const baseReward = isWinner ? 100 : 20;
 
-  // Location Multipliers (The "Work" Factor)
   const multipliers: Partial<Record<MatchLocationType, number>> = {
-    shelter: 1, // Great for Level 1-10
-    halls: 2, // Great for Level 10-20
-    "neon-alley-club": 5, // Necessary for Level 30+
-    zenith: 25, // The only way to move the bar at Level 80+
+    shelter: 1,
+    halls: 2,
+    "neon-alley-club": 5,
+    zenith: 25,
   };
 
   const locMult = multipliers[location] || 1;
 
-  // Diminishing Returns Logic
-  // If you are Level 50 playing in "The Shelter", you get 90% less XP.
   const levelPenalty = currentLevel > 20 && location === "shelter" ? 0.1 : 1;
 
   return Math.floor(baseReward * locMult * levelPenalty);
 };
 
-/**
- * Pure function to calculate the next state of a single SessionStatsInterface block.
- */
 export const getUpdatedStatsBlock = (
   stats: SessionStatsInterface,
   outcome: {
@@ -132,29 +120,32 @@ export const getUpdatedStatsBlock = (
   const { isWinner, isTie, share, totalPot } = outcome;
   const updated = { ...stats };
 
-  updated.handsPlayed += 1;
+  updated.hands.played += 1;
 
   if (isTie) {
-    updated.handsTied += 1;
-    updated.lastHandResult = "tie";
-    updated.totalSessionProfit += share;
+    updated.hands.tied += 1;
+    updated.log.lastHandResult = "tie";
+    updated.monetary.totalProfit += share;
   } else if (isWinner) {
-    updated.handsWon += 1;
-    updated.currentWinStreak += 1;
-    updated.currentLossStreak = 0;
-    updated.lastHandResult = "win";
-    updated.biggestPotWon = Math.max(updated.biggestPotWon, totalPot);
-    updated.totalSessionProfit += share; // share is totalPot in a solo win
+    updated.hands.won += 1;
+    updated.streak.currentWin += 1;
+    updated.streak.currentLoss = 0;
+    updated.log.lastHandResult = "win";
+    updated.monetary.biggestPotWon = Math.max(
+      updated.monetary.biggestPotWon,
+      totalPot,
+    );
+    updated.monetary.totalProfit += share; // share is totalPot in a solo win
   } else {
-    updated.handsLost += 1;
-    updated.currentLossStreak += 1;
-    updated.currentWinStreak = 0;
-    updated.lastHandResult = "loss";
+    updated.hands.lost += 1;
+    updated.streak.currentLoss += 1;
+    updated.streak.currentWin = 0;
+    updated.log.lastHandResult = "loss";
   }
 
-  updated.longestWinStreak = Math.max(
-    updated.longestWinStreak,
-    updated.currentWinStreak,
+  updated.streak.longestWin = Math.max(
+    updated.streak.longestWin,
+    updated.streak.currentWin,
   );
 
   return updated;

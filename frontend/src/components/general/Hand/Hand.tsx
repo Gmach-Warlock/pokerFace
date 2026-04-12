@@ -4,7 +4,7 @@ import Card from "../Card/Card";
 import "./Hand.css";
 import { toggleDiscard } from "../../../features/match/matchSlice";
 import { useAppSelector, useAppDispatch } from "../../../app/hooks/gameHooks";
-import { selectDeckStyle } from "../../../features/match/matchSelectors";
+import { selectDeckStyle } from "../../../features/match/selectors/stateSelectors";
 
 export default function Hand(props: HandInterface) {
   const { matchType, cards, currentLocation, isTitle } = props;

@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store/store";
 import { calculateXpProgress } from "../../app/logic/profile/profileLogic";
-
+import { selectHero } from "../match/selectors/heroSelectors";
 const selectProfileState = (state: RootState) => state.authorize;
 
 export const selectPlayerData = createSelector(
@@ -55,3 +55,8 @@ export const selectProfileData = createSelector(
 );
 export const selectInitialHeroProfileState = (state: RootState) =>
   state.profile.playerData;
+
+export const selectHeroXpProgress = createSelector([selectHero], (hero) => {
+  if (!hero) return 0;
+  return (hero.profile.xp / hero.profile.nextLevel) * 100;
+});

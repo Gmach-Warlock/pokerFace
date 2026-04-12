@@ -3,8 +3,7 @@ import {
   useAppSelector,
 } from "../../../../../../app/hooks/gameHooks";
 import type { BettingButtonPropsInterface } from "../../../../../../app/interfaces/matchInterfaces";
-import { selectMatchLocation } from "../../../../../../features/match/matchSelectors";
-import { processArenaAction } from "../../../../../../features/match/matchThunks";
+import { selectMatchLocation } from "../../../../../../features/match/selectors/stateSelectors";
 import {
   advancePhase,
   performAnteUp,
@@ -19,7 +18,6 @@ export default function DealButton({
   const handleDeal = () => {
     dispatch(performAnteUp({ location: location }));
     dispatch(advancePhase());
-    dispatch(processArenaAction());
   };
 
   return (

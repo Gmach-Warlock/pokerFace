@@ -70,11 +70,11 @@ export const gamePhaseSequences: Record<string, MatchPhaseType[]> = {
   holdem: ["ante", "deal", "flop", "turn", "river", "showdown"],
   stud: [
     "ante",
-    "thirdStreet",
-    "fourthStreet",
-    "fifthStreet",
-    "sixthStreet",
-    "seventhStreet",
+    "street3",
+    "street4",
+    "street5",
+    "street6",
+    "river",
     "showdown",
   ],
 };
@@ -185,38 +185,109 @@ export const matchPhaseMessages = {
 
 export const matchPhaseMap: MatchPhaseConfigType = {
   draw: {
-    notInGameYet: { cards: 0, target: "players", side: "face-down" },
-    ante: { cards: 0, target: "players", side: "face-down" },
-    deal: { cards: 5, target: "players", side: "face-down" },
-    bettingOne: { cards: 0, target: "players", side: "face-up" }, // Add this!
-    discard: { cards: 0, target: "players", side: "face-up" },
-    draw: { cards: "variable", target: "players", side: "face-up" },
-    bettingTwo: { cards: 0, target: "players", side: "face-up" }, // Add this!
-    showdown: { cards: 0, target: "players", side: "face-up" }, // Add this!
+    notInGameYet: {
+      cards: 0,
+      target: "players",
+      side: "face-down",
+      nextPhase: "ante",
+    },
+    ante: { cards: 0, target: "players", side: "face-down", nextPhase: "deal" },
+    deal: {
+      cards: 5,
+      target: "players",
+      side: "face-down",
+      nextPhase: "bettingOne",
+    },
+    bettingOne: { cards: 0, target: "players", side: "face-up" }, // Wait for user
+    discard: { cards: 0, target: "players", side: "face-up" }, // Wait for user
+    draw: {
+      cards: "variable",
+      target: "players",
+      side: "face-up",
+      nextPhase: "bettingTwo",
+    },
+    bettingTwo: { cards: 0, target: "players", side: "face-up" }, // Wait for user
+    showdown: { cards: 0, target: "players", side: "face-up" },
   },
   holdem: {
-    ante: { cards: 0, target: "players", side: "face-down" },
-    deal: { cards: 2, target: "players", side: "face-down" },
-    preflop: { cards: 0, target: "players", side: "face-down" }, // Betting only
-    flop: { cards: 3, target: "board", side: "face-up" },
+    ante: { cards: 0, target: "players", side: "face-down", nextPhase: "deal" },
+    deal: {
+      cards: 2,
+      target: "players",
+      side: "face-down",
+      nextPhase: "preflop",
+    },
+    preflop: { cards: 0, target: "players", side: "face-down" }, // Betting starts
+    flop: {
+      cards: 3,
+      target: "board",
+      side: "face-up",
+      nextPhase: "bettingOne",
+    },
     bettingOne: { cards: 0, target: "players", side: "face-up" },
-    turn: { cards: 1, target: "board", side: "face-up" },
+    turn: {
+      cards: 1,
+      target: "board",
+      side: "face-up",
+      nextPhase: "bettingTwo",
+    },
     bettingTwo: { cards: 0, target: "players", side: "face-up" },
-    river: { cards: 1, target: "board", side: "face-up" },
+    river: {
+      cards: 1,
+      target: "board",
+      side: "face-up",
+      nextPhase: "bettingThree",
+    },
     bettingThree: { cards: 0, target: "players", side: "face-up" },
     showdown: { cards: 0, target: "players", side: "face-up" },
   },
   stud: {
-    ante: { cards: 0, target: "players", side: "face-down" },
-    street2: { cards: 2, target: "players", side: "face-down" },
-    street3: { cards: 1, target: "players", side: "face-up" }, // First "Upcard"
-    street4: { cards: 1, target: "players", side: "face-up" },
-    street5: { cards: 1, target: "players", side: "face-up" },
-    street6: { cards: 1, target: "players", side: "face-up" },
-    river: { cards: 1, target: "players", side: "face-down" }, // Final "Downcard"
+    ante: {
+      cards: 0,
+      target: "players",
+      side: "face-down",
+      nextPhase: "street2",
+    },
+    street2: {
+      cards: 2,
+      target: "players",
+      side: "face-down",
+      nextPhase: "street3",
+    },
+    street3: {
+      cards: 1,
+      target: "players",
+      side: "face-up",
+      nextPhase: "bettingOne",
+    }, // 7-Card Stud often bets here
+    street4: {
+      cards: 1,
+      target: "players",
+      side: "face-up",
+      nextPhase: "bettingTwo",
+    },
+    street5: {
+      cards: 1,
+      target: "players",
+      side: "face-up",
+      nextPhase: "bettingThree",
+    },
+    street6: {
+      cards: 1,
+      target: "players",
+      side: "face-up",
+      nextPhase: "bettingFour",
+    },
+    river: {
+      cards: 1,
+      target: "players",
+      side: "face-down",
+      nextPhase: "bettingFive",
+    },
     showdown: { cards: 0, target: "players", side: "face-up" },
   },
 };
+
 export const matchMap: MatchMapInterface = {
   shelter: ["gritty"],
   "low-vault-lounge": ["gritty", "modern"],

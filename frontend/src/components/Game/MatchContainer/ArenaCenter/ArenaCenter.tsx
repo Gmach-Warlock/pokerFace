@@ -3,24 +3,28 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../app/hooks/gameHooks";
-
-import type { BettingActionType } from "../../../../app/types/matchTypes";
 import {
-  selectActionButtonLabel,
   selectMatch,
   selectCurrentPhase,
-  selectDeck,
-  selectDeckStyle,
+  selectPot,
+  selectActivePlayerIndex,
+  selectIsPlaying,
+  selectIsHerosTurn,
+} from "../../../../features/match/selectors/stateSelectors";
+import {
+  selectActionButtonLabel,
   selectDiscardCount,
+  selectCurrentTableBet,
+} from "../../../../features/match/selectors/stateSelectors";
+import {
+  selectDeck,
   selectHeroMoney,
   selectHerosId,
-  selectIsBettingPhase,
-  selectPot,
-} from "../../../../features/match/matchSelectors";
-
+  selectCleanedDeckKey,
+  selectHeroCurrentBet,
+} from "../../../../features/match/selectors/heroSelectors";
 import { handleBet } from "../../../../features/match/matchSlice";
 import { processArenaAction } from "../../../../features/match/matchThunks";
-
 import BettingForm from "../BettingForm/BettingForm";
 import ActionMessage from "../ActionMessage/ActionMessage";
 import DrawButton from "./buttons/DrawButton/DrawButton";
@@ -30,74 +34,67 @@ import "./ArenaCenter.css";
 export default function ArenaCenter() {
   const dispatch = useAppDispatch();
   const hasInitialFired = useRef(false);
-
-  // Selectors
   const currentMatch = useAppSelector(selectMatch);
   const deck = useAppSelector(selectDeck);
-  const designKey = useAppSelector(selectDeckStyle);
   const pot = useAppSelector(selectPot);
-
-  // Destructure phase and type from the object-returning selector
-  const { phase } = useAppSelector(selectCurrentPhase);
-
   const herosId = useAppSelector(selectHerosId);
   const heroMoney = useAppSelector(selectHeroMoney);
   const discardCount = useAppSelector(selectDiscardCount);
-  const isBettingPhase = useAppSelector(selectIsBettingPhase);
+  const isHerosTurn = useAppSelector(selectIsHerosTurn);
   const buttonLabel = useAppSelector(selectActionButtonLabel);
-  const currentPlayerIndex = useAppSelector(
-    (state) => state.match.currentHand.activePlayerIndex,
-  );
-  const playingMatch = useAppSelector((state) => state.game.isPlaying);
+  const { phase } = useAppSelector(selectCurrentPhase);
+  const currentPlayerIndex = useAppSelector(selectActivePlayerIndex);
+  const playingMatch = useAppSelector(selectIsPlaying);
+  const cleanedKey = useAppSelector(selectCleanedDeckKey);
 
-  const cleanedKey = designKey.replace("/", "").replace(".png", "");
+  const currentTableBet = useAppSelector(selectCurrentTableBet); // Ensure you have this selector
+  const heroCurrentBet = useAppSelector(selectHeroCurrentBet); // And this one
 
   // 1. Initial Game Trigger
   useEffect(() => {
-    // We cast phase as a string here to satisfy TS string-literal comparisons
-    const currentPhaseStr = phase as string;
+    const shouldStartGame =
+      playingMatch && phase === "notInGameYet" && !hasInitialFired.current;
 
-    if (
-      playingMatch &&
-      currentPhaseStr === "notInGameYet" &&
-      !hasInitialFired.current
-    ) {
+    if (shouldStartGame) {
       hasInitialFired.current = true;
       dispatch(processArenaAction());
     }
 
-    if (!playingMatch) {
-      hasInitialFired.current = false;
-    }
+    if (!playingMatch) hasInitialFired.current = false;
   }, [playingMatch, phase, dispatch]);
 
-  // 2. Betting Logic
-  const handleBetFinalized = (amount: number, betType: BettingActionType) => {
-    if (!herosId) return;
-    dispatch(handleBet({ playerId: herosId, amount, type: betType }));
+  // 2. Action Area Mapper
+  const phaseComponents: Record<string, React.ReactNode> = {
+    draw: <DrawButton label={buttonLabel} isConfirming={discardCount > 0} />,
+    deal: <DealButton label={buttonLabel} />, // Default/Generic phase
+    // Add more phases here as the game grows (e.g., flop, turn, river)
   };
-
-  const isHerosTurn = isBettingPhase && currentPlayerIndex === 0;
-
   const renderActionArea = () => {
-    const currentPhaseStr = phase as string;
-
+    const isBettingPhase = phase === "bettingOne" || phase === "bettingTwo";
     if (isHerosTurn && isBettingPhase) {
       return (
         <BettingForm
-          key={`betting-form-${currentPlayerIndex}-${currentPhaseStr}`}
+          key={`betting-form-${currentPlayerIndex}-${phase}`}
           currentPot={pot}
           heroMoney={heroMoney}
-          onConfirm={handleBetFinalized}
+          currentTableBet={currentTableBet} // Add this!
+          currentPlayerBet={heroCurrentBet} // Add this!
+          onConfirm={(amount, type) => {
+            console.log("Confirming bet:", amount, type); // Debug log
+            if (herosId) {
+              dispatch(handleBet({ playerId: herosId, amount, type }));
+            } else {
+              console.error("No Hero ID found!");
+            }
+          }}
         />
       );
     }
 
-    if (currentPhaseStr === "draw") {
-      return <DrawButton label={buttonLabel} isConfirming={discardCount > 0} />;
-    }
-
-    return <DealButton label={buttonLabel} />;
+    // Priority 2: Return mapped component or fallback to DealButton
+    return (
+      phaseComponents[phase as string] || <DealButton label={buttonLabel} />
+    );
   };
 
   return (
@@ -134,6 +131,12 @@ export default function ArenaCenter() {
           </button>
         </div>
       </div>
+      <button
+        onClick={() => console.log(currentMatch)}
+        style={{ position: "fixed", top: 0, left: 0, zIndex: 9999 }}
+      >
+        FORCE LOG
+      </button>
     </div>
   );
 }

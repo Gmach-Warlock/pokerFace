@@ -53,6 +53,9 @@ export const createDealer = (): PlayerInterface => {
       isFolded: false,
       isAllIn: false,
       hasActed: false,
+      lastAction: null,
+      lastActionValue: 0,
+      isDiscarding: false,
       position: 2,
     },
     profile: {
@@ -108,6 +111,7 @@ export const createVillain = (
       isAllIn: false,
       hasActed: false,
       lastAction: "check",
+      lastActionValue: 0,
       isDiscarding: false,
       position: 0,
     },

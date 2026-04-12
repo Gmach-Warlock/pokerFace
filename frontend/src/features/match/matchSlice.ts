@@ -13,6 +13,7 @@ import type { GamePayloadInterface } from "../../app/interfaces/gameInterfaces";
 import type {
   MatchInterface,
   PlayerInterface,
+  PhaseInstruction,
 } from "../../app/interfaces/matchInterfaces";
 
 // 2. CORE LOGIC & UTILITIES
@@ -20,6 +21,7 @@ import {
   generateDeck,
   createVillain,
   createDealer,
+  createChips,
 } from "../../app/logic/factory/factoryFunctions";
 import {
   checkLastManStanding,
@@ -27,10 +29,7 @@ import {
   shuffleDeck,
   pickAnteAmount,
 } from "../../app/logic/match/utils/utils";
-import {
-  calculateCardsNeeded,
-  evaluatePokerHand,
-} from "../../app/logic/match/evaluators/evaluators";
+import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
 import {
   getNextActivePlayerIndex,
   validateBetAction,
@@ -51,6 +50,15 @@ import {
   INITIAL_SESSION_STATS,
   INITIAL_LIFETIME_STATS,
 } from "../../app/assets/profile/profileAssets";
+import {
+  distributeToBoard,
+  distributeToPlayer,
+} from "../../app/logic/match/betting/bettingUtils";
+import {
+  canAdvancePhaseLogic,
+  rotateDealerIndex,
+  getInitialActivePlayerIndex,
+} from "../../app/logic/match/utils/stateUtils";
 
 const initialMatchState: MatchInterface = {
   general: {
@@ -62,6 +70,11 @@ const initialMatchState: MatchInterface = {
     matchType: "draw",
     numberOfDecks: 1,
     playingMatch: false,
+  },
+  client: {
+    localPlayerId: "",
+    isObserver: false,
+    currentIndex: 0,
   },
   config: {
     rules: {
@@ -77,6 +90,7 @@ const initialMatchState: MatchInterface = {
     },
   },
   variantSpecifics: {
+    minimumParticipants: 2,
     casinoVariantSpecifics: {
       dealersHand: [],
       houseEdge: 0,
@@ -120,6 +134,7 @@ const initialMatchState: MatchInterface = {
       type: "draw",
       phase: "notInGameYet",
       step: 0,
+      isFinalStreet: false,
     },
   },
   results: {
@@ -143,33 +158,24 @@ const matchSlice = createSlice({
     addToPot: (state, action: PayloadAction<number>) => {
       state.currentHand.pot += action.payload;
     },
-    advancePhase: (state) => {
-      const sequence = gamePhaseSequences[state.currentHand.currentPhase.type];
-      const oldPhase = state.currentHand.currentPhase.phase; // Keep for the log
-      console.log("ADVANCE ATTEMPT:", { oldPhase, sequence }); // Is this firing?
-      if (!sequence) return;
 
-      const currentIdx = sequence.indexOf(oldPhase);
+    advancePhase: (state) => {
+      if (!canAdvancePhaseLogic(state as MatchInterface)) return;
+      const { type, phase } = state.currentHand.currentPhase;
+      const sequence = gamePhaseSequences[type];
+      const currentIdx = sequence.indexOf(phase);
 
       if (currentIdx < sequence.length - 1) {
         const nextPhase = sequence[currentIdx + 1];
-
         prepareNewPhase(state, nextPhase);
-
-        // LOG THE ACTUAL STATE PROPERTY, NOT A LOCAL VARIABLE
-        console.log(`--- PHASE SHIFT SUCCESSFUL ---`);
-        console.log(
-          `Moved from [${oldPhase}] to [${state.currentHand.currentPhase.phase}]`,
-        );
-        console.log(
-          `Next Actor: ${state.currentHand.players[state.currentHand.activePlayerIndex]?.general.name}`,
-        );
+        state.currentHand.players.forEach((p) => {
+          p.state.hasActed = false;
+        });
+        console.log(`--- PHASE SHIFT: ${phase} -> ${nextPhase} ---`);
       }
-      state.currentHand.players.forEach((p) => {
-        p.state.hasActed = false; // Reset for the new round!
-      });
       state.currentHand.isRoundTransitioning = false;
     },
+
     checkAndRefillDeck: (state) => {
       const { numberOfDecks, deckStyle } = state.general;
       const { deck } = state.currentHand;
@@ -180,27 +186,23 @@ const matchSlice = createSlice({
         state.currentHand.deck = [...deck, ...shuffledCards];
       }
     },
-    // --- Fixed completeDrawPhase ---
+
     completeDrawPhase: (state) => {
       state.currentHand.currentPhase.phase = "bettingTwo";
       state.currentHand.currentBetOnTable = 0;
       state.currentHand.lastRaiserId = null;
-
       state.currentHand.players.forEach((p) => {
         p.state.hasActed = false;
         p.state.currentBet = 0;
-        // reset lastAction for the new round
         p.state.lastAction = null;
       });
-
-      // Check if player 0 is folded before setting them as active
       state.currentHand.activePlayerIndex = state.currentHand.players[0].state
         .isFolded
         ? getNextActivePlayerIndex(state.currentHand.players, 0)
         : 0;
-
       console.log("Draw complete. Starting Betting Round 2.");
     },
+
     dealCard: (
       state,
       action: PayloadAction<{
@@ -226,107 +228,59 @@ const matchSlice = createSlice({
         }
       }
     },
-    // matchSlice.ts -> dealRound reducer
-    dealRound: (state) => {
-      console.log("!!! REDUCER START: dealRound hit !!!"); // Is this at the absolute top?
-      const { currentPhase, deck, players } = state.currentHand;
-      const { matchType } = state.general;
-      const { type, phase } = currentPhase;
 
-      const config = (matchPhaseMap as MatchPhaseConfigType)[type]?.[phase];
-      console.log(
-        `[Deal Check] Phase: ${phase} | Target: ${config?.target} | Cards: ${config?.cards}`,
-      );
-      if (!config) {
-        console.error(`[dealRound] Missing config for ${type} phase: ${phase}`);
-        return;
-      }
+    dealRound: (state: MatchInterface) => {
+      const { currentHand } = state;
+      const { currentPhase, deck, players, dealerIndex } = currentHand;
+      const config = (matchPhaseMap as MatchPhaseConfigType)[
+        currentPhase.type
+      ]?.[currentPhase.phase] as PhaseInstruction;
 
-      // --- 1. BOARD / COMMUNITY DEALING ---
+      if (!config) return;
+
       if (config.target === "board") {
-        if (matchType === "holdem" && state.variantSpecifics) {
-          const cardsToDeal = config.cards as number;
-          console.log(`[dealRound] Dealing ${cardsToDeal} to board.`);
-          for (let i = 0; i < cardsToDeal; i++) {
-            const card = deck.pop();
-            if (card) {
-              state.variantSpecifics.holdemSpecifics.communityCards.push({
-                ...card,
-                side: "face-up",
-                currentLocation: "board",
-                isDiscarded: false,
-              });
-            }
-          }
-        }
-        return;
+        distributeToBoard(state, config.cards as number);
+      } else {
+        players.forEach((player, idx) => {
+          if (player.general.isDealer || player.state.isFolded) return;
+          distributeToPlayer(player, idx, config, deck, currentPhase);
+        });
       }
 
-      // --- 2. PLAYER DEALING ---
-      players.forEach((player, idx) => {
-        if (player.general.isDealer || player.state.isFolded) return;
-
-        // Filter out discarded cards before calculating needs
-        const prevHandCount = player.state.hand.length;
-        player.state.hand = player.state.hand.filter(
-          (card) => !card.isDiscarded,
+      if (config.nextPhase) {
+        currentHand.currentPhase.phase = config.nextPhase;
+        currentHand.players.forEach((p) => {
+          p.state.hasActed = false;
+          p.state.currentBet = 0;
+        });
+        currentHand.activePlayerIndex = getInitialActivePlayerIndex(
+          players,
+          dealerIndex,
         );
-        const handCountAfterFilter = player.state.hand.length;
-
-        const handBefore = player.state.hand.length;
-
-        // Log the specific config we are using
-        console.log(
-          `[Reducer Deep Dive] ${player.general.name} | Phase: ${phase} | ConfigCards: ${config.cards}`,
-        );
-
-        const cardsNeeded = calculateCardsNeeded(type, phase, handBefore);
-
-        console.log(
-          `[dealRound] Player: ${player.general.name} | Hand size (prev/clean): ${prevHandCount}/${handCountAfterFilter} | Cards Needed: ${cardsNeeded}`,
-        );
-
-        // Log the specific config we are using
-        console.log(
-          `[Reducer Deep Dive] ${player.general.name} | Phase: ${phase} | ConfigCards: ${config.cards}`,
-        );
-
-        for (let i = 0; i < cardsNeeded; i++) {
-          const card = deck.pop();
-          if (card) {
-            let finalSide = config.side;
-            if (player.general.type === "human") finalSide = "face-up";
-
-            player.state.hand.push({
-              ...card,
-              side: finalSide,
-              currentLocation: `p${idx + 1}` as CurrentLocationType,
-              isDiscarded: false,
-            });
-          }
-        }
-      });
+        currentHand.currentBetOnTable = 0;
+        currentHand.actionMessage = `Phase: ${config.nextPhase.toUpperCase()}`;
+        currentHand.messageId += 1;
+      }
     },
+
     finishMatch: (state) => {
       state.general.playingMatch = false;
     },
+
     foldHand: (state, action: PayloadAction<{ playerId: string }>) => {
       const { playerId } = action.payload;
       const player = state.currentHand.players.find(
         (p) => p.general.id === playerId,
       );
-
-      if (!player) return;
-
+      if (!player || player.state.isFolded) return;
       player.state.isFolded = true;
       player.state.hasActed = true;
       player.state.lastAction = "fold";
-      state.currentHand.actionMessage = `${player.general.name} folds`;
+      state.currentHand.actionMessage = `${player.general.name} folds.`;
       state.currentHand.messageId += 1;
-
-      if (checkLastManStanding(state)) return;
-
-      // Crucial: Use the new signature here
+      if (checkLastManStanding(state)) {
+        return;
+      }
       state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
         state.currentHand.players,
         state.currentHand.activePlayerIndex,
@@ -345,69 +299,57 @@ const matchSlice = createSlice({
       const player = state.currentHand.players.find(
         (p) => p.general.id === playerId,
       );
+      if (!player || player.general.isDealer) {
+        console.warn(
+          "Rejected bet action: Player is the Dealer or does not exist.",
+        );
+        return;
+      }
 
-      if (!player || player.general.isDealer) return;
-
-      // 1. Handle Folds
       if (type === "fold") {
         player.state.isFolded = true;
         player.state.lastAction = "fold";
         player.state.hasActed = true;
         state.currentHand.actionMessage = `${player.general.name} folds.`;
         state.currentHand.messageId += 1;
-
-        // Check if only one person is left (Game Over for this hand)
         if (checkLastManStanding(state)) return;
-
         state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
           state.currentHand.players,
           state.currentHand.activePlayerIndex,
         );
         return;
       }
-
-      // 2. Validate Action
       const { valid, reason } = validateBetAction(
         player,
         amount,
         state.currentHand.currentBetOnTable,
         type,
       );
-
       if (!valid) {
         state.currentHand.actionMessage = reason || "Invalid Move";
         state.currentHand.messageId += 1;
         return;
       }
-
-      // 3. Resolve Financials
       const { newPlayerMoney, newPlayerBet, newPot, isAllIn } = resolveBetState(
         player,
         amount,
         state.currentHand.pot,
       );
-
-      // 4. Update Global & Player State
       player.profile.money = newPlayerMoney;
       player.state.currentBet = newPlayerBet;
       player.state.hasActed = true;
       player.state.isAllIn = isAllIn;
       player.state.lastAction = type;
       state.currentHand.pot = newPot;
-
       if (type === "raise") {
         state.currentHand.currentBetOnTable = newPlayerBet;
         state.currentHand.lastRaiserId = playerId;
         state.currentHand.actionMessage = `${player.general.name} raises to $${newPlayerBet}.`;
-
-        // The "Price Jump" Rule: Reset everyone who isn't all-in or folded
         state.currentHand.players.forEach((p) => {
-          if (
-            p.general.id !== playerId &&
-            !p.state.isFolded &&
-            !p.state.isAllIn &&
-            !p.general.isDealer
-          ) {
+          const isRaiser = p.general.id === playerId;
+          const canStillAct =
+            !p.state.isFolded && !p.state.isAllIn && !p.general.isDealer;
+          if (!isRaiser && canStillAct) {
             p.state.hasActed = false;
           }
         });
@@ -417,23 +359,16 @@ const matchSlice = createSlice({
             ? `${player.general.name} calls.`
             : `${player.general.name} checks.`;
       }
-
       state.currentHand.messageId += 1;
-
-      // 5. Determine Next Turn or Round End
-      // We check if the betting round is complete BEFORE moving the index
-      const roundComplete = state.currentHand.players
-        .filter(
-          (p) => !p.general.isDealer && !p.state.isFolded && !p.state.isAllIn,
-        )
-        .every(
-          (p) =>
-            p.state.hasActed &&
-            p.state.currentBet === state.currentHand.currentBetOnTable,
-        );
-
+      const activeContestants = state.currentHand.players.filter(
+        (p) => !p.general.isDealer && !p.state.isFolded && !p.state.isAllIn,
+      );
+      const roundComplete = activeContestants.every(
+        (p) =>
+          p.state.hasActed &&
+          p.state.currentBet === state.currentHand.currentBetOnTable,
+      );
       if (roundComplete) {
-        // This flag tells our middleware/thunk to trigger the next dealer phase
         state.currentHand.isRoundTransitioning = true;
       } else {
         state.currentHand.activePlayerIndex = getNextActivePlayerIndex(
@@ -442,6 +377,7 @@ const matchSlice = createSlice({
         );
       }
     },
+
     handlePlayerBroke: (
       state,
       action: PayloadAction<{ playerId: string; method: "plei" | "daily" }>,
@@ -450,25 +386,22 @@ const matchSlice = createSlice({
       const player = state.currentHand.players.find(
         (p) => p.general.id === playerId,
       );
-
       if (!player || !player.profile) return;
-
       if (method === "plei" && (player.profile.plei ?? 0) >= 10) {
         player.profile.plei! -= 10;
         player.profile.money += 500;
       }
-
       if (method === "daily") {
         player.profile.money = 100;
       }
     },
+
     markNpcDiscard: (
       state,
       action: PayloadAction<{ playerIndex: number; cardIndices: number[] }>,
     ) => {
       const { playerIndex, cardIndices } = action.payload;
       const player = state.currentHand.players[playerIndex];
-
       if (player && player.state.hand) {
         cardIndices.forEach((index) => {
           if (player.state.hand[index]) {
@@ -477,6 +410,22 @@ const matchSlice = createSlice({
         });
       }
     },
+
+    nextTurn: (state) => {
+      const { players, activePlayerIndex } = state.currentHand;
+      let nextIndex = (activePlayerIndex + 1) % players.length;
+      while (
+        players[nextIndex].general.isDealer ||
+        players[nextIndex].state.isFolded ||
+        players[nextIndex].state.isAllIn
+      ) {
+        nextIndex = (nextIndex + 1) % players.length;
+        if (nextIndex === activePlayerIndex) break;
+      }
+
+      state.currentHand.activePlayerIndex = nextIndex;
+    },
+
     performAnteUp: (
       state,
       action: PayloadAction<{ location: MatchLocationType }>,
@@ -484,13 +433,14 @@ const matchSlice = createSlice({
       const { location } = action.payload;
       const match = state;
       const amount = pickAnteAmount(location);
-
       match.currentHand.players.forEach((player) => {
         if (player.general.isDealer) return;
         player.profile.money -= amount;
         match.currentHand.pot += amount;
+        player.state.hasActed = true;
       });
     },
+
     playerRaise: (
       state,
       action: PayloadAction<{ playerId: string; amount: number }>,
@@ -500,7 +450,6 @@ const matchSlice = createSlice({
       const player = match.currentHand.players.find(
         (p) => p.general.id === playerId,
       );
-
       if (player && player.profile.money >= amount) {
         player.state.currentBet += amount;
         player.profile.money -= amount;
@@ -508,7 +457,6 @@ const matchSlice = createSlice({
         player.state.lastAction = "raise";
         if (player.profile.money === 0) player.state.isAllIn = true;
         match.currentHand.pot += amount;
-
         match.currentHand.players.forEach((p) => {
           if (
             p.general.id !== playerId &&
@@ -520,17 +468,26 @@ const matchSlice = createSlice({
         });
       }
     },
+
     prepareNextHand: (state) => {
       const match = state;
+      match.currentHand.dealerIndex = rotateDealerIndex(
+        match.currentHand.dealerIndex,
+        match.currentHand.players.length,
+      );
+      match.currentHand.activePlayerIndex = getInitialActivePlayerIndex(
+        match.currentHand.players,
+        match.currentHand.dealerIndex,
+      );
+      match.currentHand.handNumber += 1;
+      match.currentHand.pot = 0;
       match.results.lastWinAmount = 0;
       match.currentHand.pot = 0;
       match.currentHand.currentBetOnTable = 0;
       match.currentHand.lastRaiserId = null;
       match.currentHand.activePlayerIndex = 0;
-
       match.results.winnerId = "";
       match.results.winningHand = "";
-
       match.currentHand.players.forEach((player) => {
         player.state.hand = [];
         player.state.isFolded = false;
@@ -538,97 +495,100 @@ const matchSlice = createSlice({
         player.state.currentBet = 0;
         player.state.hasActed = false;
       });
-
       const gameType = match.currentHand.currentPhase.type;
       const sequence = gamePhaseSequences[gameType];
       match.currentHand.currentPhase.phase = sequence[1];
       match.currentHand.actionMessage = "New Hand Started";
       match.currentHand.messageId += 1;
     },
+
     quitMatch: (state) => {
-      state.general.numberOfOpponents = 1;
+      state.general.playingMatch = false;
+      state.client.localPlayerId = "";
       state.currentHand.players = [];
       state.currentHand.pot = 0;
       state.general.playingMatch = false;
+      state.general.numberOfOpponents = 1;
+      state.currentHand.players = [];
+      state.currentHand.pot = 0;
+      state.results = {
+        winnerId: "",
+        winningHand: "",
+        lastWinAmount: 0,
+        isGameOver: false,
+      };
     },
+
     resetGame: () => {
       return initialMatchState;
     },
-    resolveShowdown: (state) => {
-      const match = state;
 
-      const activePlayers = match.currentHand.players.filter(
-        (p) => !p.state.isFolded,
+    resolveShowdown: (state) => {
+      const activePlayers = state.currentHand.players.filter(
+        (p) => !p.state.isFolded && p.general.type !== "dealer",
       );
 
       if (activePlayers.length === 0) return;
 
-      const results = activePlayers.map((player) => {
-        const evaluation = evaluatePokerHand(player.state.hand);
-        return {
-          id: player.general.id,
-          name: player.general.name,
-          rankValue: evaluation.rankValue,
-          handName: evaluation.label,
-        };
-      });
-
-      const winnerResult = results.reduce((prev, current) =>
-        prev.rankValue > current.rankValue ? prev : current,
-      );
-
-      const winningPlayer = match.currentHand.players.find(
-        (p) => p.general.id === winnerResult.id,
-      );
-
-      if (winningPlayer) {
-        winningPlayer.profile.money += match.currentHand.pot;
-
-        match.results.winnerId = winningPlayer.general.id ?? "";
-        match.results.winningHand = winnerResult.handName;
-        match.results.lastWinAmount = match.currentHand.pot;
-
-        console.log(
-          `${winningPlayer.general.name} wins $${match.currentHand.pot} with ${winnerResult.handName}!`,
+      const evaluations = activePlayers.map((p) => ({
+        id: p.general.id,
+        res: evaluatePokerHand(p.state.hand),
+      }));
+      const maxRank = Math.max(...evaluations.map((e) => e.res.rankValue));
+      const winners = evaluations.filter((e) => e.res.rankValue === maxRank);
+      const potPerWinner = Math.floor(state.currentHand.pot / winners.length);
+      winners.forEach((w) => {
+        const player = state.currentHand.players.find(
+          (p) => p.general.id === w.id,
         );
-      }
-      match.currentHand.pot = 0;
+        if (player) {
+          player.profile.money += potPerWinner;
+          const chipsWon = createChips(potPerWinner);
+          Object.keys(chipsWon).forEach((color) => {
+            const key = color as keyof typeof chipsWon;
+            player.state.chips[key] += chipsWon[key];
+          });
+        }
+      });
+      const leadWinner = state.currentHand.players.find(
+        (p) => p.general.id === winners[0].id,
+      );
+      state.results.winnerId =
+        winners.length > 1 ? "split" : (leadWinner?.general.id ?? "");
+      state.results.winningHand = winners[0].res.label;
+      state.currentHand.pot = 0;
+      state.currentHand.currentPhase.phase = "showdown";
     },
+
     rotateDealer: (state) => {
       const len = state.currentHand.players.length;
       if (len === 0) return;
-
-      // The logic: (Current - 1 + Length) % Length
-      // Adding length handles the "0 to Top" jump automatically
       state.currentHand.dealerIndex =
         (state.currentHand.dealerIndex - 1 + len) % len;
-
       console.log(
         `Dealer rotated to index: ${state.currentHand.dealerIndex} (${state.currentHand.players[state.currentHand.dealerIndex].general.name})`,
       );
     },
+
     startMatch: (state, action: PayloadAction<GamePayloadInterface>) => {
       const {
         numberOfOpponents,
         matchLocation,
         numberOfDecks,
-        hero, // This should now carry the LifetimeStats from your profile
+        hero,
         deckStyle,
         difficultyLevel,
         matchType,
       } = action.payload;
-
-      // 1. General & Hand Setup
+      state.client.localPlayerId = hero.general.id;
       state.general.playingMatch = true;
       state.general.matchType = matchType;
       state.general.matchLocation = matchLocation;
       state.general.deckStyle = deckStyle;
       state.general.difficultyLevel = difficultyLevel;
-
       state.currentHand.dealerIndex = numberOfOpponents;
       state.currentHand.currentPhase.type = matchType;
 
-      // 2. Variant Reset
       if (matchType === "draw") {
         state.variantSpecifics.drawSpecifics = { ...INITIAL_DRAW_SPECIFICS };
       } else if (matchType === "holdem") {
@@ -637,17 +597,14 @@ const matchSlice = createSlice({
         };
       }
 
-      // 3. Opponent Generation
       const count = numberOfOpponents ?? 1;
       const availableThemes = matchMap[
         matchLocation as keyof typeof matchMap
       ] || ["classic"];
       const selectedTheme =
         availableThemes[Math.floor(Math.random() * availableThemes.length)];
-
       const newOpponents: PlayerInterface[] = [];
       const usedNames = new Set<string>();
-
       while (newOpponents.length < count) {
         const candidate = createVillain(selectedTheme);
         if (!usedNames.has(candidate.general.name)) {
@@ -655,10 +612,9 @@ const matchSlice = createSlice({
             ...candidate,
             state: {
               ...candidate.state,
-              chips: startingChips, // Using your helper-defined starting chips
+              chips: startingChips,
               position: newOpponents.length + 1,
             },
-            // Villains start with fresh session stats
             stats: {
               lifetime: { ...INITIAL_LIFETIME_STATS },
               session: { ...INITIAL_SESSION_STATS },
@@ -673,26 +629,24 @@ const matchSlice = createSlice({
           usedNames.add(candidate.general.name);
         }
       }
-
-      // 4. Final Player List Assembly (The Hero Logic)
       const dealerEntity = createDealer();
-
-      // Incorporate Lifetime Stats here
       const heroWithStats: PlayerInterface = {
         ...hero,
         general: {
           ...hero.general,
+          id: hero.general.id,
           type: "human",
         },
         state: {
           ...hero.state,
-          chips: startingChips,
+          chips: Object.values(hero.state.chips).some((v) => v > 0)
+            ? hero.state.chips
+            : startingChips,
           position: 0,
         },
-        // CRITICAL: Map the persistent lifetime stats from the profile payload
         stats: {
           lifetime: hero.stats?.lifetime || { ...INITIAL_LIFETIME_STATS },
-          session: { ...INITIAL_SESSION_STATS }, // Reset session for the new match
+          session: { ...INITIAL_SESSION_STATS },
         },
         flags: {
           isInitialLoad: false,
@@ -701,14 +655,11 @@ const matchSlice = createSlice({
           hasTurnFocus: false,
         },
       };
-
       state.currentHand.players = [
         heroWithStats,
         ...newOpponents,
         dealerEntity,
       ];
-
-      // 5. Deck & Phase Finalization
       state.currentHand.deck = shuffleDeck(
         generateDeck(numberOfDecks, deckStyle),
       );
@@ -725,9 +676,9 @@ const matchSlice = createSlice({
         opponent.profile.money -= action.payload.amount;
       }
     },
+
     toggleDiscard: (state, action: PayloadAction<number>) => {
       const cardIndex = action.payload;
-
       const hero = state.currentHand.players.find(
         (p) => p.general.type === "human",
       );
@@ -752,6 +703,7 @@ export const {
   handleBet,
   handlePlayerBroke,
   markNpcDiscard,
+  nextTurn,
   performAnteUp,
   prepareNextHand,
   quitMatch,

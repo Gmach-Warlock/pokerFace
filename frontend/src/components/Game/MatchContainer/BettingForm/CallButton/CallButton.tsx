@@ -3,7 +3,7 @@ import {
   useAppSelector,
 } from "../../../../../app/hooks/gameHooks";
 import type { BettingInterface } from "../../../../../app/interfaces/matchInterfaces";
-import { selectHerosId } from "../../../../../features/match/matchSelectors";
+import { selectHerosId } from "../../../../../features/match/selectors/heroSelectors";
 import { handleBet } from "../../../../../features/match/matchSlice";
 
 export default function CallButton({

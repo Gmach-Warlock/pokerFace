@@ -24,12 +24,14 @@ export const calculateBetResults = (
 
 // evaluators.ts -> calculateCardsNeeded
 export const calculateCardsNeeded = (
-  type: string,
+  type: keyof typeof matchPhaseMap,
   phase: string,
   currentHandLength: number,
 ): number => {
-  const config = matchPhaseMap[type]?.[phase];
-
+  const gameConfig = matchPhaseMap[type];
+  const config = gameConfig
+    ? gameConfig[phase as keyof typeof gameConfig]
+    : undefined;
   if (!config) {
     console.warn(`[calculateCardsNeeded] No config found for ${type}:${phase}`);
     return 0;

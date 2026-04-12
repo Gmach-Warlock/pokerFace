@@ -3,12 +3,12 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../../app/hooks/gameHooks";
-import { selectHerosId } from "../../../../../features/match/matchSelectors";
+import { selectHerosId } from "../../../../../features/match/selectors/heroSelectors";
 import { handleBet } from "../../../../../features/match/matchSlice";
 
 interface RaiseButtonProps extends BettingInterface {
   currentPlayerBet: number;
-  sliderValue: number; // The total amount Gary wants to have on the table
+  sliderValue: number;
 }
 
 export default function RaiseButton({
@@ -21,13 +21,6 @@ export default function RaiseButton({
   const handleRaise = () => {
     if (!herosId) return;
 
-    /**
-     * Logic Check:
-     * In our new 'resolveBetState' utility, 'amount' represents
-     * the NEW chips being put into the pot.
-     * * If Gary has $5 in and wants to Raise TO $20,
-     * we send $15 to the reducer.
-     */
     const additionalAmount = sliderValue - currentPlayerBet;
 
     dispatch(

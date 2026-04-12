@@ -1,5 +1,9 @@
-import type { VillainThemeType } from "../types/villainsTypes";
+import type {
+  VillainThemeType,
+  DialogueToneType,
+} from "../types/villainsTypes";
 import type { SituationType } from "../global/global";
+import type { CurrentSituationType } from "../types/matchTypes";
 
 export interface CharacterPersonalityInterface {
   situations: Record<SituationType, number>;
@@ -38,3 +42,14 @@ export type SituationalDialogueInterface = Record<
   SituationType,
   DialogueInterface
 >;
+
+export interface BanterPayload {
+  senderId: string;
+  tone: DialogueToneType;
+  situation: CurrentSituationType;
+  message: string; // Pulled from the personality.unique.lines
+  isAutoTriggered: boolean; // True if low-level, False if player chose it
+}
+
+/* 
+Situation+ Stats ContextResulting EmotionstrongHandWin Streak > 2hyperstrongHandNeutral StatsstoicweakHandBeing RaisedshookbluffingHigh AggressionsmugsulkingLoss Streak > 3tiltedneutralLow Potzen */

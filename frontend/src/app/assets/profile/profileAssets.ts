@@ -1,7 +1,8 @@
-import type { SessionStatsInterface } from "../../interfaces/matchInterfaces";
+import type { SessionStatsInterface } from "../../interfaces/profileInterfaces";
 import type {
   AchievementInterface,
   FetchInterface,
+  LifetimeStatsInterface,
 } from "../../interfaces/profileInterfaces";
 
 export const fetchObject: FetchInterface = {
@@ -47,30 +48,41 @@ export const GLOBAL_ACHIEVEMENTS: AchievementInterface[] = [
 ];
 
 export const INITIAL_SESSION_STATS: SessionStatsInterface = {
-  handsPlayed: 0,
-  handsWon: 0,
-  handsLost: 0,
-  handsTied: 0,
-  currentWinStreak: 0,
-  currentLossStreak: 0,
-  longestWinStreak: 0,
-  totalSessionProfit: 0,
-  biggestPotWon: 0,
-  biggestLoss: 0,
-  totalBuyIn: 0,
-  totalCashOut: 0,
-  vpipCount: 0,
-  pfrCount: 0,
-  bluffsAttempted: 0,
-  bluffsSucceeded: 0,
-  showdownsReached: 0,
-  showdownsWon: 0,
-  startTime: new Date().toISOString(),
-  endTime: null, // The "Neo Tokyo" start clock
-  lastHandResult: null,
+  hands: {
+    played: 0,
+    won: 0,
+    lost: 0,
+    tied: 0,
+    showdownsReached: 0,
+    showdownsWon: 0,
+  },
+  monetary: {
+    totalBet: 0,
+    totalProfit: 0,
+    biggestPotWon: 0,
+    biggestLoss: 0,
+    totalBuyIn: 0,
+    totalCashOut: 0,
+  },
+  activity: {
+    vpipCount: 0,
+    pfrCount: 0,
+    bluffsAttempted: 0,
+    bluffsSucceeded: 0,
+  },
+  streak: {
+    currentWin: 0,
+    currentLoss: 0,
+    longestWin: 0,
+  },
+  log: {
+    startTime: new Date().toISOString(),
+    endTime: null,
+    lastHandResult: null,
+  },
 };
 
-export const INITIAL_LIFETIME_STATS = {
+export const INITIAL_LIFETIME_STATS: LifetimeStatsInterface = {
   matches: {
     hand: {
       handsPlayed: 0,
@@ -90,7 +102,7 @@ export const INITIAL_LIFETIME_STATS = {
       totalBuyIn: 0,
       totalCashOut: 0,
       allTimeHighBalance: 0,
-      totalRakePaid: 0, // If your game has a "house" fee
+      totalRakePaid: 0,
       biggestSuckout: 0,
     },
     various: {
@@ -124,10 +136,10 @@ export const INITIAL_LIFETIME_STATS = {
       pro: [],
     },
     totalBeaten: 0,
+    history: {}, // Initialized as empty object per the optional history interface
   },
   achievements: {
     unlocked: [],
-
     milestones: {
       highestLevelReached: 1,
       totalXpEarned: 0,

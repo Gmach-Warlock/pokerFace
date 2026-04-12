@@ -4,10 +4,8 @@ import { useAppSelector } from "../../../app/hooks/gameHooks";
 import { useEffect } from "react";
 import PhaseAlert from "./PhaseAlert/PhaseAlert";
 import WinnerOverlay from "./MatchResultsOverlay/MatchResultsOverlay";
-import {
-  selectOpponents,
-  selectCurrentPhase,
-} from "../../../features/match/matchSelectors";
+import { selectOpponents } from "../../../features/match/selectors/playerSelectors";
+import { selectCurrentPhase } from "../../../features/match/selectors/stateSelectors";
 
 export default function MatchContainer() {
   const opponents = useAppSelector(selectOpponents || []);

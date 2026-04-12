@@ -5,13 +5,13 @@ import {
   useMediaQuery,
 } from "../../../../../app/hooks/gameHooks";
 import ChipStacks from "../../../../general/ChipStacks/ChipStacks";
+import { selectDeckStyle } from "../../../../../features/match/selectors/stateSelectors";
 import {
-  selectDeckStyle,
   selectOpponentStatusClass,
   selectPlayerChips,
-  selectPlayerName,
   selectPlayerMoney,
-} from "../../../../../features/match/matchSelectors";
+  selectPlayerName,
+} from "../../../../../features/match/selectors/playerSelectors";
 
 interface OpponentPropsInterface {
   data: PlayerInterface;

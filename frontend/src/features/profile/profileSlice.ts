@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { SessionStatsInterface } from "../../app/interfaces/matchInterfaces";
-import type { ProfileInterface } from "../../app/interfaces/profileInterfaces";
+import type {
+  ProfileInterface,
+  SessionStatsInterface,
+} from "../../app/interfaces/profileInterfaces";
 import { startingChips } from "../../app/assets/match/matchAssets";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
@@ -31,6 +33,7 @@ const initialProfileState: ProfileInterface = {
       isAllIn: false,
       hasActed: false,
       lastAction: "check",
+      lastActionValue: 0,
       isDiscarding: false,
       position: 0,
     },
@@ -67,7 +70,6 @@ const profileSlice = createSlice({
     addExperience: (state, action: PayloadAction<number>) => {
       if (state.playerData.profile) {
         state.playerData.profile.xp += action.payload;
-        // You can add level-up logic here later!
       }
     },
 
@@ -77,6 +79,27 @@ const profileSlice = createSlice({
       state.meta.password = action.payload.password;
       state.meta.authorized = true;
     },
+
+    syncMatchResults: (
+      state,
+      action: PayloadAction<{ money: number; xp: number }>,
+    ) => {
+      const { money, xp } = action.payload;
+      if (state.playerData.profile) {
+        state.playerData.profile.money = money;
+
+        state.playerData.profile.xp += xp;
+
+        if (state.playerData.profile.xp >= state.playerData.profile.nextLevel) {
+          state.playerData.profile.level += 1;
+          state.playerData.profile.xp = 0;
+          state.playerData.profile.nextLevel = Math.floor(
+            state.playerData.profile.nextLevel * 1.5,
+          );
+        }
+      }
+    },
+
     updateAchievements: (
       state,
       action: PayloadAction<SessionStatsInterface>,
@@ -94,25 +117,30 @@ const profileSlice = createSlice({
         }
 
         if (ach.id === "bluff_master") {
-          ach.currentProgress = stats.bluffsSucceeded;
+          ach.currentProgress = stats.activity.bluffsSucceeded;
         }
 
         if (ach.currentProgress >= ach.targetValue) {
           ach.isUnlocked = true;
-          // Trace change: updating plei inside the nest
           if (profile.profile.plei !== null) {
             profile.profile.plei += ach.rewardPlei;
           }
         }
       });
     },
+
     updateMoney: (state, action: PayloadAction<number>) => {
       state.playerData.profile.money += action.payload;
     },
   },
 });
 
-export const { addExperience, createUser, updateAchievements, updateMoney } =
-  profileSlice.actions;
+export const {
+  addExperience,
+  createUser,
+  syncMatchResults,
+  updateAchievements,
+  updateMoney,
+} = profileSlice.actions;
 
 export default profileSlice.reducer;

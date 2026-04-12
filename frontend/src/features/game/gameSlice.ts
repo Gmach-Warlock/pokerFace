@@ -23,6 +23,7 @@ const initialGameState: GameInterface = {
       type: "draw",
       phase: "notInGameYet",
       step: 0,
+      isFinalStreet: false,
     },
   },
   isMatchStarted: false,
@@ -52,7 +53,6 @@ const gameSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Listen specifically for the startMatch action from the OTHER slice
     builder.addCase(startMatch, (state) => {
       state.isPlaying = true;
     });

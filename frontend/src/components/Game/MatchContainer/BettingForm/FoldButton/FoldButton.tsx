@@ -2,7 +2,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../../app/hooks/gameHooks";
-import { selectHerosId } from "../../../../../features/match/matchSelectors";
+import { selectHerosId } from "../../../../../features/match/selectors/heroSelectors";
 import { foldHand } from "../../../../../features/match/matchSlice";
 
 export default function FoldButton() {

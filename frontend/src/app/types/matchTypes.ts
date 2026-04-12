@@ -42,14 +42,7 @@ export type ChipIconType =
   | "faceDropShadow"
   | "sideDropShadow";
 export type ContestantType = "hero" | "opponent" | "dealer";
-export type CurrentLocationType =
-  | "p1"
-  | "p2"
-  | "p3"
-  | "p4"
-  | "p5"
-  | "board"
-  | "demo";
+export type CurrentLocationType = "deck" | "board" | `p${number}` | "demo";
 export type CurrentSituationType =
   | "strongHand"
   | "weakHand"
@@ -72,6 +65,7 @@ export type DrawPhaseType =
   | "deal"
   | "bettingOne"
   | "draw"
+  | "discard"
   | "bettingTwo"
   | "showdown";
 export type GameDisplayType =
@@ -86,10 +80,11 @@ export type MatchPhaseType =
   | HoldemPhaseType
   | StudPhaseType
   | "notInGameYet";
-export type MatchPhaseConfigType = Record<
-  string,
-  Record<string, PhaseInstruction>
->;
+export type MatchPhaseConfigType = {
+  [K in MatchType]?: {
+    [P in MatchPhaseType]?: PhaseInstruction;
+  };
+};
 export type HandType =
   | "single-high"
   | "pair"
@@ -105,9 +100,13 @@ export type HandType =
 export type HoldemPhaseType =
   | "ante"
   | "deal"
+  | "preflop" // First betting round
   | "flop"
+  | "bettingOne" // Post-flop betting
   | "turn"
+  | "bettingTwo" // Post-turn betting
   | "river"
+  | "bettingThree" // Post-river betting
   | "showdown";
 export type IconSizeType = "small" | "medium" | "large";
 export type LastResultType = "win" | "loss" | "fold" | "tie" | null;
@@ -116,8 +115,10 @@ export type MatchType = "draw" | "holdem" | "stud";
 export type MatchMapType = Partial<
   Record<MatchLocationType, VillainThemeType[]>
 >;
+
 export type NumberOfOpponentsType = 1 | 2 | 3 | 4 | 5;
-export type PlayerType = "human" | "computer";
+export type PlayerType = "human" | "computer" | "dealer";
+
 export type PokerChoiceType =
   | "ante"
   | "call"
@@ -128,9 +129,15 @@ export type PokerChoiceType =
 
 export type StudPhaseType =
   | "ante"
-  | "thirdStreet"
-  | "fourthStreet"
-  | "fifthStreet"
-  | "sixthStreet"
-  | "seventhStreet"
+  | "street2"
+  | "street3"
+  | "street4"
+  | "street5"
+  | "street6"
+  | "river"
+  | "bettingOne"
+  | "bettingTwo"
+  | "bettingThree"
+  | "bettingFour"
+  | "bettingFive"
   | "showdown";

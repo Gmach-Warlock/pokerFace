@@ -11,9 +11,9 @@ import {
   selectHeroHand,
   selectHeroChips,
   selectHeroIsFolded,
-  selectDeckStyle,
   selectHeroHandRank,
-} from "../../../../../features/match/matchSelectors";
+} from "../../../../../features/match/selectors/heroSelectors";
+import { selectDeckStyle } from "../../../../../features/match/selectors/stateSelectors";
 import Hand from "../../../../general/Hand/Hand";
 
 export default function Hero() {

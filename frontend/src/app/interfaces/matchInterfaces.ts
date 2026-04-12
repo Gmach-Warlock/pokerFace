@@ -11,18 +11,21 @@ import type {
   DeckStyleType,
   DifficultyType,
   HandType,
-  LastResultType,
   MatchType,
   PlayerType,
   PokerChoiceType,
   NumberOfOpponentsType,
   MatchPhaseType,
 } from "../types/matchTypes";
-import type { VillainThemeType } from "../types/villainsTypes";
+import type {
+  PlayerEmotionType,
+  VillainThemeType,
+} from "../types/villainsTypes";
 import type { MatchLocationType } from "../types/worldMapTypes";
 import type {
   AchievementInterface,
   LifetimeStatsInterface,
+  SessionStatsInterface,
 } from "./profileInterfaces";
 
 export interface BaseMatchInterface {
@@ -36,13 +39,18 @@ export interface BaseMatchInterface {
     numberOfDecks: DeckNumberType;
     playingMatch: boolean;
   };
+  client: {
+    localPlayerId: string;
+    isObserver: boolean;
+    currentIndex: number;
+  };
   config: {
     rules: {
       ante: number;
       minBet: number;
-      maxBet?: number; // For Limit/No-Limit logic
+      maxBet?: number;
       blindStructure?: "static" | "increasing";
-      turnTimer: number; // For multiplayer/NPC think time
+      turnTimer: number;
     };
     limits: {
       maxPlayers: number;
@@ -88,7 +96,7 @@ export interface BaseMatchInterface {
     theme: "neo-tokyo" | "cyber-punk" | "classic";
     skylineStatus: "active" | "dimmed" | "flickering";
     tableColor: string;
-    activeEffects: string[]; // e.g., ['neon-glow', 'rain-overlay']
+    activeEffects: string[];
   };
 }
 export interface BettingButtonProps {
@@ -122,8 +130,8 @@ export interface CardInterface {
 export interface CasinoVariantSpecifics {
   dealersHand: CardInterface[];
   houseEdge: number;
-  payoutMultiplier: number; // For scaling wins based on hand strength
-  minDealerQualifyingRank?: number; // e.g., "Dealer must have a pair of 4s to play"
+  payoutMultiplier: number;
+  minDealerQualifyingRank?: number;
 }
 export interface ChipInterface {
   color: ChipColorType;
@@ -156,20 +164,28 @@ export interface EvaluatedHandInterface {
 }
 
 export interface HoldemSpecifics {
-  communityCards: CardInterface[]; // The Flop, Turn, and River
-  burnCards: CardInterface[]; // The cards discarded before each "street"
-  buttonIndex: number; // The dealer position
+  communityCards: CardInterface[];
+  burnCards: CardInterface[];
+  buttonIndex: number;
   bigBlind: number;
   smallBlind: number;
 }
-// matchInterfaces.ts
+
+export interface IBetValidationResult {
+  valid: boolean;
+  reason?: string;
+}
+
+export interface IResolvedBetState {
+  newPlayerMoney: number;
+  newPlayerBet: number;
+  newPot: number;
+  isAllIn: boolean;
+}
 
 export interface MatchInterface extends BaseMatchInterface {
-  /**
-   * Encapsulates data unique to the specific poker variant
-   * (e.g., community cards for Hold'em, discard limits for Draw)
-   */
   variantSpecifics: {
+    minimumParticipants: number;
     casinoVariantSpecifics: CasinoVariantSpecifics;
     drawSpecifics: DrawSpecifics;
     holdemSpecifics: HoldemSpecifics;
@@ -182,6 +198,7 @@ export interface MatchPhaseInterface {
   type: MatchType;
   phase: MatchPhaseType;
   step: number;
+  isFinalStreet: boolean;
 }
 
 export interface MatchStateInterface {
@@ -194,50 +211,52 @@ export interface MatchStateInterface {
   activePlayerIndex: number;
   dealerIndex: number;
   location: string;
-  // Use a partial or null for game-specific data
   holdemData?: {
     communityCards: CardInterface[];
   };
 }
 
 export interface MatchSummaryInterface {
-  matchId: string;
-  location: MatchLocationType;
-  gameType: MatchType;
-  difficulty: DifficultyType;
-
-  // Financials
-  finalPot: number;
-  earningsCash: number;
-  earningsPlei: number;
-
-  // Performance
-  wasVictory: boolean;
-  bestHandRank: HandType;
-  opponentsKnockedOut: number;
-  bluffsSucceeded: number;
-
-  // Progression
-  xpGained: number;
-  newLevelReached: boolean;
-  unlockedItemIds: string[];
+  general: {
+    matchId: string;
+    location: MatchLocationType;
+    gameType: MatchType;
+    difficulty: DifficultyType;
+  };
+  monetary: {
+    finalPot: number;
+    earningsCash: number;
+    earningsPlei: number;
+  };
+  performance: {
+    wasVictory: boolean;
+    bestHandRank: HandType;
+    opponentsKnockedOut: number;
+    bluffsSucceeded: number;
+  };
+  progress: {
+    xpGained: number;
+    newLevelReached: boolean;
+    unlockedItemIds: string[];
+  };
 }
 export interface NoSpecificsInterface {
   isWaiting: true;
   lobbyMessage: string;
-  readyPlayers: string[]; // IDs of players who have clicked "Ready"
+  readyPlayers: string[];
 }
 export interface PhaseInstruction {
   cards: number | "variable";
-  target: "players" | "board";
+  target: "player" | "players" | "board";
   side: CardSideType;
   hero?: CardSideType;
   opp?: CardSideType;
   community?: CardSideType;
+  nextPhase?: MatchPhaseType;
 }
 export interface PlayerInterface {
   general: {
-    id: string | null;
+    id: string;
     name: string;
     type: PlayerType;
     difficulty?: DifficultyType;
@@ -250,9 +269,10 @@ export interface PlayerInterface {
     isFolded: boolean;
     isAllIn: boolean;
     hasActed: boolean;
-    lastAction?: PokerChoiceType;
-    isDiscarding?: boolean;
-    position: number; // Table seat index
+    lastAction: PokerChoiceType;
+    lastActionValue: number;
+    isDiscarding: boolean;
+    position: number;
   };
   profile: {
     level: number;
@@ -279,7 +299,8 @@ export interface PlayerInterface {
     hasTurnFocus: boolean;
   };
   personality?: {
-    archetype: VillainThemeType; // and so on
+    archetype: VillainThemeType;
+    currentEmotion: PlayerEmotionType;
     situations: Record<string, number>;
     tells: {
       physical: string;
@@ -301,33 +322,6 @@ export interface PlayerInterface {
       };
     };
   };
-}
-export interface SessionStatsInterface {
-  handsPlayed: number;
-  handsWon: number;
-  handsLost: number;
-  handsTied: number;
-
-  currentWinStreak: number;
-  currentLossStreak: number;
-  longestWinStreak: number;
-
-  totalSessionProfit: number;
-  biggestPotWon: number;
-  biggestLoss: number;
-  totalBuyIn: number;
-  totalCashOut: number;
-
-  vpipCount: number; // Voluntarily Put In Pot
-  pfrCount: number; // Pre-Flop Raise
-  bluffsAttempted: number;
-  bluffsSucceeded: number;
-  showdownsReached: number;
-  showdownsWon: number;
-
-  startTime: string;
-  endTime: string | null;
-  lastHandResult: LastResultType;
 }
 
 export interface StudSpecifics {

@@ -9,7 +9,7 @@ import type {
 import { evaluatePokerHand } from "../evaluators/evaluators";
 import { logNPCDecision } from "../debuggers/matchDebuggers";
 import type { RootState } from "../../../store/store";
-import { selectPlayerHandEval } from "../../../../features/match/matchSelectors";
+import { selectPlayerHandEval } from "../../../../features/match/selectors/playerSelectors";
 
 export const getAIDiscardIndices = (hand: CardInterface[]): number[] => {
   const evaluation = evaluatePokerHand(hand);

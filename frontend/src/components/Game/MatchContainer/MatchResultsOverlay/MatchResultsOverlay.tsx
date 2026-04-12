@@ -3,15 +3,19 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../../../../app/hooks/gameHooks";
-
 import {
   selectWinnerId,
   selectWinningHandLabel,
-  selectPlayerById,
-} from "../../../../features/match/matchSelectors";
+} from "../../../../features/match/selectors/stateSelectors";
+import { selectHero } from "../../../../features/match/selectors/heroSelectors";
+import { selectPlayerById } from "../../../../features/match/selectors/playerSelectors";
 import { useEffect, useState } from "react";
-import { prepareNextHand } from "../../../../features/match/matchSlice";
+import {
+  prepareNextHand,
+  quitMatch,
+} from "../../../../features/match/matchSlice";
 import { useNavigate } from "react-router";
+import { updateMoney } from "../../../../features/profile/profileSlice";
 
 export default function MatchResultOverlay() {
   const dispatch = useAppDispatch();
@@ -20,16 +24,19 @@ export default function MatchResultOverlay() {
   const winner = useAppSelector((state) =>
     selectPlayerById(state, winnerId ?? ""),
   );
-
+  const hero = useAppSelector(selectHero);
   const [displayAmount, setDisplayAmount] = useState(0);
   const navigate = useNavigate();
 
-  // Counter animation logic
   const winAmount = useAppSelector(
     (state) => state.match.results.lastWinAmount || 0,
   );
 
   const handleQuit = () => {
+    dispatch(updateMoney(hero.profile.money));
+
+    dispatch(quitMatch());
+
     navigate("/game/world");
   };
 
@@ -38,10 +45,9 @@ export default function MatchResultOverlay() {
   };
 
   useEffect(() => {
-    // Only trigger if we actually have a win amount to show
     if (winAmount > 0) {
       let start = 0;
-      const end = winAmount; // Use the stable value here
+      const end = winAmount;
       const duration = 1000;
       const increment = end / (duration / 16);
 
@@ -56,7 +62,7 @@ export default function MatchResultOverlay() {
       }, 16);
       return () => clearInterval(timer);
     }
-  }, [winAmount]); // Only re-run if a new win amount is recorded
+  }, [winAmount]);
 
   if (!winnerId) return null;
 

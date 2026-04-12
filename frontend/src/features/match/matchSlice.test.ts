@@ -33,6 +33,9 @@ describe("matchSlice dealRound reducer", () => {
         isFolded: false,
         isAllIn: false,
         hasActed: false,
+        lastAction: null,
+        lastActionValue: 0,
+        isDiscarding: false,
         position: 0,
       },
       profile: {
@@ -71,6 +74,11 @@ describe("matchSlice dealRound reducer", () => {
         numberOfDecks: 1,
         playingMatch: true,
       },
+      client: {
+        localPlayerId: "",
+        isObserver: false,
+        currentIndex: 0,
+      },
       config: {
         rules: {
           ante: 10,
@@ -83,6 +91,7 @@ describe("matchSlice dealRound reducer", () => {
         },
       },
       variantSpecifics: {
+        minimumParticipants: 2,
         drawSpecifics: { ...INITIAL_DRAW_SPECIFICS },
         holdemSpecifics: { ...INITIAL_HOLDEM_SPECIFICS },
         casinoVariantSpecifics: { ...INITIAL_CASINO_SPECIFICS },
@@ -104,6 +113,7 @@ describe("matchSlice dealRound reducer", () => {
           type: "draw",
           phase: "ante",
           step: 0,
+          isFinalStreet: false,
         },
         deck: [
           {
