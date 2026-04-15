@@ -4,7 +4,6 @@ import type { CardInterface } from "../../../interfaces/matchInterfaces";
 
 describe("AI Discard Logic", () => {
   it("should discard nothing if the hand is strong (Rank >= 400)", () => {
-    // Mocking a Straight or better
     const hand = [
       { value: 10, suit: "heart" },
       { value: "J", suit: "heart" },
@@ -27,7 +26,6 @@ describe("AI Discard Logic", () => {
     ] as CardInterface[];
 
     const result = getAIDiscardIndices(hand);
-    // Should discard indices 2, 3, and 4
     expect(result).toEqual([2, 3, 4]);
   });
 });

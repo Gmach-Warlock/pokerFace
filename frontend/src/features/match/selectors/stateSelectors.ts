@@ -1,20 +1,24 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../../app/store/store";
 import { canAdvancePhaseLogic } from "../../../app/logic/match/utils/stateUtils";
+import { selectMatch, selectPlayers } from "./baseSelectors";
 import {
   selectHerosId,
   selectHeroHand,
   selectHeroAmountToCall,
   selectHeroMoney,
 } from "./heroSelectors";
-import { selectPlayerName, selectPlayers } from "./playerSelectors";
+import { selectPlayerName } from "./playerSelectors";
 
-export const selectMatch = (state: RootState) => state.match;
+/**
+ * ============================================================
+ * STATE SELECTORS
+ * ============================================================
+ */
 
 export const selectCurrentPhaseName = (state: RootState) =>
   state.match.currentHand.currentPhase.phase;
 
-// 2. Use this for components that need the type AND phase (like ArenaCenter)
 export const selectCurrentPhase = (state: RootState) =>
   state.match.currentHand.currentPhase;
 export const selectPot = createSelector(
@@ -25,10 +29,6 @@ export const selectMatchLocation = createSelector(
   [selectMatch],
   (m) => m.general.matchLocation,
 );
-export const selectDeckStyle = createSelector(
-  [selectMatch],
-  (m) => m.general.deckStyle,
-);
 
 export const selectIsBettingPhase = createSelector(
   [selectCurrentPhase],
@@ -37,21 +37,11 @@ export const selectIsBettingPhase = createSelector(
     return p === "bettingone" || p === "bettingtwo";
   },
 );
-export const selectIsPlaying = (state: RootState) => state.game.isPlaying;
-export const selectCurrentMaxBet = createSelector([selectMatch], (match) => {
-  const allBets = match.currentHand.players.map((p) => p.state.currentBet ?? 0);
-  return Math.max(...allBets, 0);
-});
 
 export const selectCanAdvancePhase = createSelector([selectMatch], (match) =>
   canAdvancePhaseLogic(match),
 );
 
-/**
- * ============================================================
- * Betting & UI SELECTORS
- * ============================================================
- */
 export const selectCurrentPot = (state: RootState) =>
   state.match.currentHand.pot;
 export const selectWinnerId = createSelector(
@@ -78,16 +68,12 @@ export const selectDiscardCount = createSelector(
 export const selectActionButtonLabel = createSelector(
   [selectCurrentPhase, selectDiscardCount, selectHeroAmountToCall],
   (currentPhase, discardCount, amountToCall) => {
-    // 1. Phase names are case-sensitive. Let's force lowercase for comparison
-    // to avoid "bettingOne" vs "bettingone" bugs.
     const p = currentPhase.phase.toLowerCase();
 
     switch (p) {
       case "ante":
         return "Ante Up & Deal";
       case "deal":
-        // This is where you were getting stuck.
-        // If the cards are dealt but the phase hasn't advanced yet:
         return "Start Betting";
       case "draw":
         return discardCount > 0 ? `Swap ${discardCount} Cards` : "Stand Pat";
@@ -97,7 +83,6 @@ export const selectActionButtonLabel = createSelector(
       case "showdown":
         return "See Results";
       default:
-        // Use a more descriptive fallback for debugging
         return `Finish ${currentPhase.phase}`;
     }
   },
@@ -147,9 +132,7 @@ export const selectIsRoundOver = (state: RootState) => {
 
   if (["ante", "deal", "showdown"].includes(currentPhase.phase)) return false;
 
-  // If 0 or 1 person can still act, the round is essentially over
   if (activeAndNotAllIn.length <= 1) {
-    // Check if everyone else has matched the current bet on table
     const activePlayers = state.match.currentHand.players.filter(
       (p) => !p.state.isFolded,
     );
@@ -173,8 +156,6 @@ export const selectIsHerosTurn = (state: RootState) => {
   const { players, activePlayerIndex } = state.match.currentHand;
   const currentPlayer = players[activePlayerIndex];
 
-  // Checking by type is safer than index 0 if you ever
-  // decide to move the hero's position in the array
   return currentPlayer?.general.type === "human";
 };
 
@@ -182,12 +163,10 @@ export const selectLastManStanding = createSelector(
   [selectPlayers],
   (players) => {
     const activePlayers = players.filter((p) => !p.state.isFolded);
-    // Return the single player if they are the only one left, otherwise null
     return activePlayers.length === 1 ? activePlayers[0] : null;
   },
 );
 
-// 2. Helper to check if the match should end immediately due to folds
 export const selectIsGameOverByFold = createSelector(
   [selectLastManStanding],
   (lastMan) => lastMan !== null,

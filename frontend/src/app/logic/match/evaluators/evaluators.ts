@@ -22,7 +22,6 @@ export const calculateBetResults = (
   };
 };
 
-// evaluators.ts -> calculateCardsNeeded
 export const calculateCardsNeeded = (
   type: keyof typeof matchPhaseMap,
   phase: string,
@@ -37,24 +36,20 @@ export const calculateCardsNeeded = (
     return 0;
   }
 
-  // 1. Handle "variable" (usually for the Draw phase)
   if (config.cards === "variable") {
     const needed = 5 - currentHandLength;
     console.log(`[calc] Variable mode: 5 - ${currentHandLength} = ${needed}`);
     return needed;
   }
 
-  // 2. Ensure we don't try to deal to players if the target is the board
   if (config.target === "board") {
     return 0;
   }
 
-  // 3. Handle standard numeric deals (Ante/Deal phases)
   if (typeof config.cards === "number") {
     const targetTotal = config.cards;
     const needed = targetTotal - currentHandLength;
 
-    // Fixed the log to use the narrowed targetTotal variable
     if (currentHandLength === 0 && phase === "ante") {
       console.log(
         `[MATH CHECK] Target: ${targetTotal} | Current: ${currentHandLength} | Needs: ${needed}`,

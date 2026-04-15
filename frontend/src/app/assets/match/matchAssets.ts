@@ -139,7 +139,7 @@ export const INITIAL_NO_SPECIFICS: NoSpecificsInterface = {
 
 export const INITIAL_CASINO_SPECIFICS: CasinoVariantSpecifics = {
   dealersHand: [],
-  houseEdge: 0.05, // 5% edge default
+  houseEdge: 0.05,
   payoutMultiplier: 1,
 };
 

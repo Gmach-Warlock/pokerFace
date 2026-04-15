@@ -65,7 +65,7 @@ describe("matchSlice dealRound reducer", () => {
 
     initialState = {
       general: {
-        id: "match-123",
+        matchId: "",
         numberOfOpponents: 1,
         deckStyle: "arrowBolt",
         difficultyLevel: "normal",
@@ -170,20 +170,10 @@ describe("matchSlice dealRound reducer", () => {
 
   it("should deal 5 cards to the human player during the draw ante phase", () => {
     const state = matchReducer(initialState, dealRound());
-
-    // Access nested state for the player
     const humanHand = state.currentHand.players[0].state.hand;
-
-    // 1. Check if cards were added to Gary's hand
     expect(humanHand.length).toBe(5);
-
-    // 2. Check if Gary's cards are face-up (overridden for humans in dealRound logic)
     expect(humanHand[0].side).toBe("face-up");
-
-    // 3. Check if location is correctly assigned (e.g., p1, p2)
     expect(humanHand[0].currentLocation).toBe("p1");
-
-    // 4. Verify deck is now empty
     expect(state.currentHand.deck.length).toBe(0);
   });
 });

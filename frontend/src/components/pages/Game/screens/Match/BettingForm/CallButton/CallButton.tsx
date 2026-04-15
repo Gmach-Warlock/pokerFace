@@ -1,0 +1,38 @@
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../../../app/hooks/gameHooks";
+import type { BettingInterface } from "../../../../../../../app/interfaces/matchInterfaces";
+import { selectHerosId } from "../../../../../../../features/match/selectors/heroSelectors";
+import { handleBet } from "../../../../../../../features/match/matchSlice";
+import { processArenaAction } from "../../../../../../../features/match/matchThunks";
+
+export default function CallButton({
+  currentTableBet = 0,
+  currentPlayerBet = 0,
+}: BettingInterface) {
+  const dispatch = useAppDispatch();
+  const herosId = useAppSelector(selectHerosId);
+
+  const amountToCall = Math.max(0, currentTableBet - currentPlayerBet);
+  const isCheck = amountToCall === 0;
+
+  const handleCall = () => {
+    if (!herosId) return;
+    console.log("trying to bet here");
+    dispatch(
+      handleBet({
+        playerId: herosId,
+        amount: amountToCall,
+        type: isCheck ? "check" : "call",
+      }),
+    );
+    dispatch(processArenaAction());
+  };
+
+  return (
+    <button type="button" className="btn btn--call" onClick={handleCall}>
+      {isCheck ? "Check" : `Call $${amountToCall}`}
+    </button>
+  );
+}

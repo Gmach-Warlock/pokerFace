@@ -1,15 +1,20 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-import { dealRound, markNpcDiscard } from "./matchSlice";
+import {
+  dealRound,
+  forceNextTurn,
+  markNpcDiscard,
+  resolveShowdown,
+} from "./matchSlice";
 import type { RootState } from "../../app/store/store";
 import { evaluatePokerHand } from "../../app/logic/match/evaluators/evaluators";
 import {
   executeTurn,
   getNPCDiscardDecision,
 } from "../../app/logic/match/utils/utils";
+import { selectMatch } from "./selectors/baseSelectors";
 import { handleBet } from "./matchSlice";
 import {
-  selectMatch,
   selectCurrentPhaseName,
   selectCurrentTurnPlayer,
 } from "./selectors/stateSelectors";
@@ -44,7 +49,15 @@ export const processArenaAction = createAsyncThunk(
         return;
 
       case "bettingOne":
-      case "bettingTwo":
+      case "bettingTwo": {
+        if (currentPlayer.general.isDealer || currentPlayer.state.isFolded) {
+          console.log(
+            `⏩ Skipping ${currentPlayer.general.name} (Dealer or Folded)`,
+          );
+          dispatch(forceNextTurn());
+          dispatch(processArenaAction());
+          return;
+        }
         if (
           currentPlayer?.general.type === "computer" &&
           !currentPlayer.state.isFolded
@@ -61,9 +74,10 @@ export const processArenaAction = createAsyncThunk(
           );
         }
         return;
+      }
 
       case "showdown":
-        // You can add logic here to trigger winner animations/calculations
+        dispatch(resolveShowdown());
         return;
     }
   },

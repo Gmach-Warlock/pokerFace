@@ -6,7 +6,7 @@ import {
   selectHeroMoney,
   selectHeroAmountToCall,
 } from "./heroSelectors";
-import { selectCurrentPhase, selectMatch } from "./stateSelectors";
+import { selectMatch } from "./baseSelectors";
 import { selectPlayerName } from "./playerSelectors";
 
 /**
@@ -14,6 +14,7 @@ import { selectPlayerName } from "./playerSelectors";
  * Betting & UI SELECTORS
  * ============================================================
  */
+
 export const selectCurrentPot = (state: RootState) =>
   state.match.currentHand.pot;
 export const selectWinnerId = createSelector(
@@ -36,28 +37,6 @@ export const selectWinnerName = createSelector(
 export const selectDiscardCount = createSelector(
   [selectHeroHand],
   (hand) => hand.filter((card) => card.isDiscarded).length,
-);
-export const selectActionButtonLabel = createSelector(
-  [selectCurrentPhase, selectDiscardCount, selectHeroAmountToCall],
-  (currentPhase, discardCount, amountToCall) => {
-    const p = currentPhase.phase.toLowerCase();
-
-    switch (p) {
-      case "ante":
-        return "Ante Up & Deal";
-      case "deal":
-        return "Start Betting";
-      case "draw":
-        return discardCount > 0 ? `Swap ${discardCount} Cards` : "Stand Pat";
-      case "bettingone":
-      case "bettingtwo":
-        return amountToCall > 0 ? `Call $${amountToCall}` : "Check";
-      case "showdown":
-        return "See Results";
-      default:
-        return `Finish ${currentPhase.phase}`;
-    }
-  },
 );
 
 export const selectMinBetAmount = createSelector(

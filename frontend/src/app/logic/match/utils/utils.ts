@@ -15,7 +15,7 @@ import type {
 } from "../../../types/matchTypes";
 import { anteMap, matchPhaseMap } from "../../../assets/match/matchAssets";
 import { INITIAL_SESSION_STATS } from "../../../assets/profile/profileAssets";
-import { createChips } from "../../factory/factoryFunctions";
+import { createChips } from "../../factory/pokerFactories";
 
 export const awardPotToPlayer = (state: MatchInterface, playerId: string) => {
   const winner = state.currentHand.players.find(
@@ -24,21 +24,15 @@ export const awardPotToPlayer = (state: MatchInterface, playerId: string) => {
   const potAmount = state.currentHand.pot;
 
   if (winner && potAmount > 0) {
-    // 1. Update the Master Balance
     winner.profile.money += potAmount;
 
-    // 2. Update the Visual Chips
     const winningChips = createChips(potAmount);
     Object.keys(winningChips).forEach((color) => {
       const key = color as keyof typeof winningChips;
       winner.state.chips[key] += winningChips[key];
     });
-
-    // 3. Record for UI/Results
     state.results.winnerId = winner.general.id;
     state.results.lastWinAmount = potAmount;
-
-    // 4. Reset table
     state.currentHand.pot = 0;
   }
 };
@@ -46,16 +40,12 @@ export const awardPotToPlayer = (state: MatchInterface, playerId: string) => {
 export const checkLastManStanding = (state: MatchInterface) => {
   const activePlayers = getActivePlayers(state.currentHand.players);
 
-  // If only 1 person hasn't folded
   if (
     activePlayers.length === 1 &&
     state.currentHand.currentPhase.phase !== "showdown"
   ) {
     const winner = activePlayers[0];
-
-    // Use the unified payout logic
     awardPotToPlayer(state, winner.general.id);
-
     state.currentHand.currentPhase.phase = "showdown";
     state.currentHand.actionMessage = `${winner.general.name} wins the pot!`;
     return true;
@@ -111,16 +101,11 @@ export const getCardDestination = (
 
 export const getNextActivePlayerIndex = (match: MatchInterface) => {
   const totalPlayers = match.currentHand.players.length;
-  // Start checking from the next person
   let nextIndex = (match.currentHand.activePlayerIndex + 1) % totalPlayers;
 
   for (let i = 0; i < totalPlayers; i++) {
     const player = match.currentHand.players[nextIndex];
 
-    // ELIGIBILITY CRITERIA:
-    // 1. Not the Dealer entity (if dealer is a non-playing NPC)
-    // 2. Not folded
-    // 3. Not all-in
     if (
       !player.general.isDealer &&
       !player.state.isFolded &&
@@ -135,7 +120,6 @@ export const getNextActivePlayerIndex = (match: MatchInterface) => {
 };
 export const getNPCDiscardDecision = (player: PlayerInterface): number[] => {
   if (player.general.type === "computer" && !player.state.isFolded) {
-    // This is the AI logic that picks which cards to swap
     return getAIDiscardIndices(player.state.hand);
   }
   return [];
@@ -163,44 +147,6 @@ export const handleFoldLogic = (state: GameInterface, playerId: string) => {
     match.pot = 0;
     state.currentlyDisplayed = "postGame";
   }
-};
-
-export const logGameStep = (
-  stage: string,
-  match: MatchInterface,
-  actionType?: string,
-) => {
-  const activePlayer =
-    match.currentHand.players[match.currentHand.activePlayerIndex];
-
-  console.group(
-    `%c[MATCH STEP]: ${stage}`,
-    "color: #00f3ff; font-weight: bold; text-shadow: 0 0 5px #00f3ff;",
-  );
-  console.log(
-    `%cType: %c${match.general.matchType.toUpperCase()} | Phase: %c${match.currentHand.currentPhase.phase}`,
-    "font-weight: bold",
-    "color: #ff00ff",
-    "color: #00ff00",
-  );
-  console.log(
-    `Active: ${activePlayer?.general.name || "None"} (Index: ${match.currentHand.activePlayerIndex}) action type: ${actionType}`,
-  );
-  console.log(
-    `Pot: $${match.currentHand.pot} | Table Bet: $${match.currentHand.currentBetOnTable} | Deck: ${match.currentHand.deck.length}`,
-  );
-
-  console.table(
-    match.currentHand.players.map((p) => ({
-      name: p.general.name,
-      chips: p.profile.money,
-      folded: p.state.isFolded,
-      acted: p.state.hasActed,
-      last: p.state.lastAction,
-    })),
-  );
-
-  console.groupEnd();
 };
 
 export const pickAnteAmount = (location: MatchLocationType) => {

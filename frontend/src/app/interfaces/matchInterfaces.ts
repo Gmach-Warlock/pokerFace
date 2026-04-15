@@ -30,7 +30,7 @@ import type {
 
 export interface BaseMatchInterface {
   general: {
-    id: string;
+    matchId: string;
     numberOfOpponents: NumberOfOpponentsType;
     deckStyle: DeckStyleType;
     difficultyLevel: DifficultyType;
@@ -161,6 +161,42 @@ export interface EvaluatedHandInterface {
   label: string;
   rankValue: number;
   strength: number;
+}
+
+export interface HandResultsInterface {
+  meta: {
+    winningPlayerId: string;
+    winningPlayerName: string;
+    winningHand: HandType;
+    totalPot: number;
+    players: PlayerInterface[];
+  };
+
+  playerSummaries: {
+    playerId: string;
+    isHuman: boolean;
+    netProfit: number;
+    totalBetThisHand: number;
+    wasBluff: boolean;
+    bluffSucceeded: boolean;
+    didVPIP: boolean;
+    didPFR: boolean;
+    reachedShowdown: boolean;
+    wonShowdown: boolean;
+    handRankValue: number;
+    finalHandName: string;
+  }[];
+
+  rewards: {
+    playerId: string;
+    xpGained: number;
+    pleiGained: number;
+    newLevelReached: boolean;
+    achievementsUnlocked: string[];
+  }[];
+
+  isGameOver: boolean;
+  matchId: string;
 }
 
 export interface HoldemSpecifics {
@@ -322,6 +358,12 @@ export interface PlayerInterface {
       };
     };
   };
+}
+
+export interface PendingMatchData {
+  location: string;
+  opponents: string;
+  fullData: FormData;
 }
 
 export interface StudSpecifics {

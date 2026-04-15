@@ -6,6 +6,7 @@ import {
   dealCard,
   dealRound,
   handleBet,
+  resolveShowdown,
 } from "../../features/match/matchSlice";
 import type { RootState } from "../store/store";
 import { processArenaAction } from "../../features/match/matchThunks";
@@ -32,13 +33,29 @@ deckListener.startListening({
   matcher: isAnyOf(handleBet, advancePhase),
   effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
-
+    const players = state.match.currentHand.players;
     const phaseName = selectCurrentPhaseName(state);
     const isBettingPhase = selectIsBettingPhase(state);
     const isHerosTurn = selectIsHerosTurn(state);
     const isRoundOver = selectIsRoundOver(state);
     const currentPlayer = selectCurrentTurnPlayer(state);
     const isSystemPhase = ["ante", "deal", "draw"].includes(phaseName);
+    const activeContestants = players.filter(
+      (p) => !p.state.isFolded && p.general.type !== "dealer",
+    );
+
+    if (phaseName === "showdown") {
+      console.log("🏁 Showdown Phase Detected. Resolving...");
+      await listenerApi.delay(500);
+      listenerApi.dispatch(resolveShowdown());
+      return;
+    }
+
+    if (activeContestants.length === 1) {
+      console.log("🏆 Only one player left. Triggering Showdown...");
+      await listenerApi.delay(1000);
+      listenerApi.dispatch(resolveShowdown());
+    }
 
     if (isHerosTurn && !isRoundOver) {
       console.log("MIDDLEWARE: Hero turn detected. Standing by...");

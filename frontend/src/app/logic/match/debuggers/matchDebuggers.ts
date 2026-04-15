@@ -77,3 +77,41 @@ export const logNPCDecision = (
   });
   console.groupEnd();
 };
+
+export const logGameStep = (
+  stage: string,
+  match: MatchInterface,
+  actionType?: string,
+) => {
+  const activePlayer =
+    match.currentHand.players[match.currentHand.activePlayerIndex];
+
+  console.group(
+    `%c[MATCH STEP]: ${stage}`,
+    "color: #00f3ff; font-weight: bold; text-shadow: 0 0 5px #00f3ff;",
+  );
+  console.log(
+    `%cType: %c${match.general.matchType.toUpperCase()} | Phase: %c${match.currentHand.currentPhase.phase}`,
+    "font-weight: bold",
+    "color: #ff00ff",
+    "color: #00ff00",
+  );
+  console.log(
+    `Active: ${activePlayer?.general.name || "None"} (Index: ${match.currentHand.activePlayerIndex}) action type: ${actionType}`,
+  );
+  console.log(
+    `Pot: $${match.currentHand.pot} | Table Bet: $${match.currentHand.currentBetOnTable} | Deck: ${match.currentHand.deck.length}`,
+  );
+
+  console.table(
+    match.currentHand.players.map((p) => ({
+      name: p.general.name,
+      chips: p.profile.money,
+      folded: p.state.isFolded,
+      acted: p.state.hasActed,
+      last: p.state.lastAction,
+    })),
+  );
+
+  console.groupEnd();
+};

@@ -24,6 +24,8 @@
   --color-neon-green: hsl(184, 100%, 50%);
   --color-neon-pink: hsl(306, 100%, 50%);
 
+  --gold-accent: hsl(48, 89%, 50%);
+  --bg-deep: hsla(260, 33%, 9%, 0.95);
   --card-red: hsl(355, 78%, 56%);
   --card-shadow: hsla(0, 0%, 0%, 0.4);
   --card-glow: hsla(183, 100%, 50%, 0.15);
@@ -183,3 +185,5 @@
     background-color: var(--color-nt-surface);
   }
 }
+
+/* new css */

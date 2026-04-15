@@ -41,7 +41,21 @@ export interface FetchInterface {
   message: string;
   payload: null | object;
 }
-
+export interface HandSettlement {
+  playerId: string;
+  statsDelta: {
+    netProfit: number;
+    xpGained: number;
+    pleiGained: number;
+    wonHand: boolean;
+    isBluff: boolean;
+  };
+  levelUp: {
+    didLevelUp: boolean;
+    newLevel: number;
+    unlockedItems: string[];
+  };
+}
 export interface LocationProgress {
   starsEarned: number; // 0-3 stars per location
   highestDifficultyCleared: DifficultyType;

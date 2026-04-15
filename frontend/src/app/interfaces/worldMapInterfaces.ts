@@ -5,17 +5,15 @@ export interface LevelTier {
   level: number;
   requiredXp: number;
   rankTitle: string;
-  unlocks?: string[]; // IDs for decks or locations
+  unlocks?: string[];
 }
 export interface LocationDetailsInterface {
-  // Static gates: What do I need to get in the door?
   requirements: {
     minLevel: number;
     entryFeePlei: number;
-    requiredAchievementId?: string; // e.g., "Must defeat Boss 1"
+    requiredAchievementId?: string;
   };
 
-  // Local Progress: What have I achieved in THIS specific club?
   progress: {
     rank: number; // 0 to 5 "stars" for this area
     unlockedLocalItems: string[]; // e.g., ["neon-deck"]
@@ -23,9 +21,9 @@ export interface LocationDetailsInterface {
     timesBossEncountered: number;
   };
 
-  // The math: How have I played here?
   stats: SessionStatsInterface;
 }
+
 export interface MatchMapInterface {
   shelter: ["gritty"];
   "low-vault-lounge": ["gritty", "modern"];

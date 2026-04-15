@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../../app/store/store";
 import { evaluatePokerHand } from "../../../app/logic/match/evaluators/evaluators";
-import { selectMatch } from "./stateSelectors";
+import { selectMatch } from "./baseSelectors";
 
 /**
  * ============================================================
@@ -41,7 +41,6 @@ export const selectDealer = createSelector([selectMatch], (match) => {
   return players[dealerIndex] || null;
 });
 
-// This helper is great for UI if you ever decide to show a "Dealer" label
 export const selectIsPlayerDealer = (playerId: string) =>
   createSelector(
     [selectMatch],
@@ -49,9 +48,6 @@ export const selectIsPlayerDealer = (playerId: string) =>
       match.currentHand.players[match.currentHand.dealerIndex]?.general.id ===
       playerId,
   );
-
-export const selectPlayers = (state: RootState) =>
-  state.match.currentHand.players;
 
 export const selectOpponents = createSelector([selectMatch], (match) => {
   return match.currentHand.players.filter(

@@ -6,16 +6,16 @@ import {
 } from "react-router";
 import "./App.css";
 import Root from "./Root";
-import Game from "./components/Game/Game";
-import Home from "./components/Home/Home";
+import Game from "./components/pages/Game/Game";
+import Home from "./components/pages/Home/Home";
 import Protected from "./components/Protected/Protected";
-import Title from "./components/Game/Title/Title";
-import MatchContainer from "./components/Game/MatchContainer/MatchContainer";
-import Shelter from "./components/Game/MatchContainer/areas/Shelter/Shelter";
-import MainMenu from "./components/Game/MainMenu/MainMenu";
-import Halls from "./components/Game/MatchContainer/areas/Halls/Halls";
-import { WorldMap } from "./components/Game/WorldMap/WorldMap";
-import Lobby from "./components/Game/Lobby/Lobby";
+import Title from "./components/pages/Game/screens/Title/Title";
+import MatchContainer from "./components/pages/Game/screens/Match/Match";
+import Shelter from "./components/pages/Game/screens/Match/areas/Shelter/Shelter";
+import MainMenu from "./components/pages/Game/screens/MainMenu/MainMenu";
+import Halls from "./components/pages/Game/screens/Match/areas/Halls/Halls";
+import { WorldMap } from "./components/pages/Game/screens/WorldMap/WorldMap";
+import Lobby from "./components/pages/Game/screens/Lobby/Lobby";
 
 function App() {
   const router = createBrowserRouter(
@@ -23,7 +23,6 @@ function App() {
       <Route path="/" element={<Root />}>
         <Route index element={<Home />} />
         <Route path="home" element={<Home />} />
-
         <Route element={<Protected />}>
           <Route path="game" element={<Game />}>
             <Route index element={<Title />} />
